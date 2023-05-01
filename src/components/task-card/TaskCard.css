@@ -1,0 +1,22 @@
+.task-status {
+    width: max-content;
+}
+
+.task-status .ant-tag {
+    cursor: pointer;
+}
+
+.ant-card-body {
+    display: flex;
+}
+
+.additional-details {
+    border-left: 2px solid #c2bcbc;
+    border-radius: 10px;
+    padding-left: 5%;
+}
+
+.ant-space {
+    position: relative;
+    float: right;
+}
