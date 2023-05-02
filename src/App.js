@@ -1,5 +1,7 @@
 import React, {useState, useEffect } from "react";
+
 import TaskCard from './components/task-card/TaskCard';
+import TasksContext from "./contexts/TasksContext";
 import './App.css';
 
 function App() {
@@ -21,11 +23,13 @@ function App() {
 
   return (
 
-    <div id="container">
-      {tasks.map(task => (
-        <TaskCard key={task.id} task={task} />
-      ))}
-    </div>
+    <TasksContext.Provider value={tasks}>
+      <div id="container">
+        {tasks.map(task => (
+          <TaskCard key={task.id} task={task} />
+        ))}
+      </div>
+    </TasksContext.Provider>
   );
 }
 
