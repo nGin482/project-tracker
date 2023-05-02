@@ -7,3 +7,16 @@
   width: 50%;
   margin: 0 auto;
 }
+
+h1 {
+  text-align: center;
+  background-color: white;
+  width: max-content;
+  margin: 30px auto;
+  padding: 10px 50px;
+  border-radius: 10px;
+}
+
+#create-task {
+  left: 80%;
+}
