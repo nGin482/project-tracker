@@ -4,6 +4,7 @@ import { Button } from "antd";
 import TaskCard from './components/task-card/TaskCard';
 import NewTask from "./components/new-task/NewTask";
 import TasksContext from "./contexts/TasksContext";
+import { getTasks } from "./services/requests";
 import './App.css';
 
 function App() {
@@ -11,20 +12,10 @@ function App() {
   const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
-    setTasks([
-      {
-        id: 'DVD-01',
-        title: 'Create DVD Library',
-        project: 'DVD-Library',
-        type: 'Task',
-        status: 'Backlog',
-        description: 'Create a DVD Library that stores and renders all DVDs owned.',
-        comments: []
-      }
-    ]);
+    getTasks().then(tasks => {
+      setTasks(tasks)
+    })
   }, []);
-
-  const updateTasks = task => setTasks([...tasks, task]);
 
   return (
 
@@ -36,7 +27,7 @@ function App() {
           <TaskCard key={task.id} task={task} />
         ))}
       </div>
-      <NewTask showForm={showForm} setShowForm={setShowForm} project="DVD-Library" onSuccess={updateTasks}/>
+      <NewTask showForm={showForm} setShowForm={setShowForm} project="DVD-Library" onSuccess={setTasks}/>
     </TasksContext.Provider>
   );
 }
