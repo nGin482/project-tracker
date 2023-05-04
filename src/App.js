@@ -19,7 +19,7 @@ function App() {
 
   return (
 
-    <TasksContext.Provider value={tasks}>
+    <TasksContext.Provider value={{tasks, setTasks}}>
       <h1>Project Tracker</h1>
       <div id="container">
         <Button id="create-task" onClick={() => setShowForm(true)}>Create New Task</Button>
@@ -27,7 +27,7 @@ function App() {
           <TaskCard key={task.id} task={task} />
         ))}
       </div>
-      <NewTask showForm={showForm} setShowForm={setShowForm} project="DVD-Library" onSuccess={setTasks}/>
+      <NewTask showForm={showForm} setShowForm={setShowForm} project="DVD-Library"/>
     </TasksContext.Provider>
   );
 }
