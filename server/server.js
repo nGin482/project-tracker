@@ -1,6 +1,8 @@
 const express = require("express");
-const app = express();
 const cors = require("cors");
+const Utils = require("../utilities/task_utils");
+
+const app = express();
 
 app.use(cors());
 app.use(express.json());
@@ -26,12 +28,13 @@ app.get('/api/tasks', (request, response) => {
 })
 
 app.post('/api/tasks', (request, response) => {
-    const newTask = request.body;
-    if (!newTask) {
+    if (!request.body) {
         response.status(500).json('Something went wrong')
     }
+    const taskID = Utils.setTaskID('DVD', tasks.map(task => task.id))
+    const newTask = {...request.body, id: taskID};
     tasks.push(newTask);
-    response.status(200).json({'status': 'success'})
+    response.status(200).json({status: 'success', task: newTask})
     
 })
 
