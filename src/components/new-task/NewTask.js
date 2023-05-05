@@ -1,23 +1,36 @@
-import { useState, useEffect } from "react";
-import { Form, Input, Button, Select, Alert, Modal } from "antd";
+import { useState, useContext } from "react";
+import { Form, Input, Select, Alert, Modal } from "antd";
 
+import { createTask } from "../../services/requests";
+import TasksContext from "../../contexts/TasksContext";
 import "./NewTask.css";
 
 const NewTask = (props) => {
-    const { showForm, setShowForm, project, onSuccess } = props;
-    console.log(props)
+    const { showForm, setShowForm, project } = props;
     const { Option } = Select;
 
     const [showAlertBanner, setShowAlertBanner] = useState(false);
     const [form] = Form.useForm();
+    const [errorMessage, setErrorMessage] = useState('');
+    const {tasks, setTasks} = useContext(TasksContext);
 
-    const createTask = values => {
-        console.log(values)
-
-        const task = {...values, status: 'Backlog', project: project, id: 'DVD-02'};
-        console.log(task);
-        onSuccess(task);
-        form.resetFields();
+    const createNewTask = () => {
+        form.validateFields().then(values => {
+            const task = {...values, status: 'Backlog', project: project};
+            createTask(task).then(data => {
+                setTasks([...tasks, data.task]);
+                setShowForm(false);
+                form.resetFields();
+            })
+            .catch(err => {
+                setErrorMessage('An internal server error occurred');
+                setShowAlertBanner(true);
+            })
+        })
+        .catch(err => {
+            setErrorMessage('An error occured. Please check the form and the data entered');
+            setShowAlertBanner(true);
+        })
     }
 
     return (
@@ -25,23 +38,14 @@ const NewTask = (props) => {
             title="Create a new Task"
             open={showForm}
             okText="Create"
-            onOk={() => {
-                form.validateFields().then(values => {
-                    createTask(values);
-                    setShowForm(false);
-                })
-                .catch(err => {
-                    console.log(err)
-                    setShowAlertBanner(true)
-                })
-            }}
+            onOk={createNewTask}
             cancelText="Cancel"
             onCancel={() => setShowForm(false)}
         >
             <Form
                 form={form}
             >
-                {showAlertBanner ? <Alert type="error" message="An Error Occurred!" showIcon /> : ''}
+                {showAlertBanner ? <Alert type="error" message={errorMessage} showIcon /> : ''}
                 {!project ? (
                     <Form.Item
                     label="Project"
