@@ -2,21 +2,6 @@
     width: max-content;
 }
 
-.task-card .task-status .ant-tag {
-    cursor: pointer;
-}
-
 .task-card .ant-card-body {
     display: flex;
-}
-
-.task-card .additional-details {
-    border-left: 2px solid #c2bcbc;
-    border-radius: 10px;
-    padding-left: 5%;
-}
-
-.task-card .ant-space {
-    position: relative;
-    float: right;
 }

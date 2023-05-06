@@ -4,6 +4,7 @@ import { EyeOutlined, EditOutlined, SettingOutlined } from "@ant-design/icons";
 
 import StatusTag from "./StatusTag";
 import "./TaskCard.css";
+import AdditionalDetails from "../../AdditionalDetails";
 
 const TaskCard = props => {
     const [task, setTask] = useState(props.task);
@@ -22,10 +23,13 @@ const TaskCard = props => {
     return (
         <Card title={title} className="task-card" extra={<SettingOutlined />} actions={[<EyeOutlined key="view" />, <EditOutlined key="edit" />]}>
             <p>{description}</p>
-            <Space direction="vertical" className="additional-details">
-                <Tag color="blue-inverse">{project}</Tag>
-                <StatusTag handleStatus={changeStatus} status={status} />
-            </Space>
+            <AdditionalDetails
+                status={task.status}
+                changeStatus={changeStatus}
+                project={task.project}
+                created={task.created}
+                width={200}    
+            />
 
             {comments && comments.length > 0 ? (
                 <>

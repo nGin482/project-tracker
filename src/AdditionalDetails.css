@@ -1,0 +1,30 @@
+.task-card .additional-details {
+    border-left: 2px solid #c2bcbc;
+    border-radius: 10px;
+    padding-left: 5%;
+}
+
+.task-card .ant-space, .task-page .ant-space {
+    position: relative;
+    float: right;
+}
+
+.task-status .ant-tag {
+    cursor: pointer;
+}
+
+
+#task-page .additional-details {
+    background-color: white;
+    padding: 5% 0 5% 5%;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;
+    overflow: auto;
+    height: 100vh;
+    position: fixed;
+    margin-left: 1100px;
+    font-size: large;
+}
+
+#task-page .additional-details h4 {
+    text-align: center;
+}
