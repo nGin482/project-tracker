@@ -1,14 +1,15 @@
 import React, {useState, useEffect } from "react";
-import { Card, Tag, Divider, Space } from "antd";
+import { useNavigate } from "react-router-dom";
+import { Card, Divider } from "antd";
 import { EyeOutlined, EditOutlined, SettingOutlined } from "@ant-design/icons";
 
-import StatusTag from "./StatusTag";
-import "./TaskCard.css";
 import AdditionalDetails from "../../AdditionalDetails";
+import "./TaskCard.css";
 
 const TaskCard = props => {
     const [task, setTask] = useState(props.task);
-    const { title, project, status, description, comments } = task;
+    const { title, project, status, created, description, comments } = task;
+    const navigate = useNavigate()
 
     useEffect(() => {
         console.log(task)
@@ -21,13 +22,18 @@ const TaskCard = props => {
 
 
     return (
-        <Card title={title} className="task-card" extra={<SettingOutlined />} actions={[<EyeOutlined key="view" />, <EditOutlined key="edit" />]}>
+        <Card
+            title={title}
+            className="task-card"
+            extra={<SettingOutlined />} 
+            actions={[<EyeOutlined key="view" onClick={() => navigate(`/task/${task.id}`)}/>, <EditOutlined key="edit" />]}
+        >
             <p>{description}</p>
             <AdditionalDetails
-                status={task.status}
+                status={status}
                 changeStatus={changeStatus}
-                project={task.project}
-                created={task.created}
+                project={project}
+                created={created}
                 width={200}    
             />
 
