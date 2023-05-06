@@ -22,7 +22,7 @@ const IndexPage = () => {
             </div>
             <NewTask showForm={showForm} setShowForm={setShowForm} project="DVD-Library"/>
         </>
-    )
-}
+    );
+};
 
 export default IndexPage;

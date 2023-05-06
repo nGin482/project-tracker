@@ -17,12 +17,12 @@ const TaskPage = () => {
     
     useEffect(() => {
         getTask(taskID).then(data => {
-            setTask(data)
+            setTask(data);
         })
-    }, [taskID])
+    }, [taskID]);
 
     const changeStatus = status => {
-        setTask({...task, status: status})
+        setTask({...task, status: status});
     }
 
     return  (
@@ -42,17 +42,17 @@ const TaskPage = () => {
                             changeStatus={changeStatus}
                             project={task.project}
                             created={task.created}
-                            showHeader={true}
+                            showHeader
                             width={470}
                         />
                     </Layout>
                 </div>
             ) 
             : ''
-            }
+            };
             
         </>
-    )
-}
+    );
+};
 
 export default TaskPage;
