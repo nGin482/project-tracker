@@ -7,14 +7,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const currentDate = new Date()
 const tasks = [
     {
-      id: 'DVD-01',
+      id: 'DVD-1',
       title: 'Create DVD Library',
       project: 'DVD-Library',
       type: 'Task',
       status: 'Backlog',
       description: 'Create a DVD Library that stores and renders all DVDs owned.',
+      created: `${currentDate.toDateString()} ${currentDate.toLocaleTimeString([], {hour12: false})}`,
       comments: []
     }
   ]
@@ -25,6 +27,18 @@ app.get('/', (request, response) => {
 
 app.get('/api/tasks', (request, response) => {
     response.json(tasks);
+})
+
+app.get('/api/tasks/:taskID', (request, response) => {
+    const { taskID } = request.params;
+    
+    const task = tasks.find(task => task.id === taskID)
+    if (task) {
+        response.status(200).json(task)
+    }
+    else {
+        response.status(404).send(`The server cannot find a task with the ID ${taskID}`)
+    }
 })
 
 app.post('/api/tasks', (request, response) => {
