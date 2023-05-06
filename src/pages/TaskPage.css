@@ -1,6 +1,5 @@
 #task-page {
     background-color: #fff;
-    /* display: flex; */
 }
 
 #task-page .ant-layout-sider {
@@ -8,5 +7,4 @@
 }
 #task-content {
     width: 70%;
-    height: 1000px;
 }
