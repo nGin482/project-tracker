@@ -20,7 +20,7 @@ const TaskCard = props => {
 
 
     return (
-        <Card title={title} extra={<SettingOutlined />} actions={[<EyeOutlined key="view" />, <EditOutlined key="edit" />]}>
+        <Card title={title} className="task-card" extra={<SettingOutlined />} actions={[<EyeOutlined key="view" />, <EditOutlined key="edit" />]}>
             <p>{description}</p>
             <Space direction="vertical" className="additional-details">
                 <Tag color="blue-inverse">{project}</Tag>

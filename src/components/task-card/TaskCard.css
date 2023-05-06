@@ -1,22 +1,22 @@
-.task-status {
+.task-card .task-status {
     width: max-content;
 }
 
-.task-status .ant-tag {
+.task-card .task-status .ant-tag {
     cursor: pointer;
 }
 
-.ant-card-body {
+.task-card .ant-card-body {
     display: flex;
 }
 
-.additional-details {
+.task-card .additional-details {
     border-left: 2px solid #c2bcbc;
     border-radius: 10px;
     padding-left: 5%;
 }
 
-.ant-space {
+.task-card .ant-space {
     position: relative;
     float: right;
 }
