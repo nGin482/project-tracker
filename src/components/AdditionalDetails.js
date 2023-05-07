@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Space, Tag } from "antd";
 
-import StatusTag from "./components/task-card/StatusTag";
+import StatusTag from "./task-card/StatusTag";
 import "./AdditionalDetails.css";
 import Sider from "antd/es/layout/Sider";
 

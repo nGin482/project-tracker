@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, Divider } from "antd";
 import { EyeOutlined, EditOutlined, SettingOutlined } from "@ant-design/icons";
 
-import AdditionalDetails from "../../AdditionalDetails";
+import AdditionalDetails from "../AdditionalDetails";
 import "./TaskCard.css";
 
 const TaskCard = props => {

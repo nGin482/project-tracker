@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { Layout, Spin } from "antd";
 import { isEmpty } from "lodash";
 
-import AdditionalDetails from "../AdditionalDetails";
+import AdditionalDetails from "../components/AdditionalDetails";
 import ErrorPage from "./ErrorPage";
 import ErrorsContext from "../contexts/ErrorsContext";
 import { getTask } from "../services/requests";
