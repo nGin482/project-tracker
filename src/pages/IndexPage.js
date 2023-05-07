@@ -17,7 +17,7 @@ const IndexPage = () => {
             <div id="container">
                 <Button id="create-task" onClick={() => setShowForm(true)}>Create New Task</Button>
                 {tasks.map(task => (
-                    <TaskCard key={task.id} task={task} />
+                    <TaskCard key={task.taskID} task={task} />
                 ))}
             </div>
             <NewTask showForm={showForm} setShowForm={setShowForm} project="DVD-Library"/>
