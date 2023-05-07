@@ -32,7 +32,7 @@ const LeftSidebar = props => {
                 bordered
                 renderItem={item => (
                     <List.Item>
-                        <NavLink to={`/task/${item.id}`}><h3>{item.title}</h3></NavLink>
+                        <NavLink to={`/task/${item.taskID}`}><h3>{item.title}</h3></NavLink>
                     </List.Item>
                 )}
             />

@@ -26,7 +26,7 @@ const TaskCard = props => {
             title={title}
             className="task-card"
             extra={<SettingOutlined />} 
-            actions={[<EyeOutlined key="view" onClick={() => navigate(`/task/${task.id}`)}/>, <EditOutlined key="edit" />]}
+            actions={[<EyeOutlined key="view" onClick={() => navigate(`/task/${task.taskID}`)}/>, <EditOutlined key="edit" />]}
         >
             <p>{description}</p>
             <AdditionalDetails
