@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const Utils = require("../utilities/task_utils");
+const Task = require("./models/taskSchema");
 
 const app = express();
 
@@ -32,24 +33,30 @@ app.get('/api/tasks', (request, response) => {
 app.get('/api/tasks/:taskID', (request, response) => {
     const { taskID } = request.params;
     
-    const task = tasks.find(task => task.id === taskID)
+    const task = tasks.find(task => task.id === taskID);
     if (task) {
-        response.status(200).json(task)
+        response.status(200).json(task);
     }
     else {
-        response.status(404).send(`The server cannot find a task with the ID ${taskID}`)
+        response.status(404).send(`The Task you were looking for doesn't exist.`);
     }
 })
 
 app.post('/api/tasks', (request, response) => {
     if (!request.body) {
-        response.status(500).json('Something went wrong')
+        response.status(500).json('Something went wrong');
     }
-    const taskID = Utils.setTaskID('DVD', tasks.map(task => task.id))
+    const taskID = Utils.setTaskID('DVD', tasks.map(task => task.id));
     const newTask = {...request.body, id: taskID};
     tasks.push(newTask);
-    response.status(200).json({status: 'success', task: newTask})
-    
+    response.status(200).json({status: 'success', task: newTask});
+})
+
+app.get('/api/tasks/project/:project', (request, response) => {
+    const { project } = request.params;
+
+    const tasksByProject = tasks.filter(task => task.project === project);
+    response.status(200).json(tasksByProject);
 })
 
 const PORT = 3001;
