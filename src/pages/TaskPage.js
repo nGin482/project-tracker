@@ -1,30 +1,35 @@
 import {useState, useEffect, useContext} from "react";
 import { useParams } from "react-router-dom";
-import { Layout, Spin } from "antd";
+import { Layout, Spin, List } from "antd";
 import { isEmpty } from "lodash";
 
-import AdditionalDetails from "../components/AdditionalDetails";
+import AdditionalDetails from "../components/sidebars/AdditionalDetails";
+import LeftSidebar from "../components/sidebars/LeftSidebar";
 import ErrorPage from "./ErrorPage";
 import ErrorsContext from "../contexts/ErrorsContext";
-import { getTask } from "../services/requests";
+import { getTask, getTasksByProject } from "../services/requests";
 import "./styles/TaskPage.css";
 
 
 const TaskPage = () => {
-    const { Content } = Layout;
+    const { Content, Sider } = Layout;
 
     const { taskID } = useParams();
     const [task, setTask] = useState({});
+    const [tasksByProject, setTasksByProject] = useState([]);
     const [errors, setErrors] = useState(false);
     const { setErrorMessage, setErrorType } = useContext(ErrorsContext);
     
     useEffect(() => {
         getTask(taskID).then(data => {
             setTask(data);
+            getTasksByProject(data.project).then(data => {
+                setTasksByProject(data);
+            })
         }).catch(err => {
             setErrors(true);
             if (err.response.status === 404) {
-                setErrorType('Not Found!')
+                setErrorType('Not Found!');
             }
             setErrorMessage(err.response.data);
         })
@@ -32,12 +37,13 @@ const TaskPage = () => {
 
     const changeStatus = status => {
         setTask({...task, status: status});
-    }
+    };
 
     return  (
         <>
             {!isEmpty(task) ? (
                 <div id="task-page">
+                    {tasksByProject.length > 0 ? <LeftSidebar listItems={tasksByProject} view="Tasks" /> : ''}
                     <Layout>
                         <div id="task-content">
                             <Content>

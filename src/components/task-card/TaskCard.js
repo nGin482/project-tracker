@@ -3,22 +3,22 @@ import { useNavigate } from "react-router-dom";
 import { Card, Divider } from "antd";
 import { EyeOutlined, EditOutlined, SettingOutlined } from "@ant-design/icons";
 
-import AdditionalDetails from "../AdditionalDetails";
+import AdditionalDetails from "../sidebars/AdditionalDetails";
 import "./TaskCard.css";
 
 const TaskCard = props => {
     const [task, setTask] = useState(props.task);
     const { title, project, status, created, description, comments } = task;
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     useEffect(() => {
         console.log(task)
         // update the DB
-    }, [task])
+    }, [task]);
     
     const changeStatus = status => {
-        setTask({...task, status: status})
-    }
+        setTask({...task, status: status});
+    };
 
 
     return (
@@ -51,6 +51,6 @@ const TaskCard = props => {
             ) : ''}
         </Card>
     );
-}
+};
 
 export default TaskCard;
