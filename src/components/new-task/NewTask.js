@@ -9,8 +9,8 @@ const NewTask = (props) => {
     const { showForm, setShowForm, project } = props;
     const { Option } = Select;
 
-    const [showAlertBanner, setShowAlertBanner] = useState(false);
     const [form] = Form.useForm();
+    const [showAlertBanner, setShowAlertBanner] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const {tasks, setTasks} = useContext(TasksContext);
 
@@ -21,6 +21,8 @@ const NewTask = (props) => {
                 setTasks([...tasks, data.task]);
                 setShowForm(false);
                 form.resetFields();
+                setShowAlertBanner(false);
+                setErrorMessage('');
             })
             .catch(err => {
                 setErrorMessage('An internal server error occurred');
