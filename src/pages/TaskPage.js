@@ -1,11 +1,13 @@
 import {useState, useEffect, useContext} from "react";
 import { useParams } from "react-router-dom";
-import { Layout } from "antd";
+import { Layout, Spin } from "antd";
 import { isEmpty } from "lodash";
 
-import { getTask } from "../services/requests";
 import AdditionalDetails from "../AdditionalDetails";
-import "./TaskPage.css";
+import ErrorPage from "./ErrorPage";
+import ErrorsContext from "../contexts/ErrorsContext";
+import { getTask } from "../services/requests";
+import "./styles/TaskPage.css";
 
 
 const TaskPage = () => {
@@ -13,11 +15,18 @@ const TaskPage = () => {
 
     const { taskID } = useParams();
     const [task, setTask] = useState({});
-    const [showForm, setShowForm] = useState(false);
+    const [errors, setErrors] = useState(false);
+    const { setErrorMessage, setErrorType } = useContext(ErrorsContext);
     
     useEffect(() => {
         getTask(taskID).then(data => {
             setTask(data);
+        }).catch(err => {
+            setErrors(true);
+            if (err.response.status === 404) {
+                setErrorType('Not Found!')
+            }
+            setErrorMessage(err.response.data);
         })
     }, [taskID]);
 
@@ -48,7 +57,13 @@ const TaskPage = () => {
                     </Layout>
                 </div>
             ) 
-            : ''
+            : errors ? (
+                <>
+                <div id="errors">
+                    <ErrorPage />
+                </div>
+                </>
+            ) : <Spin tip="Loading" size="large" />
             }
             
         </>
