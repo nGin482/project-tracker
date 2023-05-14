@@ -1,0 +1,25 @@
+.ant-layout-header {
+    background: #3aa2f2;
+    display: flex;
+    align-items: center;
+}
+
+.ant-layout-header:last-child {
+    margin-left: auto;
+}
+
+.ant-breadcrumb {
+    width: max-content;
+}
+
+img {
+    max-height: 100%;
+}
+.title {
+    background-color: #fff;
+    height: 50px;
+    border-radius: 10px;
+    font-weight: bold;
+    padding: 0 50px;
+    margin: 0 20px
+}
