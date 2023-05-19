@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { NavLink } from "react-router-dom";
 import { Button, Layout } from "antd";
 import { LoginOutlined } from "@ant-design/icons";
 
@@ -15,11 +16,15 @@ const Navbar = props => {
     return (
         <Header className="navbar">
             <img src={logo} alt="Project-Tracker"/>
-            <span className="title">Project Tracker</span>
+            <span className="title">
+                <NavLink to='/'>Project Tracker</NavLink>
+            </span>
             <Button id="create-task-button" onClick={() => setShowForm(true)}>Create New Task</Button>
             <NewTask showForm={showForm} setShowForm={setShowForm} project="DVD-Library"/>
-            <Button id="login-button" onClick={() => console.log('login')}>
-                <LoginOutlined />Login
+            <Button id="login-button">
+                <NavLink to='/login'>
+                    <LoginOutlined />Login
+                </NavLink>
             </Button>
         </Header>
     );
