@@ -1,10 +1,12 @@
 const express = require("express");
 const cors = require("cors");
+const bcrypt = require("bcrypt");
 require("dotenv").config();
 
 const Utils = require("../utilities/task_utils");
 const mongoConnection = require("./mongo");
 const Task = require("./models/TaskSchema");
+const User = require("./models/UserSchema");
 
 const app = express();
 
@@ -56,6 +58,17 @@ app.post('/api/tasks', (request, response) => {
         taskObj.save();
         response.status(200).json({status: 'success', task: taskObj});
     })
+})
+
+app.post('/api/register', async (request, response) => {
+    const { username, password, email, image } = request.body;
+    const pwHash = await bcrypt.hash(password, 14);
+    const user = { username, password: pwHash, email, image };
+
+    const newUser = new User(user);
+    newUser.save();
+    response.status(200).json({username, image});
+
 })
 
 const PORT = 3001;

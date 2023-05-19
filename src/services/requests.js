@@ -15,11 +15,15 @@ const getTasksByProject = project => {
 const createTask = task => {
     return axios.post(`${baseURL}tasks`, task).then(response => response.data);
 }
+const register = newUser => {
+    return axios.post(`${baseURL}register`, newUser).then(response => response.data)
+}
 
 
 export {
     getTasks,
     getTask,
     getTasksByProject,
-    createTask
+    createTask,
+    register
 }
