@@ -1,0 +1,18 @@
+#registration {
+    border: solid 10px #000;
+    border-radius: 30px;
+    background-color: #fff;
+    margin: 5%;
+    padding: 2% 5%;
+}
+
+#registration img {
+    margin: 0 auto;
+    display: block;
+    margin-bottom: 5%;
+}
+
+#registration #registration-submit {
+    float: right;
+    background-color: #e57200;
+}
