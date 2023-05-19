@@ -8,6 +8,7 @@ import TasksContext from "./contexts/TasksContext";
 import ErrorsContext from "./contexts/ErrorsContext";
 import { getTasks } from "./services/requests";
 import './App.css';
+import LoginPage from "./pages/LoginPage";
 
 function App() {
   const [tasks, setTasks] = useState([]);
@@ -28,6 +29,10 @@ function App() {
     {
       path: '/task/:taskID',
       element: <TaskPage />
+    },
+    {
+      path: '/login',
+      element: <LoginPage />
     }
   ]);
 
