@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Alert, Button, Form, Input, Space } from "antd";
+import { useCookies } from "react-cookie";
 
+import UserContext from "../../contexts/UserContext";
 import { login } from "../../services/requests";
 import "./Login.css";
 
@@ -8,13 +10,16 @@ const Login = props => {
     const { setFormShown } = props;
     const [form] = Form.useForm();
     const [errorMessage, setErrorMessage] = useState('');
+    const { setUser } = useContext(UserContext);
+    const [cookie, setCookie] = useCookies(['user']);
 
     const loginUser = () => {
         form.validateFields().then(values => {
             const { username, password } = values;
             login(username, password).then(data => {
                 setErrorMessage('');
-                console.log('redirecting to login page', data)
+                setUser(data);
+                setCookie('user', JSON.stringify(data), {path: '/'})
             }).catch(err => {
                 setErrorMessage(err.response.data);
             })
