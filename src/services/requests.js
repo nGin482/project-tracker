@@ -15,8 +15,12 @@ const getTasksByProject = project => {
 const createTask = task => {
     return axios.post(`${baseURL}tasks`, task).then(response => response.data);
 }
+
 const register = newUser => {
     return axios.post(`${baseURL}register`, newUser).then(response => response.data)
+}
+const login = (username, password) => {
+    return axios.post(`${baseURL}login`, {username, password}).then(response => response.data)
 }
 
 
@@ -25,5 +29,6 @@ export {
     getTask,
     getTasksByProject,
     createTask,
-    register
+    register,
+    login
 }

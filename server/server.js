@@ -71,6 +71,25 @@ app.post('/api/register', async (request, response) => {
 
 })
 
+app.post('/api/login', async (request, response) => {
+    const { username, password } = request.body;
+    User.find({username: username}).then(results => {
+        if (results.length === 0) {
+            response.status(401).send('The username or password was incorrect');
+        }
+        results.forEach(record => {
+            if (record.username === username && bcrypt.compareSync(password, record.password)) {
+                response.status(200).send(record);
+            }
+            else {
+                response.status(401).send('The username or password was incorrect');
+            }
+        })
+    }).catch(err => {
+        response.status(500).send(err);
+    })
+})
+
 const PORT = 3001;
 app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`)
