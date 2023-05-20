@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 const Utils = require("../utilities/task_utils");
@@ -62,6 +63,7 @@ app.post('/api/tasks', (request, response) => {
 
 app.post('/api/register', async (request, response) => {
     const { username, password, email, image } = request.body;
+    // check if username already exists - 409
     const pwHash = await bcrypt.hash(password, 14);
     const user = { username, password: pwHash, email, image };
 
@@ -73,21 +75,23 @@ app.post('/api/register', async (request, response) => {
 
 app.post('/api/login', async (request, response) => {
     const { username, password } = request.body;
-    User.find({username: username}).then(results => {
-        if (results.length === 0) {
-            response.status(401).send('The username or password was incorrect');
+    const user = await User.findOne({username: username})
+    if (user) {
+        if (bcrypt.compareSync(password, user.password)) {
+            const userForToken = {
+                username: user.username,
+                id: user._id
+            }
+            const token = jwt.sign(userForToken, process.env.SECRET);
+            response.status(200).send({username: user.username, email: user.email, token});
         }
-        results.forEach(record => {
-            if (record.username === username && bcrypt.compareSync(password, record.password)) {
-                response.status(200).send(record);
-            }
-            else {
-                response.status(401).send('The username or password was incorrect');
-            }
-        })
-    }).catch(err => {
-        response.status(500).send(err);
-    })
+        else {
+            response.status(401).send('The username or password is incorrect');
+        }
+    }
+    else {
+        response.status(401).send('The username or password is incorrect');
+    }
 })
 
 const PORT = 3001;
