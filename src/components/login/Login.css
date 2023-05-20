@@ -1,0 +1,16 @@
+#login-form {
+    border: solid 10px #000;
+    border-radius: 30px;
+    background-color: #fff;
+    margin: 5%;
+    padding: 2% 5%;
+}
+
+.login-alert {
+    margin-bottom: 5%;
+}
+
+#login-form #login-submit {
+    float: right;
+    background-color: #e57200;
+}
