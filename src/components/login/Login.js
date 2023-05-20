@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
-import { Alert, Button, Form, Input } from "antd";
+import { useState } from "react";
+import { Alert, Button, Form, Input, Space } from "antd";
 
 import { login } from "../../services/requests";
 import "./Login.css";
 
 const Login = props => {
+    const { setFormShown } = props;
     const [form] = Form.useForm();
     const [errorMessage, setErrorMessage] = useState('');
 
@@ -71,6 +72,10 @@ const Login = props => {
                     Login
                 </Button>
             </Form.Item>
+            <Space>
+               <span>Don't have an account?</span>
+               <Button type="primary" onClick={() => setFormShown('register')}>Create a new account</Button>
+            </Space>
         </Form>
     );
 };

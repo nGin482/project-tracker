@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Form, Input, Alert, Button } from "antd";
+import { Form, Input, Alert, Button, Space } from "antd";
 
 import { register } from "../../services/requests";
 import "./Registration.css";
 
 
 const Registration = props => {
+    const { setFormShown } = props;
     const [form] = Form.useForm();
     const [imageSource, setImageSource] = useState('//ssl.gstatic.com/accounts/ui/avatar_2x.png');
     const [errorMessage, setErrorMessage] = useState('');
@@ -123,9 +124,13 @@ const Registration = props => {
                     htmlType="submit"
                     id="registration-submit"
                 >
-                    Submit
+                    Register
                 </Button>
             </Form.Item>
+            <Space>
+               <span>Already have an account?</span>
+               <Button type="primary" onClick={() => setFormShown('login')}>Login</Button>
+            </Space>
         </Form>
     );
 };
