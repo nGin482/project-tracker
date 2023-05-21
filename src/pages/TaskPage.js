@@ -5,6 +5,7 @@ import { isEmpty } from "lodash";
 
 import AdditionalDetails from "../components/sidebars/AdditionalDetails";
 import LeftSidebar from "../components/sidebars/LeftSidebar";
+import Navbar from "../components/Navbar";
 import ErrorPage from "./ErrorPage";
 import ErrorsContext from "../contexts/ErrorsContext";
 import { getTask, getTasksByProject } from "../services/requests";
@@ -41,6 +42,7 @@ const TaskPage = () => {
 
     return  (
         <>
+            <Navbar />
             {!isEmpty(task) ? (
                 <div id="task-page">
                     {tasksByProject.length > 0 ? <LeftSidebar listItems={tasksByProject} view="Tasks" /> : ''}
