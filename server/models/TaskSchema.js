@@ -6,6 +6,7 @@ const Utils = require("../../utilities/utils");
 
 const taskSchema = new Schema({
     id: String,
+    taskID: String,
     title: String,
     description: String,
     project: String,
