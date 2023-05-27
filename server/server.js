@@ -63,10 +63,10 @@ app.post('/api/tasks', async (request, response) => {
         const taskID = TaskUtils.setTaskID('DVD', currentTaskIDs);
         const newTask = {...request.body, taskID, creator: token.username};
         const taskObj = new Task(newTask);
-        taskObj.save();
+        const savedTask = await taskObj.save();
         
         const user = await User.findOne({username: token.username});
-        user.tasks = user.tasks.concat(taskObj);
+        user.tasks = user.tasks.concat(savedTask._id);
         user.save();
         response.status(200).json({status: 'success', task: taskObj});
     }
@@ -74,19 +74,23 @@ app.post('/api/tasks', async (request, response) => {
 
 app.post('/api/register', async (request, response) => {
     const { username, password, email, image } = request.body;
-    // check if username already exists - 409
-    const pwHash = await bcrypt.hash(password, 14);
-    const user = { username, password: pwHash, email, image };
-
-    const newUser = new User(user);
-    newUser.save();
-    response.status(200).json({username, image});
+    const checkUser = User.findOne({username: username});
+    if (checkUser) {
+        response.status(409).send("The username is already in use");
+    }
+    else {
+        const pwHash = await bcrypt.hash(password, 14);
+        const user = { username, password: pwHash, email, image };
+        const newUser = new User(user);
+        newUser.save();
+        response.status(200).json({username, image});
+    }
 
 })
 
 app.post('/api/login', async (request, response) => {
     const { username, password } = request.body;
-    const user = await User.findOne({username: username});
+    const user = await User.findOne({username: username}).populate('tasks').exec();
     if (user) {
         if (bcrypt.compareSync(password, user.password)) {
             const userForToken = {
