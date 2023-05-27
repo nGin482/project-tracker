@@ -58,7 +58,7 @@ const Navbar = props => {
                         className="user-dropdown"
                     >
                         <Button id="username">
-                            <img src={user.avatar} id="avatar" width="30" height="240" />
+                            {user.avatar && <img src={user.avatar} id="avatar" width="30" height="240" />}
                             {user.username}<DownOutlined />
                         </Button>
                     </Dropdown>
