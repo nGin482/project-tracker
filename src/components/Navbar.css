@@ -15,6 +15,10 @@
 img {
     max-height: 100%;
 }
+#avatar {
+    border-radius: 50%;
+    margin-right: 5px;
+}
 .title {
     background-color: #fff;
     height: 50px;
@@ -25,4 +29,30 @@ img {
 }
 .title a {
     color: #000;
+    position: relative;
+    bottom: 9px;
+    font-size: 20px;
+}
+
+#user-display {
+    margin-left: auto;
+}
+
+#username {
+    border-radius: 10px;
+}
+#username span {
+    bottom: 6px;
+    position: relative;
+}
+#username:hover {
+    color: #000;
+}
+
+.user-dropdown {
+    background-color: #fff;
+}
+
+.user-dropdown:hover {
+    cursor: pointer;
 }

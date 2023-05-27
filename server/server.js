@@ -75,7 +75,7 @@ app.post('/api/register', async (request, response) => {
 
 app.post('/api/login', async (request, response) => {
     const { username, password } = request.body;
-    const user = await User.findOne({username: username})
+    const user = await User.findOne({username: username});
     if (user) {
         if (bcrypt.compareSync(password, user.password)) {
             const userForToken = {
@@ -83,7 +83,7 @@ app.post('/api/login', async (request, response) => {
                 id: user._id
             }
             const token = jwt.sign(userForToken, process.env.SECRET);
-            response.status(200).send({username: user.username, email: user.email, token});
+            response.status(200).send({username: user.username, email: user.email, avatar: user.image, token});
         }
         else {
             response.status(401).send('The username or password is incorrect');
