@@ -4,7 +4,8 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
-const Utils = require("../utilities/task_utils");
+const TaskUtils = require("../utilities/task_utils");
+const Utils = require("../utilities/utils");
 const mongoConnection = require("./mongo");
 const Task = require("./models/TaskSchema");
 const User = require("./models/UserSchema");
@@ -47,18 +48,28 @@ app.get('/api/tasks/project/:project', (request, response) => {
     })
 })
 
-app.post('/api/tasks', (request, response) => {
+app.post('/api/tasks', async (request, response) => {
     if (!request.body) {
         response.status(500).json('Something went wrong');
     }
-    Task.find().then(result => {
-        let currentTaskIDs = result.map(task => task.id)
-        const taskID = Utils.setTaskID('DVD', currentTaskIDs);
-        const newTask = {...request.body, taskID: taskID, creator: 'Natalie'};
+    const { authorization } = request.headers;
+    const token = jwt.verify(Utils.checkToken(authorization), process.env.SECRET);
+    if (!token && !token?.username) {
+        response.status(401).send('The request was not completed due to an unauthorised user')
+    }
+    else {
+        const tasks = await Task.find();
+        let currentTaskIDs = tasks.map(task => task.taskID);
+        const taskID = TaskUtils.setTaskID('DVD', currentTaskIDs);
+        const newTask = {...request.body, taskID, creator: token.username};
         const taskObj = new Task(newTask);
         taskObj.save();
+        
+        const user = await User.findOne({username: token.username});
+        user.tasks = user.tasks.concat(taskObj);
+        user.save();
         response.status(200).json({status: 'success', task: taskObj});
-    })
+    }
 })
 
 app.post('/api/register', async (request, response) => {

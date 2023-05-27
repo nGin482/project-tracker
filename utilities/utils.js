@@ -8,6 +8,14 @@ const createdDate = () => {
     return `${createdDateString} ${createdTimeString}`
 }
 
+const checkToken = authHeader => {
+    if (authHeader && authHeader.startsWith('Bearer')) {
+        return authHeader.replace('Bearer ', '');
+    }
+    return null;
+}
+
 module.exports = {
-    createdDate
+    createdDate,
+    checkToken
 }
