@@ -3,6 +3,7 @@ import { Form, Input, Select, Alert, Modal } from "antd";
 
 import { createTask } from "../../services/requests";
 import TasksContext from "../../contexts/TasksContext";
+import UserContext from "../../contexts/UserContext";
 import "./NewTask.css";
 
 const NewTask = (props) => {
@@ -12,12 +13,13 @@ const NewTask = (props) => {
     const [form] = Form.useForm();
     const [showAlertBanner, setShowAlertBanner] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-    const {tasks, setTasks} = useContext(TasksContext);
+    const { tasks, setTasks } = useContext(TasksContext);
+    const { user } = useContext(UserContext);
 
     const createNewTask = () => {
         form.validateFields().then(values => {
             const task = {...values, status: 'Backlog', project: project};
-            createTask(task).then(data => {
+            createTask(task, user.token).then(data => {
                 setTasks([...tasks, data.task]);
                 setShowForm(false);
                 form.resetFields();
@@ -25,7 +27,12 @@ const NewTask = (props) => {
                 setErrorMessage('');
             })
             .catch(err => {
-                setErrorMessage('An internal server error occurred');
+                if (err.response.data) {
+                    setErrorMessage(err.response.data);
+                }
+                else {
+                    setErrorMessage('An internal server error occurred');
+                }
                 setShowAlertBanner(true);
             })
         })

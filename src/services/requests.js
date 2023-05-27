@@ -1,6 +1,7 @@
 import axios from "axios";
 
 const baseURL = 'http://localhost:3001/api/'
+const authHeader = {headers: {}}
 
 
 const getTasks = () => {
@@ -12,8 +13,8 @@ const getTask = taskID => {
 const getTasksByProject = project => {
     return axios.get(`${baseURL}tasks/project/${project}`).then(response => response.data);
 }
-const createTask = task => {
-    return axios.post(`${baseURL}tasks`, task).then(response => response.data);
+const createTask = (task, token) => {
+    return axios.post(`${baseURL}tasks`, task, {headers: {"Authorization": `Bearer ${token}`}}).then(response => response.data);
 }
 
 const register = newUser => {
