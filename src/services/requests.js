@@ -23,6 +23,9 @@ const register = newUser => {
 const login = (username, password) => {
     return axios.post(`${baseURL}login`, {username, password}).then(response => response.data)
 }
+const fetchUser = username => {
+    return axios.get(`${baseURL}users/${username}`).then(response => response.data)
+}
 
 
 export {
@@ -31,5 +34,6 @@ export {
     getTasksByProject,
     createTask,
     register,
-    login
+    login,
+    fetchUser
 }

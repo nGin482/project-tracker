@@ -109,6 +109,18 @@ app.post('/api/login', async (request, response) => {
     }
 })
 
+app.get('/api/users/:username', async (request, response) => {
+    const { username } = request.params;
+
+    const user = await User.findOne({username: username}).populate('tasks').exec();
+    if (user) {
+        response.status(200).json(user);
+    }
+    else {
+        response.status(404).send(`The server cannot find a user with the username ${username}`)
+    }
+})
+
 const PORT = 3001;
 app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`)
