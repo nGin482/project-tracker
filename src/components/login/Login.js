@@ -1,4 +1,5 @@
 import { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { Alert, Button, Form, Input, Space } from "antd";
 import { useCookies } from "react-cookie";
 
@@ -12,6 +13,7 @@ const Login = props => {
     const [errorMessage, setErrorMessage] = useState('');
     const { setUser } = useContext(UserContext);
     const [cookie, setCookie] = useCookies(['user']);
+    const navigate = useNavigate();
 
     const loginUser = () => {
         form.validateFields().then(values => {
@@ -20,7 +22,10 @@ const Login = props => {
                 setErrorMessage('');
                 setUser(data);
                 setCookie('user', JSON.stringify(data), {path: '/'})
+                form.resetFields();
+                navigate(`/profile/${data.username}`)
             }).catch(err => {
+                console.log(err)
                 setErrorMessage(err.response.data);
             })
         }).catch(err => {

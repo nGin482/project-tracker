@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { NavLink } from "react-router-dom";
 import { Button, Layout, Dropdown } from "antd";
@@ -12,6 +13,7 @@ import "./Navbar.css";
 
 const Navbar = props => {
     const { Header } = Layout;
+    const navigate = useNavigate();
 
     const [showForm, setShowForm] = useState(false);
     const { user } = useContext(UserContext);
@@ -20,6 +22,7 @@ const Navbar = props => {
     const logout = () => {
         removeCookie('user', {path: '/'});
         window.location.reload();
+        navigate('/'); 
     }
 
     const items = [

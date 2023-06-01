@@ -1,5 +1,5 @@
 import React, {useState, useEffect } from "react";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Ro } from "react-router-dom";
 import { CookiesProvider } from "react-cookie";
 import { useCookies } from "react-cookie";
 
@@ -11,6 +11,7 @@ import TasksContext from "./contexts/TasksContext";
 import ErrorsContext from "./contexts/ErrorsContext";
 import { getTasks } from "./services/requests";
 import './App.css';
+import ProfilePage from "./pages/ProfilePage";
 
 function App() {
   const [tasks, setTasks] = useState([]);
@@ -37,6 +38,10 @@ function App() {
     {
       path: '/login',
       element: <LoginPage />
+    },
+    {
+      path: '/profile/:username',
+      element: <ProfilePage />
     }
   ]);
 
