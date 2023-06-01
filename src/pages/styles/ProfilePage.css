@@ -1,0 +1,13 @@
+#user-details {
+    background-color: #fff;
+    width: max-content;
+    float: right;
+    margin-right: 5%;
+    padding: 2%;
+    border-radius: 20px;
+}
+
+#user-image img {
+    width: 150px;
+    height: 150px;
+}
