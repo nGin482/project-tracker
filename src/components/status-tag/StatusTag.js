@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { Tag, Dropdown } from "antd";
 
+import useTaskStatus from "../../hooks/useTaskStatus";
+
 
 const StatusTag = props => {
-    const { status, handleStatus } = props;
+    const { status, showDescription } = props;
     const [colour, setColour] = useState('#A0A0A0');
+    const { taskStatus, changeStatus } = useTaskStatus(status);
 
     const items = [
         {
@@ -30,7 +33,7 @@ const StatusTag = props => {
     ];
     
     useEffect(() => {
-        switch (status) {
+        switch (taskStatus) {
             case "In Progress":
                 setColour('blue');
                 break;
@@ -47,16 +50,16 @@ const StatusTag = props => {
                 setColour('#A0A0A0')
                 break;
         }
-    }, [status]);
+    }, [taskStatus]);
 
     const onClick = event => {
-        handleStatus(event.domEvent.target.innerText)
+        changeStatus(event.domEvent.target.innerText);
     }
 
     return (
         <div className="task-status">
-            Status: <Dropdown menu={{items,onClick,}} trigger={['click']}>
-                <Tag color={colour}>{status}</Tag>
+            {showDescription ? "Status: " : ""}<Dropdown menu={{items,onClick,}} trigger={['click']}>
+                <Tag color={colour}>{taskStatus}</Tag>
             </Dropdown>
         </div>
     );

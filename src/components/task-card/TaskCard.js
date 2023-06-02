@@ -16,11 +16,7 @@ const TaskCard = props => {
         // update the DB
     }, [task]);
     
-    const changeStatus = status => {
-        setTask({...task, status: status});
-    };
-
-
+    
     return (
         <Card
             title={title}
@@ -31,7 +27,6 @@ const TaskCard = props => {
             <p>{description}</p>
             <AdditionalDetails
                 status={status}
-                changeStatus={changeStatus}
                 project={project}
                 created={created}
                 width={200}    
