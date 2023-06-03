@@ -4,15 +4,16 @@ const { Schema, model } = mongoose;
 const Utils = require("../../utilities/utils");
 
 const ProjectSchema = new Schema({
-    projectID: String,
-    name: String,
+    projectCode: String,
+    projectName: String,
     dateCreated: { 
         type: String,
         default: Utils.createdDate()
     },
     creator: String,
     tasks: [{
-        type: Schema.Types.ObjectId, ref: 'Task'
+        type: Schema.Types.ObjectId,
+        ref: 'Task'
     }]
 });
 
