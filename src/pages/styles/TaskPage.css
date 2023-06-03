@@ -9,3 +9,8 @@
     width: 70%;
     margin-left: 220px;
 }
+
+#tasks-drawer-button {
+    background-color: #e57200;
+    color: #fff;
+}
