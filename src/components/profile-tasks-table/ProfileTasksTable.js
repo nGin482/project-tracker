@@ -3,9 +3,7 @@ import StatusTag from "../status-tag/StatusTag";
 
 
 const ProfileTasksTable = props => {
-
     const { tasks } = props;
-
 
     const tableColumns = [
         {
@@ -57,7 +55,8 @@ const ProfileTasksTable = props => {
         {
             title: 'Description',
             dataIndex: 'description',
-            key: 'description'
+            key: 'description',
+            width: '20%'
         },
         {
             title: 'Project',
@@ -133,7 +132,13 @@ const ProfileTasksTable = props => {
     }
 
     return (
-        <Table id="profile-tasks-table" dataSource={tasks} columns={tableColumns} onChange={onTableChange} />
+        <Table
+            id="profile-tasks-table"
+            dataSource={tasks}
+            columns={tableColumns}
+            onChange={onTableChange} 
+            className="profile-right"
+        />
     )
 }
 

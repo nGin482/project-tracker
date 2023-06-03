@@ -1,8 +1,8 @@
 #user-details {
     background-color: #fff;
     width: max-content;
-    float: right;
-    margin-right: 5%;
+    height: 350px;
+    margin-right: 15%;
     padding: 2%;
     border-radius: 20px;
 }
@@ -12,7 +12,33 @@
     height: 150px;
 }
 
-#profile-tasks-table {
+.ant-table-wrapper {
     width: 80%;
     margin: 50px auto;
+}
+
+#profile-content {
+    display: flex;
+    justify-content: space-between;
+}
+
+#profile-content .profile-right {
+    margin: 0 20px;
+}
+
+#profile-menu {
+    background-color: #fff;
+    width: 20%;
+    border-radius: 10px;
+    margin-left: 3%;
+    padding: 2%;
+}
+
+#profile-menu .ant-image {
+    margin: 0 auto;
+}
+
+#profile-menu-list .ant-menu-item-selected {
+    background-color: #e57200;
+    color: #fff;
 }

@@ -1,9 +1,10 @@
 import { useState, useEffect, useContext } from "react";
-import { NavLink, useParams } from "react-router-dom";
-import { Descriptions, Image } from "antd";
+import { useParams } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
 import ProfileTasksTable from "../components/profile-tasks-table/ProfileTasksTable";
+import ProfileViewMenu from "./profile-views/ProfileViewMenu";
+import ProfileDetails from "./profile-views/ProfileDetails";
 import UserContext from "../contexts/UserContext";
 import ErrorsContext from "../contexts/ErrorsContext";
 import ErrorPage from "./ErrorPage";
@@ -14,6 +15,7 @@ import "./styles/ProfilePage.css";
 const ProfilePage = () => {
     const [user, setUser] = useState({});
     const [errors, setErrors] = useState(false);
+    const [menuView, setMenuView] = useState('profile');
 
     const { currentUser } = useContext(UserContext);
     const { errorMessage, setErrorMessage } = useContext(ErrorsContext);
@@ -37,23 +39,11 @@ const ProfilePage = () => {
             {!errors ? (
                 <>
                     <h1>{user.username}</h1>
-                    <Descriptions
-                        title={`${user.username}'s Details`}
-                        bordered
-                        layout="vertical"
-                        column={4}
-                        id="user-details"
-                    >
-                        <Descriptions.Item label="UserName">{user.username}</Descriptions.Item>
-                        <Descriptions.Item label="Email">{user.email}</Descriptions.Item>
-                        <Descriptions.Item label="Image">
-                            <Image src={user.image} width="256" height="312" id="user-image" />
-                        </Descriptions.Item>
-                        <Descriptions.Item label="Actions">
-                            <NavLink to={`/profile/${user.username}/edit`}>Edit Details</NavLink>
-                        </Descriptions.Item>
-                    </Descriptions>
-                    <ProfileTasksTable tasks={user.tasks} />
+                    <div id="profile-content">
+                        <ProfileViewMenu user={user} setView={setMenuView} />
+                        {menuView === 'profile' && <ProfileDetails user={user} />}
+                        {menuView === 'tasks' && <ProfileTasksTable tasks={user.tasks} />}
+                    </div>
                 </>
             ) : (
                 <>
