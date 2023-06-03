@@ -3,6 +3,7 @@ import { NavLink, useParams } from "react-router-dom";
 import { Descriptions, Image } from "antd";
 
 import Navbar from "../components/Navbar";
+import ProfileTasksTable from "../components/profile-tasks-table/ProfileTasksTable";
 import UserContext from "../contexts/UserContext";
 import ErrorsContext from "../contexts/ErrorsContext";
 import ErrorPage from "./ErrorPage";
@@ -28,7 +29,7 @@ const ProfilePage = () => {
                 setErrorMessage(err.response.data);
             }
         })
-    }, [])
+    }, []);
 
     return (
         <>
@@ -50,9 +51,9 @@ const ProfilePage = () => {
                         </Descriptions.Item>
                         <Descriptions.Item label="Actions">
                             <NavLink to={`/profile/${user.username}/edit`}>Edit Details</NavLink>
-
                         </Descriptions.Item>
                     </Descriptions>
+                    <ProfileTasksTable tasks={user.tasks} />
                 </>
             ) : (
                 <>

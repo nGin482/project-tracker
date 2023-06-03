@@ -11,3 +11,8 @@
     width: 150px;
     height: 150px;
 }
+
+#profile-tasks-table {
+    width: 80%;
+    margin: 50px auto;
+}
