@@ -16,7 +16,7 @@ const ErrorPage = props => {
         <>
             <h1>Something went wrong!</h1>
             <Alert type="error" message="Not Found!" description={errorMessage} showIcon />
-            <Button size="large" onClick={() => navigate('/')}>
+            <Button size="large">
                 <NavLink to="/">Home</NavLink>
             </Button>
         </>
