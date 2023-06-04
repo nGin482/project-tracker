@@ -6,6 +6,7 @@ import { Button, Layout, Dropdown } from "antd";
 import { LoginOutlined, LogoutOutlined, DownOutlined } from "@ant-design/icons";
 
 import NewTask from "../new-task/NewTask";
+import CreateProject from "../create-project/CreateProject";
 import UserContext from "../../contexts/UserContext";
 import logo from "../../assets/Logo.png";
 import "./Navbar.css";
@@ -15,7 +16,8 @@ const Navbar = props => {
     const { Header } = Layout;
     const navigate = useNavigate();
 
-    const [showForm, setShowForm] = useState(false);
+    const [showTaskForm, setShowTaskForm] = useState(false);
+    const [showProjectForm, setShowProjectForm] = useState(false);
     const { user } = useContext(UserContext);
     const [_, __, removeCookie] = useCookies(['user']);
 
@@ -49,9 +51,10 @@ const Navbar = props => {
             <span className="title">
                 <NavLink to='/'>Project Tracker</NavLink>
             </span>
-            {user ? <Button id="create-task-button" onClick={() => setShowForm(true)}>Create New Task</Button> : ''}
-            {user ? <Button id="create-project-button" onClick={() => setShowForm(true)}>Create New Project</Button> : ''}
-            <NewTask showForm={showForm} setShowForm={setShowForm} project="DVD-Library"/>
+            {user && <Button id="create-task-button" onClick={() => setShowTaskForm(true)}>Create New Task</Button>}
+            {user && <Button id="create-project-button" onClick={() => setShowProjectForm(true)}>Create New Project</Button>}
+            <NewTask showForm={showTaskForm} setShowForm={setShowTaskForm} project="DVD-Library"/>
+            <CreateProject showForm={showProjectForm} setShowForm={setShowProjectForm} />
             <div id="user-display">
                 {user ? (
                     <Dropdown
