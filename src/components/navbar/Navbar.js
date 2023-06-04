@@ -5,9 +5,9 @@ import { NavLink } from "react-router-dom";
 import { Button, Layout, Dropdown } from "antd";
 import { LoginOutlined, LogoutOutlined, DownOutlined } from "@ant-design/icons";
 
-import NewTask from "../components/new-task/NewTask";
-import UserContext from "../contexts/UserContext";
-import logo from "../assets/Logo.png";
+import NewTask from "../new-task/NewTask";
+import UserContext from "../../contexts/UserContext";
+import logo from "../../assets/Logo.png";
 import "./Navbar.css";
 
 
@@ -50,6 +50,7 @@ const Navbar = props => {
                 <NavLink to='/'>Project Tracker</NavLink>
             </span>
             {user ? <Button id="create-task-button" onClick={() => setShowForm(true)}>Create New Task</Button> : ''}
+            {user ? <Button id="create-project-button" onClick={() => setShowForm(true)}>Create New Project</Button> : ''}
             <NewTask showForm={showForm} setShowForm={setShowForm} project="DVD-Library"/>
             <div id="user-display">
                 {user ? (

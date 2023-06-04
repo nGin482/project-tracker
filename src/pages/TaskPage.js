@@ -4,7 +4,7 @@ import { Layout, Spin, Drawer, Button, List, Input } from "antd";
 import { isEmpty, omit } from "lodash";
 
 import AdditionalDetails from "../components/sidebars/AdditionalDetails";
-import Navbar from "../components/Navbar";
+import Navbar from "../components/navbar/Navbar";
 import ErrorPage from "./ErrorPage";
 import ErrorsContext from "../contexts/ErrorsContext";
 import { getTask, getTasksByProject } from "../services/requests";

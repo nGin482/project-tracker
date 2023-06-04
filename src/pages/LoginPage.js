@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import Registration from "../components/registration/Registration";
 import Login from "../components/login/Login";
-import Navbar from "../components/Navbar";
+import Navbar from "../components/navbar/Navbar";
 import logo from "./../assets/Logo.png";
 import "./styles/LoginPage.css";
 

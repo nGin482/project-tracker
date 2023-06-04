@@ -2,7 +2,7 @@ import {useState, useEffect, useContext} from "react";
 
 import TaskCard from '../components/task-card/TaskCard';
 import TasksContext from "../contexts/TasksContext";
-import Navbar from "../components/Navbar";
+import Navbar from "../components/navbar/Navbar";
 
 
 const IndexPage = () => {

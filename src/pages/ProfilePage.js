@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
 
-import Navbar from "../components/Navbar";
+import Navbar from "../components/navbar/Navbar";
 import ProfileTasksTable from "../components/profile-tasks-table/ProfileTasksTable";
 import ProfileViewMenu from "./profile-views/ProfileViewMenu";
 import ProfileDetails from "./profile-views/ProfileDetails";
