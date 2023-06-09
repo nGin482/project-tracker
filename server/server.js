@@ -9,6 +9,7 @@ const Utils = require("../utilities/utils");
 const mongoConnection = require("./mongo");
 const Task = require("./models/TaskSchema");
 const User = require("./models/UserSchema");
+const Project = require("./models/projectSchema");
 
 const app = express();
 
@@ -69,6 +70,24 @@ app.post('/api/tasks', async (request, response) => {
         user.tasks = user.tasks.concat(savedTask._id);
         user.save();
         response.status(200).json({status: 'success', task: taskObj});
+    }
+})
+
+app.get('/api/projects', async (request, response) => {
+    const projects = await Project.find({}).populate('tasks').exec();
+    response.status(200).json(projects);
+})
+
+app.post('/api/projects', async (request, response) => {
+    const { authorization } = request.headers;
+    const token = jwt.verify(Utils.checkToken(authorization), process.env.SECRET);
+    if (!token && !token?.username) {
+        response.status(401).send('The request was not completed due to an unauthorised user')
+    }
+    else {
+        const newProject = new Project({...request.body, creator: token.username});
+        const savedProject = await newProject.save();
+        response.status(200).json(savedProject);
     }
 })
 

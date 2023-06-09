@@ -29,10 +29,10 @@ const taskSchema = new Schema({
 
 taskSchema.set('toJSON', {
     transform: (document, returnedObject) => {
-      delete returnedObject._id
-      delete returnedObject.__v
+      delete returnedObject._id;
+      delete returnedObject.__v;
     }
-})
+});
 
 const Task = model('Task', taskSchema);
 

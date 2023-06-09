@@ -17,6 +17,13 @@ const ProjectSchema = new Schema({
     }]
 });
 
+ProjectSchema.set('toJSON', {
+    transform: (document, returnedObject) => {
+      delete returnedObject._id;
+      delete returnedObject.__v;
+    }
+});
+
 const Project = model('Project', ProjectSchema);
 
 module.exports = Project;
