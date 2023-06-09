@@ -59,9 +59,10 @@ app.post('/api/tasks', async (request, response) => {
         response.status(401).send('The request was not completed due to an unauthorised user')
     }
     else {
-        const tasks = await Task.find();
+        const tasks = await Task.find({project: request.body.project});
+        const project = await Project.findOne({projectName: request.body.project});
         let currentTaskIDs = tasks.map(task => task.taskID);
-        const taskID = TaskUtils.setTaskID('DVD', currentTaskIDs);
+        const taskID = TaskUtils.setTaskID(project.projectCode, currentTaskIDs);
         const newTask = {...request.body, taskID, creator: token.username};
         const taskObj = new Task(newTask);
         const savedTask = await taskObj.save();
@@ -69,6 +70,9 @@ app.post('/api/tasks', async (request, response) => {
         const user = await User.findOne({username: token.username});
         user.tasks = user.tasks.concat(savedTask._id);
         user.save();
+
+        project.tasks = project.tasks.concat(savedTask._id);
+        project.save();
         response.status(200).json({status: 'success', task: taskObj});
     }
 })

@@ -7,7 +7,7 @@ import UserContext from "../../contexts/UserContext";
 import "./NewTask.css";
 
 const NewTask = (props) => {
-    const { showForm, setShowForm, project } = props;
+    const { showForm, setShowForm } = props;
     const { Option } = Select;
 
     const [form] = Form.useForm();
@@ -18,7 +18,7 @@ const NewTask = (props) => {
 
     const createNewTask = () => {
         form.validateFields().then(values => {
-            const task = {...values, status: 'Backlog', project: project};
+            const task = {...values, status: 'Backlog'};
             createTask(task, user.token).then(data => {
                 setTasks([...tasks, data.task]);
                 setShowForm(false);
@@ -55,8 +55,7 @@ const NewTask = (props) => {
                 form={form}
             >
                 {showAlertBanner ? <Alert type="error" message={errorMessage} showIcon /> : ''}
-                {!project ? (
-                    <Form.Item
+                <Form.Item
                     label="Project"
                     name="project"
                     rules={[
@@ -69,12 +68,11 @@ const NewTask = (props) => {
                     <Select>
                         <Option value="tv-guide">TV Guide</Option>
                         <Option value="tv-guide-ui">TV Guide UI</Option>
-                        <Option value="project-tracker">Project Tracker</Option>
+                        <Option value="Project Tracker">Project Tracker</Option>
                         <Option value="read-list">Read List</Option>
                         <Option value="dvd-library">DVD Library</Option>
                     </Select>
                 </Form.Item>
-                ) : ''}
                 
                 <Form.Item 
                     label="Title"
