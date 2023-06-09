@@ -1,7 +1,7 @@
 import React, {useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { Card, Divider } from "antd";
-import { EyeOutlined, EditOutlined, SettingOutlined } from "@ant-design/icons";
+import { EditOutlined, SettingOutlined } from "@ant-design/icons";
 
 import AdditionalDetails from "../sidebars/AdditionalDetails";
 import "./TaskCard.css";
@@ -9,7 +9,6 @@ import "./TaskCard.css";
 const TaskCard = props => {
     const [task, setTask] = useState(props.task);
     const { title, project, status, created, description, comments } = task;
-    const navigate = useNavigate();
 
     useEffect(() => {
         console.log(task)
@@ -22,7 +21,7 @@ const TaskCard = props => {
             title={title}
             className="task-card"
             extra={<SettingOutlined />} 
-            actions={[<EyeOutlined key="view" onClick={() => navigate(`/task/${task.taskID}`)}/>, <EditOutlined key="edit" />]}
+            actions={[<NavLink to={`/task/${task.taskID}`}>View {task.taskID}</NavLink>, <EditOutlined key="edit" />]}
         >
             <p>{description}</p>
             <AdditionalDetails
