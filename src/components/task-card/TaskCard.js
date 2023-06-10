@@ -31,7 +31,7 @@ const TaskCard = props => {
                 width={200}    
             />
 
-            {comments && comments.length > 0 ? (
+            {comments && comments.length > 0 &&
                 <>
                     <Divider />
                     <ul>
@@ -42,7 +42,7 @@ const TaskCard = props => {
                         ))}
                     </ul>
                 </>
-            ) : ''}
+            }
         </Card>
     );
 };
