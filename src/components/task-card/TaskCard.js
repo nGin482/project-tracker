@@ -26,8 +26,6 @@ const TaskCard = props => {
             <p>{description}</p>
             <AdditionalDetails
                 taskDetails={task}
-                project={project}
-                created={created}
                 width={200}    
             />
 
