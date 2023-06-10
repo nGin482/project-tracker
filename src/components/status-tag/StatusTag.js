@@ -58,7 +58,7 @@ const StatusTag = props => {
 
     return (
         <div className="task-status">
-            {showDescription ? "Status: " : ""}<Dropdown menu={{items,onClick,}} trigger={['click']}>
+            {showDescription && "Status: "}<Dropdown menu={{items,onClick,}} trigger={['click']}>
                 <Tag color={colour}>{taskStatus}</Tag>
             </Dropdown>
         </div>
