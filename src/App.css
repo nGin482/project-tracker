@@ -1,10 +1,13 @@
 #container {
   width: 75%;
-  margin: 0 auto;
+  margin: 30px auto;
+  padding: 2%;
+  border: solid 3px black;
+  border-radius: 10px;
 }
 
 .ant-card {
-  width: 50%;
+  width: 75%;
   margin: 0 auto;
   margin-bottom: 25px;
 }
@@ -20,4 +23,20 @@ h1 {
 
 #create-task {
   left: 80%;
+}
+
+#project-controls {
+  margin-left: 142px;
+  margin-bottom: 20px;
+}
+#project-controls :not(:last-child) {
+  margin-right: 20px;
+}
+
+.ant-list-item {
+  cursor: pointer;
+}
+.ant-list-item:hover {
+  background-color: lightslategray;
+  color: white;
 }
