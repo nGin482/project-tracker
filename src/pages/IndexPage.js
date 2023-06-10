@@ -3,13 +3,14 @@ import { Button, Drawer, Input, List } from "antd";
 
 import TaskCard from '../components/task-card/TaskCard';
 import TasksContext from "../contexts/TasksContext";
+import ProjectContext from "../contexts/ProjectContext";
 import Navbar from "../components/navbar/Navbar";
 
 
 const IndexPage = props => {
-    const { projects } = props;
-    const { tasks } = useContext(TasksContext);
+    const { projects, projectViewed, setProjectViewed } = useContext(ProjectContext);
 
+    const [tasksDisplayed, setTasksDisplayed] = useState([]);
     const [showProjects, setShowProjects] = useState(false);
     const [searchResults, setSearchResults] = useState(projects);
     const [search, setSearch] = useState('');
@@ -27,12 +28,30 @@ const IndexPage = props => {
 
     useEffect(() => {
         setSearchResults(projects);
-    }, [projects])
+        let allTasks = [];
+        projects.forEach(project => allTasks = allTasks.concat(project.tasks));
+        setTasksDisplayed(allTasks);
+    }, [projects]);
+
+    useEffect(() => {
+        if (projectViewed === 'All') {
+            let allTasks = [];
+            projects.forEach(project => allTasks = allTasks.concat(project.tasks));
+            setTasksDisplayed(allTasks);
+        }
+        else {
+            setTasksDisplayed(projectViewed.tasks);
+        }
+    }, [projectViewed])
 
     const handleSearch = event => {
         setSearch(event.target.value);
     };
 
+    const switchProjectViewed = item => {
+        setProjectViewed(item);
+        setShowProjects(false);
+    }
 
     return  (
         <>
@@ -49,14 +68,14 @@ const IndexPage = props => {
                     dataSource={searchResults}
                     bordered
                     renderItem={item => (
-                        <List.Item>
+                        <List.Item onClick={() => switchProjectViewed(item)}>
                             <h3>{item.projectCode}: {item.projectName}</h3>
                         </List.Item>
                     )}
                 />
             </Drawer>
             <div id="container">
-                {tasks.map(task => (
+                {tasksDisplayed.map(task => (
                     <TaskCard key={task.taskID} task={task} />
                 ))}
             </div>

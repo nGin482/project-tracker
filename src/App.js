@@ -10,12 +10,14 @@ import ProfilePage from "./pages/ProfilePage";
 import UserContext from "./contexts/UserContext";
 import TasksContext from "./contexts/TasksContext";
 import ErrorsContext from "./contexts/ErrorsContext";
+import ProjectContext from "./contexts/ProjectContext";
 import { getTasks, getProjects } from "./services/requests";
 import './App.css';
 
 function App() {
   const [tasks, setTasks] = useState([]);
   const [projects, setProjects] = useState([]);
+  const [projectViewed, setProjectViewed] = useState('All');
   const [cookie] = useCookies(['user']);
   const [user, setUser] = useState(cookie.user);
   const [errorMessage, setErrorMessage] = useState('');
@@ -53,11 +55,13 @@ function App() {
 
     <CookiesProvider>
       <UserContext.Provider value={{user, setUser}}>
-        <TasksContext.Provider value={{tasks, setTasks}}>
-          <ErrorsContext.Provider value={{errorMessage, setErrorMessage, errorType, setErrorType}}>
-            <RouterProvider router={router} />
-          </ErrorsContext.Provider>
-        </TasksContext.Provider>
+        <ProjectContext.Provider value={{projects, setProjects, projectViewed, setProjectViewed}}>
+          <TasksContext.Provider value={{tasks, setTasks}}>
+            <ErrorsContext.Provider value={{errorMessage, setErrorMessage, errorType, setErrorType}}>
+              <RouterProvider router={router} />
+            </ErrorsContext.Provider>
+          </TasksContext.Provider>
+        </ProjectContext.Provider>
       </UserContext.Provider>
     </CookiesProvider>
   );

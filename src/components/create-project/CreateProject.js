@@ -2,11 +2,13 @@ import { useState, useEffect, useContext } from "react";
 import { Alert, Form, Input, Modal } from "antd";
 
 import UserContext from "../../contexts/UserContext";
+import ProjectContext from "../../contexts/ProjectContext";
 import { createProject } from "../../services/requests";
 
 const CreateProject = props => {
     const { showForm, setShowForm } = props;
     const { user } = useContext(UserContext);
+    const { projects, setProjects } = useContext(ProjectContext);
 
     const [form] = Form.useForm();
     const [errorsExist, setErrorsExist] = useState(false);
@@ -23,7 +25,7 @@ const CreateProject = props => {
             createProject(values, user.token).then(data => {
                 form.resetFields();
                 setShowForm(false);
-                console.log(data)
+                setProjects([...projects, data]);
             })
         })
         .catch(err => {
