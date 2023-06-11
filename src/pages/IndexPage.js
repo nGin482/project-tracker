@@ -2,7 +2,6 @@ import {useState, useEffect, useContext} from "react";
 import { Button, Drawer, Input, List } from "antd";
 
 import TaskCard from '../components/task-card/TaskCard';
-import TasksContext from "../contexts/TasksContext";
 import ProjectContext from "../contexts/ProjectContext";
 import Navbar from "../components/navbar/Navbar";
 
