@@ -1,13 +1,23 @@
-#task-page {
-    background-color: #fff;
-}
-
 #task-page .ant-layout-sider {
     display: flex;
 }
+
+#task-page section {
+    background: none;
+}
+
 #task-content {
-    width: 70%;
-    margin-left: 220px;
+    width: calc(100% - 5% - 470px);
+    margin-left: 5%;
+    background-color: #fff;
+    padding: 10px;
+    margin-top: 20px;
+    border-radius: 5px;
+}
+
+#task-content h1 {
+    background-color: #3aa2f2;
+    color: #fff;
 }
 
 #tasks-drawer-button {
