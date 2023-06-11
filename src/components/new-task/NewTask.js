@@ -2,7 +2,7 @@ import { useState, useContext } from "react";
 import { Form, Input, Select, Alert, Modal } from "antd";
 
 import { createTask } from "../../services/requests";
-import TasksContext from "../../contexts/TasksContext";
+import ProjectContext from "../../contexts/ProjectContext";
 import UserContext from "../../contexts/UserContext";
 import "./NewTask.css";
 
@@ -13,14 +13,20 @@ const NewTask = (props) => {
     const [form] = Form.useForm();
     const [showAlertBanner, setShowAlertBanner] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-    const { tasks, setTasks } = useContext(TasksContext);
+    const { setProjects } = useContext(ProjectContext);
     const { user } = useContext(UserContext);
 
     const createNewTask = () => {
         form.validateFields().then(values => {
             const task = {...values, status: 'Backlog'};
             createTask(task, user.token).then(data => {
-                setTasks([...tasks, data.task]);
+                const { project } = task;
+                setProjects(projects => {
+                    const newProjects = [...projects];
+                    const updateProject = newProjects.find(proj => proj.projectName === project);
+                    updateProject.tasks = [...updateProject.tasks, data.task];
+                    return newProjects;
+                });
                 setShowForm(false);
                 form.resetFields();
                 setShowAlertBanner(false);
@@ -54,7 +60,7 @@ const NewTask = (props) => {
             <Form
                 form={form}
             >
-                {showAlertBanner ? <Alert type="error" message={errorMessage} showIcon /> : ''}
+                {showAlertBanner && <Alert type="error" message={errorMessage} showIcon />}
                 <Form.Item
                     label="Project"
                     name="project"
