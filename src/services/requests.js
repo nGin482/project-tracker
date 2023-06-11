@@ -18,8 +18,8 @@ const getTasksByProject = project => {
 const createTask = (task, token) => {
     return axios.post(`${baseURL}tasks`, task, authHeader(token)).then(response => response.data);
 }
-const updateTask = (taskID, newDetails) => {
-    return axios.patch(`${baseURL}tasks/${taskID}`, newDetails).then(response => response.data);
+const updateTask = (taskID, newDetails, token) => {
+    return axios.patch(`${baseURL}tasks/${taskID}`, newDetails, authHeader(token)).then(response => response.data);
 }
 
 const getProjects = () => {

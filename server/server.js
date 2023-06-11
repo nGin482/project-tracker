@@ -56,7 +56,7 @@ app.post('/api/tasks', async (request, response) => {
     const { authorization } = request.headers;
     const token = jwt.verify(Utils.checkToken(authorization), process.env.SECRET);
     if (!token && !token?.username) {
-        response.status(401).send('The request was not completed due to an unauthorised user')
+        response.status(401).send('The request was not completed due to an unauthorised user');
     }
     else {
         const tasks = await Task.find({project: request.body.project});
@@ -78,21 +78,32 @@ app.post('/api/tasks', async (request, response) => {
 })
 
 app.patch('/api/tasks/:taskID', async (request, response) => {
-    const taskID = request.params.taskID;
-    const { field, value } = request.body;
-    const updatedTask = await Task.findOneAndUpdate(
-        {taskID: taskID},
-        {[field]: value},
-        {new: true}
-    );
-
-    if (updatedTask) {
-        response.status(200).json(updatedTask)
+    const { authorization } = request.headers;
+    if (!authorization) {
+        response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
     }
     else {
-        response.status(404).send(`Unable to find a task with ID ${taskID}`)
+        const token = jwt.verify(Utils.checkToken(authorization), process.env.SECRET);
+        if (!token && !token.username) {
+            response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+        }
+        else {
+            const taskID = request.params.taskID;
+            const { field, value } = request.body;
+            const updatedTask = await Task.findOneAndUpdate(
+                {taskID: taskID},
+                {[field]: value},
+                {new: true}
+            );
+        
+            if (updatedTask) {
+                response.status(200).json(updatedTask)
+            }
+            else {
+                response.status(404).send(`Unable to find a task with ID ${taskID}`)
+            }
+        }
     }
-    
 })
 
 app.get('/api/projects', async (request, response) => {
