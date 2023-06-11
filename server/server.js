@@ -77,6 +77,24 @@ app.post('/api/tasks', async (request, response) => {
     }
 })
 
+app.patch('/api/tasks/:taskID', async (request, response) => {
+    const taskID = request.params.taskID;
+    const { field, value } = request.body;
+    const updatedTask = await Task.findOneAndUpdate(
+        {taskID: taskID},
+        {[field]: value},
+        {new: true}
+    );
+
+    if (updatedTask) {
+        response.status(200).json(updatedTask)
+    }
+    else {
+        response.status(404).send(`Unable to find a task with ID ${taskID}`)
+    }
+    
+})
+
 app.get('/api/projects', async (request, response) => {
     const projects = await Project.find({}).populate('tasks').exec();
     response.status(200).json(projects);
