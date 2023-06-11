@@ -97,7 +97,7 @@ const TaskPage = () => {
                             </Content>
                         </div>
                         <AdditionalDetails
-                            taskDetails={omit(task, 'title', 'description', 'taskID', 'comments')}
+                            taskDetails={omit(task, 'title', 'description', 'comments')}
                             showHeader
                             width={470}
                         />
