@@ -12,6 +12,16 @@
     width: max-content;
 }
 
+.create-modal-button:not(:last-child) {
+    margin-right: 15px;
+}
+.create-modal-button:hover {
+    background-color: #e57200;
+}
+.create-modal-button:hover > span {
+    color: #fff;
+}
+
 img {
     max-height: 100%;
 }

@@ -51,8 +51,26 @@ const Navbar = props => {
             <span className="title">
                 <NavLink to='/'>Project Tracker</NavLink>
             </span>
-            {user && <Button id="create-task-button" onClick={() => setShowTaskForm(true)}>Create New Task</Button>}
-            {user && <Button id="create-project-button" onClick={() => setShowProjectForm(true)}>Create New Project</Button>}
+            {user && (
+                <Button
+                    id="create-task-button"
+                    className="create-modal-button"
+                    onClick={() => setShowTaskForm(true)}
+                >
+                    Create New Task
+                </Button>
+                )
+            }
+            {user && (
+                <Button
+                    id="create-project-button"
+                    className="create-modal-button"
+                    onClick={() => setShowProjectForm(true)}
+                >
+                    Create New Project
+                </Button>
+                )
+            }
             <NewTask showForm={showTaskForm} setShowForm={setShowTaskForm} />
             <CreateProject showForm={showProjectForm} setShowForm={setShowProjectForm} />
             <div id="user-display">
