@@ -4,11 +4,12 @@ import { Card, Divider } from "antd";
 import { EditOutlined, SettingOutlined } from "@ant-design/icons";
 
 import AdditionalDetails from "../sidebars/AdditionalDetails";
+import TaskType from "../task-type-icon/TaskType";
 import "./TaskCard.css";
 
 const TaskCard = props => {
     const [task, setTask] = useState(props.task);
-    const { title, project, status, created, description, comments } = task;
+    const { title, description, comments, type } = task;
 
     useEffect(() => {
         console.log(task)
@@ -18,7 +19,7 @@ const TaskCard = props => {
     
     return (
         <Card
-            title={title}
+            title={<div><TaskType type={type} /><span className={`task-title task-title__${type}`}>{title}</span></div>}
             className="task-card"
             extra={<SettingOutlined />} 
             actions={[<NavLink to={`/task/${task.taskID}`}>View {task.taskID}</NavLink>, <EditOutlined key="edit" />]}

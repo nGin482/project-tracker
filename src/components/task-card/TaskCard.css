@@ -5,3 +5,13 @@
 .task-card .ant-card-body {
     display: flex;
 }
+
+.task-title:not(.task-title__bug) {
+    bottom: 2px;
+    position: relative;
+}
+
+.task-title.task-title__bug {
+    bottom: 1px;
+    position: relative;
+}
