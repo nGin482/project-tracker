@@ -17,7 +17,7 @@ const taskSchema = new Schema({
         default: Utils.createdDate()
     },
     updated: String,
-    creator: String,
+    reporter: String,
     comments: [
         {
             comment: String,

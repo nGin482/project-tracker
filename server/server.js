@@ -67,7 +67,7 @@ app.post('/api/tasks', async (request, response) => {
             const project = await Project.findOne({projectName: request.body.project});
             let currentTaskIDs = tasks.map(task => task.taskID);
             const taskID = TaskUtils.setTaskID(project.projectCode, currentTaskIDs);
-            const newTask = {...request.body, taskID, creator: token.username};
+            const newTask = {...request.body, taskID, reporter: token.username};
             const taskObj = new Task(newTask);
             const savedTask = await taskObj.save();
             
