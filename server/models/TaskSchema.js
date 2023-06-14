@@ -18,6 +18,10 @@ const taskSchema = new Schema({
     },
     updated: String,
     reporter: String,
+    linkedTasks: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Task'
+    }],
     comments: [
         {
             comment: String,
