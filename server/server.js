@@ -68,8 +68,13 @@ app.post('/api/tasks', async (request, response) => {
             let currentTaskIDs = tasks.map(task => task.taskID);
             const taskID = TaskUtils.setTaskID(project.projectCode, currentTaskIDs);
             const newTask = {...request.body, taskID, reporter: token.username};
-            const taskObj = new Task(newTask);
-            const savedTask = await taskObj.save();
+            if (request.body.linkedTasks) {
+                const linkedTasks = await Task.find({taskID: {$in: request.body.linkedTasks}});
+                const linkedTasksChecked = linkedTasks.filter(linkTask => linkTask._id);
+                newTask.linkedTasks = linkedTasksChecked;
+            }
+            const taskDoc = new Task(newTask);
+            const savedTask = await taskDoc.save();
             
             const user = await User.findOne({username: token.username});
             user.tasks = user.tasks.concat(savedTask._id);
@@ -77,7 +82,7 @@ app.post('/api/tasks', async (request, response) => {
     
             project.tasks = project.tasks.concat(savedTask._id);
             project.save();
-            response.status(200).json({status: 'success', task: taskObj});
+            response.status(200).json({status: 'success', task: taskDoc});
         }
     }
 })
@@ -108,6 +113,42 @@ app.patch('/api/tasks/:taskID', async (request, response) => {
                 response.status(404).send(`Unable to find a task with ID ${taskID}`)
             }
         }
+    }
+})
+
+app.patch('/api/tasks/:taskID/link', async (request, response) => {
+    const { authorization } = request.headers;
+    if (!authorization) {
+        response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to link these tasks');
+    }
+    else {
+        const token = jwt.verify(Utils.checkToken(authorization), process.env.SECRET);
+        if (!token && !token.username) {
+            response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to link these tasks');
+        }
+        else {
+            const { taskID } = request.params;
+            const taskBeingLinked = await Task.findOne({taskID: taskID});
+            const taskToLink = await Task.findOne({taskID: request.body.taskToLink});
+            if (taskBeingLinked && taskToLink) {
+                if (taskBeingLinked.linkedTasks) {
+                    taskBeingLinked.linkedTasks = taskBeingLinked.linkedTasks.concat(taskToLink._id);
+                    taskBeingLinked.save();
+                    response.status(200).json(taskBeingLinked);
+                }
+            }
+            else {
+                if (!taskBeingLinked && taskToLink) {
+                    response.status(404).send('The server cannot link these tasks together as the task being linked does not exist');
+                }
+                else if (taskBeingLinked && !taskToLink) {
+                    response.status(404).send('The server cannot link these tasks together as the task to link not exist');
+                }
+                else {
+                    response.status(404).send('Unable to link these tasks together as they both do not exist');
+                }
+            }
+        } 
     }
 })
 
