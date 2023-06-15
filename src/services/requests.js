@@ -21,6 +21,9 @@ const createTask = (task, token) => {
 const updateTask = (taskID, newDetails, token) => {
     return axios.patch(`${baseURL}tasks/${taskID}`, newDetails, authHeader(token)).then(response => response.data);
 }
+const linkTasks = (taskID, tasks, token) => {
+    return axios.patch(`${baseURL}tasks/${taskID}/link`, tasks, authHeader(token)).then(response => response.data);
+}
 
 const getProjects = () => {
     return axios.get(`${baseURL}projects`).then(response => response.data);
@@ -46,6 +49,7 @@ export {
     getTasksByProject,
     createTask,
     updateTask,
+    linkTasks,
     getProjects,
     createProject,
     register,
