@@ -127,26 +127,32 @@ app.patch('/api/tasks/:taskID/link', async (request, response) => {
             response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to link these tasks');
         }
         else {
-            const { taskID } = request.params;
-            const taskBeingLinked = await Task.findOne({taskID: taskID});
-            const taskToLink = await Task.findOne({taskID: request.body.taskToLink});
-            if (taskBeingLinked && taskToLink) {
-                if (taskBeingLinked.linkedTasks) {
-                    taskBeingLinked.linkedTasks = taskBeingLinked.linkedTasks.concat(taskToLink._id);
-                    taskBeingLinked.save();
-                    response.status(200).json(taskBeingLinked);
+            if (request.body.linkedTasks) {
+                const { taskID } = request.params;
+                const taskBeingLinked = await Task.findOne({taskID: taskID});
+                const linkedTasks = await Task.find({taskID: {$in: request.body.linkedTasks}});
+                const linkedTasksChecked = linkedTasks.filter(linkTask => linkTask._id);
+                if (taskBeingLinked && linkedTasksChecked.length > 0) {
+                    if (taskBeingLinked.linkedTasks) {
+                        taskBeingLinked.linkedTasks = taskBeingLinked.linkedTasks.concat(linkedTasksChecked);
+                        taskBeingLinked.save();
+                        response.status(200).json(taskBeingLinked);
+                    }
+                }
+                else {
+                    if (!taskBeingLinked && linkedTasksChecked.length > 0) {
+                        response.status(404).send('The server cannot link these tasks together as the task being linked does not exist');
+                    }
+                    else if (taskBeingLinked && linkedTasksChecked.length === 0) {
+                        response.status(404).send('The server cannot link these tasks together as there are no tasks to link');
+                    }
+                    else {
+                        response.status(404).send('Unable to link these tasks together as they both do not exist');
+                    }
                 }
             }
             else {
-                if (!taskBeingLinked && taskToLink) {
-                    response.status(404).send('The server cannot link these tasks together as the task being linked does not exist');
-                }
-                else if (taskBeingLinked && !taskToLink) {
-                    response.status(404).send('The server cannot link these tasks together as the task to link not exist');
-                }
-                else {
-                    response.status(404).send('Unable to link these tasks together as they both do not exist');
-                }
+                response.status(400).send('The request was sent without data. Please ensure that tasks are selected to be linked')
             }
         } 
     }
