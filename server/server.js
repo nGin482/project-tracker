@@ -31,14 +31,17 @@ app.get('/api/tasks', (request, response) => {
     });
 })
 
-app.get('/api/tasks/:taskID', (request, response) => {
+app.get('/api/tasks/:taskID', async (request, response) => {
     const { taskID } = request.params;
-    
-    Task.findOne({taskID: taskID}).then(result => {
-        response.status(200).json(result);
-    }).catch(err => {
-        response.status(404).send(`The Task you were looking for doesn't exist.`);
-    })
+
+    const task = await Task.findOne({taskID: taskID}).populate('linkedTasks').exec();
+
+    if (task) {
+        response.status(200).json(task)
+    }
+    else {
+        response.status(404).send('This Task does not exist.')
+    }
 })
 
 app.get('/api/tasks/project/:project', (request, response) => {
