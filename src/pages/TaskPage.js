@@ -4,6 +4,7 @@ import { Layout, Spin, Drawer, Button, List, Input } from "antd";
 import { isEmpty, omit } from "lodash";
 
 import AdditionalDetails from "../components/sidebars/AdditionalDetails";
+import LinkTasks from "../components/link-tasks/LinkTasks";
 import Navbar from "../components/navbar/Navbar";
 import ErrorPage from "./ErrorPage";
 import ErrorsContext from "../contexts/ErrorsContext";
@@ -14,15 +15,23 @@ import "./styles/TaskPage.css";
 const TaskPage = () => {
     const { Content } = Layout;
     const { taskID } = useParams();
+    const { setErrorMessage, setErrorType } = useContext(ErrorsContext);
 
+    // Task being viewed
     const [task, setTask] = useState({});
+    
+    //Task by Project Drawer
     const [tasksByProject, setTasksByProject] = useState([]);
     const [showTasksDrawer, setShowTasksDrawer] = useState(false);
     const [search, setSearch] = useState('');
     const [searchResults, setSearchResults] = useState([]);
+    
+    // Linking Tasks
+    const [showLinkTasks, setShowLinkTasks] = useState(false);
+    
+    // Misc
     const [errors, setErrors] = useState(false);
     
-    const { setErrorMessage, setErrorType } = useContext(ErrorsContext);
     
     useEffect(() => {
         getTask(taskID).then(data => {
@@ -87,13 +96,29 @@ const TaskPage = () => {
                         <div id="task-content">
                             <Button
                                 onClick={() => setShowTasksDrawer(true)}
+                                className="task-page-action-buttons"
                                 id="tasks-drawer-button"
                             >
                                 Show Tasks in this Project
                             </Button>
+                            <Button
+                                onClick={() => setShowLinkTasks(!showLinkTasks)}
+                                className="task-page-action-buttons"
+                                id="link-tasks"
+                            >
+                                Link Task
+                            </Button>
                             <Content>
                                 <h1>{task.title}</h1>
                                 <p>{task.description}</p>
+                                {showLinkTasks && (
+                                    <LinkTasks
+                                        taskID={taskID}
+                                        tasksByProject={tasksByProject}
+                                        setVisible={setShowLinkTasks}
+                                    />
+                                )}
+                                {/* show linked tasks */}
                             </Content>
                         </div>
                         <AdditionalDetails
