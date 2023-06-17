@@ -23,8 +23,8 @@ const LinkTasks = props => {
         if (searchTerm !== '') {
             setLinkTasksDropdownOptions(
                 tasksByProject.filter(task => 
-                    task.title.toLowerCase().includes(searchTerm) ||
-                    task.taskID.toLowerCase().includes(searchTerm)
+                    task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    task.taskID.toLowerCase().includes(searchTerm.toLowerCase())
                 )
                 .map(task => ({value: `${task.taskID}: ${task.title}`}))
             );
