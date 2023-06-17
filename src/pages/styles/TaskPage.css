@@ -24,3 +24,31 @@
     background-color: #e57200;
     color: #fff;
 }
+
+.link-task {
+    border: solid 1px #778899;
+    border-radius: 10px;
+    width: max-content;
+    padding: 7px;
+    margin: 7px 7px 7px 0;
+}
+
+.link-task-search {
+    width: 300px;
+}
+
+#link-task-input {
+    display: inline-flex;
+}
+
+#confirm-cancel-link :first-child {
+    margin: 0 7px;
+}
+
+.link-task .remove-link-task {
+    margin-left: 10px;
+}
+
+.remove-link-task:hover span {
+    color: #000;
+}
