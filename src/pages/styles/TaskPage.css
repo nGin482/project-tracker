@@ -52,3 +52,25 @@
 .remove-link-task:hover span {
     color: #000;
 }
+
+.related-task {
+    display: block;
+    padding: 5px;
+    border: solid 3px lightslategray;
+    width: max-content;
+    border-radius: 7px;
+    color: #000;
+}
+
+.related-task:hover {
+    opacity: 0.8;
+    cursor: pointer;
+}
+
+.linked-task, .linked-task:hover {
+    color: #000;
+}
+
+.related-task:not(:first-child) {
+    margin-top: 6px;
+}

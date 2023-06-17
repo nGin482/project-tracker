@@ -1,10 +1,11 @@
 import {useState, useEffect, useContext} from "react";
 import { useParams, NavLink } from "react-router-dom";
-import { Layout, Spin, Drawer, Button, List, Input } from "antd";
+import { Layout, Spin, Divider, Drawer, Button, List, Input } from "antd";
 import { isEmpty, omit } from "lodash";
 
 import AdditionalDetails from "../components/sidebars/AdditionalDetails";
 import LinkTasks from "../components/link-tasks/LinkTasks";
+import StatusTag from "../components/status-tag/StatusTag";
 import Navbar from "../components/navbar/Navbar";
 import ErrorPage from "./ErrorPage";
 import ErrorsContext from "../contexts/ErrorsContext";
@@ -118,7 +119,26 @@ const TaskPage = () => {
                                         setVisible={setShowLinkTasks}
                                     />
                                 )}
-                                {/* show linked tasks */}
+                                {task.linkedTasks.length > 0 && (
+                                    <div id="related-tasks-section">
+                                        <Divider orientation="left">Related Tasks</Divider>
+                                        {task.linkedTasks.map(linkedTask => (
+                                            <div key={linkedTask.taskID} className="related-task">
+                                                <NavLink
+                                                    to={`/task/${linkedTask.taskID}`}
+                                                    className="linked-task"
+                                                >
+                                                    {linkedTask.taskID}: {linkedTask.title}
+                                                </NavLink>
+                                                <StatusTag
+                                                    status={linkedTask.status}
+                                                    taskID={linkedTask.taskID}
+                                                />
+                                            </div>
+
+                                        ))}
+                                    </div>
+                                )}
                             </Content>
                         </div>
                         <AdditionalDetails
