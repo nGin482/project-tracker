@@ -1,14 +1,12 @@
 import { useState, useContext } from "react";
 import { Alert, AutoComplete, Button, Modal } from "antd";
 
-import ProjectContext from "../../contexts/ProjectContext";
 import UserContext from "../../contexts/UserContext";
 import { linkTasks } from "../../services/requests";
 
 const LinkTasks = props => {
     const { taskID, tasksByProject, setVisible, setTask } = props;
     const { user } = useContext(UserContext);
-    const { setProjects } = useContext(ProjectContext);
 
     const [linkedTasks, setLinkedTasks] = useState([]);
     const [linkTaskInput, setLinkTaskInput] = useState('');
