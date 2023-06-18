@@ -139,7 +139,7 @@ app.patch('/api/tasks/:taskID/link', async (request, response) => {
                     if (taskBeingLinked.linkedTasks) {
                         taskBeingLinked.linkedTasks = taskBeingLinked.linkedTasks.concat(linkedTasksChecked);
                         taskBeingLinked.save();
-                        response.status(200).json(taskBeingLinked);
+                        response.status(200).json({taskBeingLinked, linkedTasks});
                     }
                 }
                 else {
