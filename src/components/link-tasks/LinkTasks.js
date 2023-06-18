@@ -1,12 +1,14 @@
 import { useState, useContext } from "react";
 import { Alert, AutoComplete, Button, Modal } from "antd";
+
+import ProjectContext from "../../contexts/ProjectContext";
+import UserContext from "../../contexts/UserContext";
 import { linkTasks } from "../../services/requests";
 
-import UserContext from "../../contexts/UserContext";
-
 const LinkTasks = props => {
-    const { taskID, tasksByProject, setVisible } = props;
+    const { taskID, tasksByProject, setVisible, setTask } = props;
     const { user } = useContext(UserContext);
+    const { setProjects } = useContext(ProjectContext);
 
     const [linkedTasks, setLinkedTasks] = useState([]);
     const [linkTaskInput, setLinkTaskInput] = useState('');
@@ -53,8 +55,12 @@ const LinkTasks = props => {
     
     const confirmLinkTasks = () => {
         const tasksToLink = linkedTasks.map(task => task.split(': ')[0])
-        linkTasks(taskID, {linkedTasks: tasksToLink}, user.token).then(() => {
+        linkTasks(taskID, {linkedTasks: tasksToLink}, user.token).then(data => {
             setLinkedTasks([]);
+            setTask(task => {
+                const updatedTask = {...task, linkedTasks: task.linkedTasks.concat(data.linkedTasks)}
+                return updatedTask;
+            });
         })
         .catch(err => {
             setShowErrorModal(true)

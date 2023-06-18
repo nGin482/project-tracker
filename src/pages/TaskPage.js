@@ -117,6 +117,7 @@ const TaskPage = () => {
                                         taskID={taskID}
                                         tasksByProject={tasksByProject}
                                         setVisible={setShowLinkTasks}
+                                        setTask={setTask}
                                     />
                                 )}
                                 {task.linkedTasks.length > 0 && (
