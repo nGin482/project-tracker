@@ -167,17 +167,7 @@ const NewTask = (props) => {
                         mode="multiple"
                         onSearch={text => searchRelatedTasks(text)}
                         options={relatedTasksFound}
-                    >
-
-                    </Select>
-
-                    {/* <AutoComplete
-                        onSearch={text => searchRelatedTasks(text)}
-                        onSelect={item => selectedRelatedTask(item)}
-                        open={relatedTasksSearch !== ''}
-                        options={relatedTasksFound}
-                        value={relatedTasksSearch}
-                    /> */}
+                    />
                 </Form.Item>
             </Form>
         </Modal>
