@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useContext } from "react";
 import { Alert, Form, Input, Modal } from "antd";
 
 import UserContext from "../../contexts/UserContext";
@@ -13,56 +13,38 @@ const CreateProject = props => {
     const [form] = Form.useForm();
     const [errorsExist, setErrorsExist] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-    const [errors, setErrors] = useState(false);
-    const [fieldsWithErrors, setFieldsWithErrors] = useState(false);
 
     const createNewProject = () => {
         form.validateFields().then(values => {
-            console.log(values)
             setErrorsExist(false);
-            setFieldsWithErrors(false);
-            setErrorMessage('');
             createProject(values, user.token).then(data => {
                 form.resetFields();
                 setShowForm(false);
                 setProjects([...projects, data]);
+            }).catch(err => {
+                if (err.response.data) {
+                    setErrorMessage(err.response.data);
+                }
+                else {
+                    setErrorMessage('Please try again later');
+                }
             })
         })
         .catch(err => {
             setErrorsExist(true);
-            setErrors(err.errorFields);
-            setErrorMessage("There was an error completing the form");
+            setErrorMessage('Please ensure all fields are filled out correctly');
         })
+    };
+
+    const cancelCreateProject = () => {
+        setShowForm(false);
+        setErrorsExist(false);
+        form.resetFields();
     }
 
     const onProjectCodeChange = value => {
         form.setFieldsValue({projectCode: value.toUpperCase()});
     }
-
-    useEffect(() => {
-        if (errors) {
-            const fields = []
-            errors.forEach(field => {
-                let fieldName = field.name[0];
-                fieldName = fieldName.charAt(0).toUpperCase() + fieldName.slice(1);
-                fieldName = fieldName.replace('Project', 'Project ')
-
-                fields.push({fieldName, errors: field.errors});
-            })
-            setFieldsWithErrors(fields);
-        }
-    }, [errors, errorsExist])
-
-    const ErrorDescription = () => (
-        fieldsWithErrors.map(field => 
-            <>
-                <span>{field.fieldName}</span>
-                <ul>
-                    {field.errors.map(error => <li>{error}</li>)}
-                </ul>
-            </>
-        )
-    )
 
     return (
         <Modal
@@ -71,12 +53,16 @@ const CreateProject = props => {
             okText="Create"
             onOk={createNewProject}
             cancelText="Cancel"
-            onCancel={() => setShowForm(false)}
+            onCancel={cancelCreateProject}
         >
             <Form
                 form={form}
             >
-                {errorsExist && <Alert type="error" message={errorMessage} description={fieldsWithErrors && <ErrorDescription />} showIcon />}
+                {errorsExist && <Alert
+                    type="error"
+                    message={errorMessage}
+                    showIcon
+                />}
                 <Form.Item
                     label="Project Name"
                     name="projectName"

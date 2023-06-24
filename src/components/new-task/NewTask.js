@@ -11,9 +11,10 @@ const NewTask = (props) => {
     const { Option } = Select;
 
     const [form] = Form.useForm();
-    const [showAlertBanner, setShowAlertBanner] = useState(false);
     const [relatedTasksFound, setRelatedTasksFound] = useState([]);
+    const [errorsExist, setErrorsExist] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+   
     const { projects, setProjects } = useContext(ProjectContext);
     const { user } = useContext(UserContext);
 
@@ -44,7 +45,7 @@ const NewTask = (props) => {
                 });
                 setShowForm(false);
                 form.resetFields();
-                setShowAlertBanner(false);
+                setErrorsExist(false);
                 setErrorMessage('');
             })
             .catch(err => {
@@ -52,16 +53,23 @@ const NewTask = (props) => {
                     setErrorMessage(err.response.data);
                 }
                 else {
-                    setErrorMessage('An internal server error occurred');
+                    setErrorMessage('Please try again later');
                 }
-                setShowAlertBanner(true);
+                setErrorsExist(true);
             })
         })
         .catch(err => {
-            setErrorMessage('An error occured. Please check the form and the data entered');
-            setShowAlertBanner(true);
+            setErrorMessage('Please ensure all fields are filled out correctly')
+            setErrorsExist(true);
         })
     };
+
+    const cancelCreateNewTask = () => {
+        setShowForm(false);
+        form.resetFields();
+        setErrorMessage('');
+        setErrorsExist(false);
+    }
 
     const searchRelatedTasks = searchTerm => {
         if (searchTerm === '') {
@@ -93,12 +101,16 @@ const NewTask = (props) => {
             okText="Create"
             onOk={createNewTask}
             cancelText="Cancel"
-            onCancel={() => setShowForm(false)}
+            onCancel={cancelCreateNewTask}
         >
             <Form
                 form={form}
             >
-                {showAlertBanner && <Alert type="error" message={errorMessage} showIcon />}
+                {errorsExist && <Alert
+                    type="error"
+                    message={errorMessage}
+                    showIcon
+                />}
                 <Form.Item
                     label="Project"
                     name="project"
