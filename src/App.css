@@ -40,3 +40,7 @@ h1 {
   background-color: lightslategray;
   color: white;
 }
+
+.create-modal {
+  width: 75% !important;
+}

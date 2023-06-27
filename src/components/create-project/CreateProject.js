@@ -54,6 +54,7 @@ const CreateProject = props => {
             onOk={createNewProject}
             cancelText="Cancel"
             onCancel={cancelCreateProject}
+            className="create-modal"
         >
             <Form
                 form={form}

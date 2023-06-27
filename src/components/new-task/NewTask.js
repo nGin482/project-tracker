@@ -102,6 +102,7 @@ const NewTask = (props) => {
             onOk={createNewTask}
             cancelText="Cancel"
             onCancel={cancelCreateNewTask}
+            className="create-modal"
         >
             <Form
                 form={form}
