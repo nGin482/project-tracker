@@ -125,31 +125,32 @@ const TaskPage = () => {
                     )}
                     <Layout>
                         <div id="task-content">
-                            <Button
-                                onClick={() => setShowTasksDrawer(true)}
-                                className="task-page-action-buttons"
-                                id="tasks-drawer-button"
-                            >
-                                Show Tasks in this Project
-                            </Button>
-                            <Button
-                                onClick={() => setShowLinkTasks(!showLinkTasks)}
-                                className="task-page-action-buttons"
-                                id="link-tasks"
-                            >
-                                Link Task
-                            </Button>
-                            {contextHolder}
-                            <Popconfirm
-                                title={`Delete ${task.taskID}`}
-                                description="Are you sure you want to delete this task?"
-                                onConfirm={handleDeleteTask}
-                                okText="Yes"
-                                cancelText="No"
-                            >
-                                <Button danger>Delete Task</Button>
-                            </Popconfirm>
-
+                            <div id="task-action-buttons">
+                                <Button
+                                    onClick={() => setShowTasksDrawer(true)}
+                                    className="task-page-action-buttons"
+                                    id="tasks-drawer-button"
+                                >
+                                    Show Tasks in this Project
+                                </Button>
+                                <Button
+                                    onClick={() => setShowLinkTasks(!showLinkTasks)}
+                                    className="task-page-action-buttons"
+                                    id="link-tasks"
+                                >
+                                    Link Task
+                                </Button>
+                                {contextHolder}
+                                <Popconfirm
+                                    title={`Delete ${task.taskID}`}
+                                    description="Are you sure you want to delete this task?"
+                                    onConfirm={handleDeleteTask}
+                                    okText="Yes"
+                                    cancelText="No"
+                                >
+                                    <Button danger>Delete Task</Button>
+                                </Popconfirm>
+                            </div>
                             <Content>
                                 <h1>{task.title}</h1>
                                 <p>{task.description}</p>
