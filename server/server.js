@@ -161,6 +161,24 @@ app.patch('/api/tasks/:taskID/link', async (request, response) => {
     }
 })
 
+app.delete('/api/tasks/:taskID', async (request, response) => {
+    const { authorization } = request.headers;
+    if (!authorization) {
+        response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to link these tasks');
+    }
+    else {
+        const token = jwt.verify(Utils.checkToken(authorization), process.env.SECRET);
+        if (!token && !token.username) {
+            response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to link these tasks');
+        }
+        else {
+            const { taskID } = request.params;
+            await Task.findOneAndDelete({taskID: taskID});
+            response.status(200).send('The task was successfully deleted');
+        }
+    }
+})
+
 app.get('/api/projects', async (request, response) => {
     const projects = await Project.find({}).populate('tasks').exec();
     response.status(200).json(projects);
