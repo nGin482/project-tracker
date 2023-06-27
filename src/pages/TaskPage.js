@@ -1,6 +1,16 @@
 import {useState, useEffect, useContext} from "react";
-import { useParams, NavLink } from "react-router-dom";
-import { Layout, Spin, Divider, Drawer, Button, List, Input } from "antd";
+import { useParams, NavLink, useNavigate } from "react-router-dom";
+import {
+    Button,
+    Divider,
+    Drawer,
+    Input,
+    Layout,
+    List,
+    message,
+    Popconfirm,
+    Spin
+} from "antd";
 import { isEmpty, omit } from "lodash";
 
 import AdditionalDetails from "../components/sidebars/AdditionalDetails";
@@ -9,14 +19,20 @@ import StatusTag from "../components/status-tag/StatusTag";
 import Navbar from "../components/navbar/Navbar";
 import ErrorPage from "./ErrorPage";
 import ErrorsContext from "../contexts/ErrorsContext";
-import { getTask, getTasksByProject } from "../services/requests";
+import UserContext from "../contexts/UserContext";
+import useProjects from "../hooks/useProjects";
+import { getTask, getTasksByProject, deleteTask } from "../services/requests";
 import "./styles/TaskPage.css";
 
 
 const TaskPage = () => {
     const { Content } = Layout;
+    const navigate = useNavigate();
+    const [messageApi, contextHolder] = message.useMessage();
     const { taskID } = useParams();
+    const { deleteTaskState } = useProjects();
     const { setErrorMessage, setErrorType } = useContext(ErrorsContext);
+    const { user } = useContext(UserContext);
 
     // Task being viewed
     const [task, setTask] = useState({});
@@ -69,6 +85,20 @@ const TaskPage = () => {
         setSearch(event.target.value);
     };
 
+    const handleDeleteTask = () => {
+        deleteTask(task.taskID, user.token).then(data => {
+            deleteTaskState(task.project, task.taskID);
+            navigate('/');
+        }).catch(err => {
+            if (err.response.data) {
+                messageApi.error(err.response.data);
+            }
+            else {
+                messageApi.error(err);
+            }
+        });
+    };
+
     return (
         <>
             <Navbar />
@@ -109,6 +139,17 @@ const TaskPage = () => {
                             >
                                 Link Task
                             </Button>
+                            {contextHolder}
+                            <Popconfirm
+                                title={`Delete ${task.taskID}`}
+                                description="Are you sure you want to delete this task?"
+                                onConfirm={handleDeleteTask}
+                                okText="Yes"
+                                cancelText="No"
+                            >
+                                <Button danger>Delete Task</Button>
+                            </Popconfirm>
+
                             <Content>
                                 <h1>{task.title}</h1>
                                 <p>{task.description}</p>
