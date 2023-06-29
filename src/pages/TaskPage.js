@@ -153,7 +153,7 @@ const TaskPage = () => {
                             </div>
                             <Content>
                                 <h1>{task.title}</h1>
-                                <p>{task.description}</p>
+                                <div dangerouslySetInnerHTML={{__html: task.description}} />
                                 {showLinkTasks && (
                                     <LinkTasks
                                         taskID={taskID}

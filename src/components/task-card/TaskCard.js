@@ -56,7 +56,7 @@ const TaskCard = props => {
         >
             {contextHolder}
 
-            <p>{description}</p>
+            <div className="task-description" dangerouslySetInnerHTML={{__html: description}} />
             <AdditionalDetails
                 taskDetails={task}
                 width={200}    
