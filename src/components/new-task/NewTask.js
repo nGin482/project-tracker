@@ -1,5 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { Form, Input, Select, Alert, Modal } from "antd";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 import { createTask } from "../../services/requests";
 import ProjectContext from "../../contexts/ProjectContext";
@@ -12,6 +14,7 @@ const NewTask = (props) => {
 
     const [form] = Form.useForm();
     const [relatedTasksFound, setRelatedTasksFound] = useState([]);
+    const [delayEditorLoad, setDelayEditorLoad] = useState(false);
     const [errorsExist, setErrorsExist] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
    
@@ -94,6 +97,17 @@ const NewTask = (props) => {
         }
     };
 
+    // Webpack throws a ResizeObserver loop limit exceeded error
+    // This was introduced when the CKEditor has been introduced into the Modal,
+    // where the resizing of the CKEditor as the Modal grows is causing the resize
+    // handling to be constantly called.
+    // The below function sets a state variable when the Modal has finished loading,
+    // which acts as a signal to render the CKEditor into the form
+    // TODO: might be able to update this to only execute in development
+    const renderDescriptionEditor = () => {
+        showForm ? setDelayEditorLoad(true) : setDelayEditorLoad(false);
+    }
+
     return (
         <Modal
             title="Create a new Task"
@@ -103,6 +117,7 @@ const NewTask = (props) => {
             cancelText="Cancel"
             onCancel={cancelCreateNewTask}
             className="create-modal"
+            afterOpenChange={renderDescriptionEditor}
         >
             <Form
                 form={form}
@@ -146,6 +161,10 @@ const NewTask = (props) => {
                 <Form.Item
                     label="Description"
                     name="description"
+                    getValueFromEvent={(event, editor) => {
+                        const data = editor.getData();
+                        return data;
+                    }}
                     rules={[
                         {
                             required: true,
@@ -153,7 +172,13 @@ const NewTask = (props) => {
                         }
                     ]}
                 >
-                    <Input.TextArea />
+                    {delayEditorLoad ? (
+                        <CKEditor
+                            editor={ClassicEditor}
+                        />
+                    ) :
+                        <Input.TextArea />
+                    }
                 </Form.Item>
                 <Form.Item
                     label="Type"
