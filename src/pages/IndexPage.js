@@ -77,9 +77,7 @@ const IndexPage = props => {
                     <Button onClick={() => setShowProjects(!showProjects)}>Find Project</Button>
                     <Button onClick={() => setProjectViewed('All')}>View all Tasks</Button>
                 </div>
-                {tasksDisplayed.map(task => (
-                    <TaskCard key={task.taskID} task={task} />
-                ))}
+                {tasksDisplayed.map(task => <TaskCard key={task.taskID} task={task} />)}
             </div>
         </>
     );
