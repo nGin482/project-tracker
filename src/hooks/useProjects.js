@@ -11,7 +11,13 @@ const useProjects = () => {
     };
 
     const updateTaskState = (project, taskID, updatedTask) => {
-        
+        setProjects(projects => {
+            const updatedProjects = [...projects];
+            const projectToUpdate = updatedProjects.find(proj => proj.projectName === project);
+            const taskIndex = projectToUpdate.tasks.findIndex(task => task.taskID === taskID);
+            projectToUpdate.tasks[taskIndex] = updatedTask;
+            return updatedProjects;
+        })
     };
 
     const deleteTaskState = (project, taskID) => {

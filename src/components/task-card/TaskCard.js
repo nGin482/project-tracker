@@ -1,33 +1,49 @@
 import React, {useState, useEffect, useContext } from "react";
 import { NavLink } from "react-router-dom";
-import { Card, Divider, message, Popconfirm } from "antd";
-import { DeleteOutlined } from "@ant-design/icons";
+import { Button, Card, Divider, message, Popconfirm, Popover } from "antd";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 import AdditionalDetails from "../sidebars/AdditionalDetails";
 import TaskType from "../task-type-icon/TaskType";
 import useProjects from "../../hooks/useProjects";
 import UserContext from "../../contexts/UserContext";
-import { deleteTask } from "../../services/requests";
+import { updateTask, deleteTask } from "../../services/requests";
 import "./TaskCard.css";
 
 const TaskCard = props => {
-    const [task, setTask] = useState(props.task);
+    const { task } = props;
     const { title, description, comments, type, project } = task;
+    
+    const [editingTask, setEditingTask] = useState(false);
+    const [newDescription, setNewDescription] = useState('');
+    
     const [messageApi, contextHolder] = message.useMessage();
+    const { updateTaskState, deleteTaskState } = useProjects();
 
-    const { deleteTaskState } = useProjects();
     const { user } = useContext(UserContext);
 
-    useEffect(() => {
-        console.log(task)
-        // update the DB
-    }, [task]);
+    const updateTaskDetails = () => {
+        const taskDescription = newDescription === '' ? description : newDescription;
+        updateTask(task.taskID, {field: 'description', value: taskDescription}, user.token).then(data => {
+            updateTaskState(project, task.taskID, data);
+            setEditingTask(false);
+        }).catch(err => {
+            if (err?.response.data) {
+                messageApi.error(err.response.data);
+            }
+            else {
+                messageApi.error(err);
+            }
+        })
+    }
 
     const handleDeleteTask = () => {
         deleteTask(task.taskID, user.token).then(data => {
             deleteTaskState(project, task.taskID);
         }).catch(err => {
-            if (err.response.data) {
+            if (err?.response.data) {
                 messageApi.error(err.response.data);
             }
             else {
@@ -52,11 +68,31 @@ const TaskCard = props => {
                     <DeleteOutlined />
                 </Popconfirm>
             }
-            actions={[<NavLink to={`/task/${task.taskID}`}>View {task.taskID}</NavLink>]}
+            actions={[
+                <NavLink to={`/task/${task.taskID}`}>View {task.taskID}</NavLink>,
+                <Popover title={`Edit ${task.taskID}`}>
+                    <EditOutlined onClick={() => setEditingTask(!editingTask)} />
+                </Popover>
+            ]}
         >
             {contextHolder}
 
-            <div className="task-description" dangerouslySetInnerHTML={{__html: description}} />
+            <div className="task-info task__general-info">
+                {editingTask ? (
+                    <>
+                        <CKEditor
+                            editor={ClassicEditor}
+                            data={description}
+                            onChange={(event, editor) => {
+                                const data = editor.getData();
+                                setNewDescription(data);
+                            }}
+                        />
+                        <Button onClick={() => setEditingTask(false)}>Cancel</Button>
+                        <Button htmlType="submit" type="primary" onClick={updateTaskDetails}>Update</Button>
+                    </>
+                ) : <div className="task-description" dangerouslySetInnerHTML={{__html: description}} />}
+            </div>
             <AdditionalDetails
                 taskDetails={task}
                 width={200}    
