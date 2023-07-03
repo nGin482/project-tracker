@@ -9,7 +9,7 @@ import AdditionalDetails from "../sidebars/AdditionalDetails";
 import TaskType from "../task-type-icon/TaskType";
 import useProjects from "../../hooks/useProjects";
 import UserContext from "../../contexts/UserContext";
-import { updateTask, deleteTask } from "../../services/requests";
+import { updateTaskDetail, deleteTask } from "../../services/requests";
 import "./TaskCard.css";
 
 const TaskCard = props => {
@@ -26,7 +26,7 @@ const TaskCard = props => {
 
     const updateTaskDetails = () => {
         const taskDescription = newDescription === '' ? description : newDescription;
-        updateTask(task.taskID, {field: 'description', value: taskDescription}, user.token).then(data => {
+        updateTaskDetail(task.taskID, {field: 'description', value: taskDescription}, user.token).then(data => {
             updateTaskState(project, task.taskID, data);
             setEditingTask(false);
         }).catch(err => {

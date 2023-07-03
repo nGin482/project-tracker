@@ -2,7 +2,7 @@ import { useState, useContext } from "react";
 
 import ProjectContext from "../contexts/ProjectContext";
 import UserContext from "../contexts/UserContext";
-import { updateTask } from "../services/requests";
+import { updateTaskDetail } from "../services/requests";
 
 const useTaskStatus = status => {
     const [taskStatus, setTaskStatus] = useState(status);
@@ -10,7 +10,7 @@ const useTaskStatus = status => {
     const { user } = useContext(UserContext);
 
     const changeStatus = (taskID, newStatus) => {
-        return updateTask(taskID, {field: 'status', value: newStatus}, user.token).then(() => {
+        return updateTaskDetail(taskID, {field: 'status', value: newStatus}, user.token).then(() => {
             setTaskStatus(newStatus);
             setProjects(projects => {
                 projects.forEach(project => {
