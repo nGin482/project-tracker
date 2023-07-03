@@ -90,6 +90,34 @@ app.post('/api/tasks', async (request, response) => {
     }
 })
 
+app.put('/api/tasks/:taskID', async (request, response) => {
+    const { authorization } = request.headers;
+    if (!authorization) {
+        response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
+    else {
+        const token = jwt.verify(Utils.checkToken(authorization), process.env.SECRET);
+        if (!token && !token.username) {
+            response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+        }
+        else {
+            const { taskID } = request.params;
+            const updatedTask = await Task.findOneAndReplace(
+                {taskID: taskID},
+                {...request.body},
+                {new: true}
+            );
+            console.log(updatedTask)
+            if (updatedTask) {
+                response.status(200).json(updatedTask);
+            }
+            else {
+                response.status(404).send(`Unable to find a task with ID ${taskID}`);
+            }
+        }
+    }
+})
+
 app.patch('/api/tasks/:taskID', async (request, response) => {
     const { authorization } = request.headers;
     if (!authorization) {
@@ -108,12 +136,11 @@ app.patch('/api/tasks/:taskID', async (request, response) => {
                 {[field]: value},
                 {new: true}
             );
-        
             if (updatedTask) {
-                response.status(200).json(updatedTask)
+                response.status(200).json(updatedTask);
             }
             else {
-                response.status(404).send(`Unable to find a task with ID ${taskID}`)
+                response.status(404).send(`Unable to find a task with ID ${taskID}`);
             }
         }
     }
