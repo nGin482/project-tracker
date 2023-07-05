@@ -11,6 +11,8 @@ import {
     Popconfirm,
     Spin
 } from "antd";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { isEmpty, omit } from "lodash";
 
 import AdditionalDetails from "../components/sidebars/AdditionalDetails";
@@ -21,7 +23,7 @@ import ErrorPage from "./ErrorPage";
 import ErrorsContext from "../contexts/ErrorsContext";
 import UserContext from "../contexts/UserContext";
 import useProjects from "../hooks/useProjects";
-import { getTask, getTasksByProject, deleteTask } from "../services/requests";
+import { getTask, getTasksByProject, updateTask, deleteTask } from "../services/requests";
 import "./styles/TaskPage.css";
 
 
@@ -30,7 +32,7 @@ const TaskPage = () => {
     const navigate = useNavigate();
     const [messageApi, contextHolder] = message.useMessage();
     const { taskID } = useParams();
-    const { deleteTaskState } = useProjects();
+    const { updateTaskState, deleteTaskState } = useProjects();
     const { setErrorMessage, setErrorType } = useContext(ErrorsContext);
     const { user } = useContext(UserContext);
 
@@ -45,6 +47,10 @@ const TaskPage = () => {
     
     // Linking Tasks
     const [showLinkTasks, setShowLinkTasks] = useState(false);
+
+    // Edit Task
+    const [editingTask, setEditingTask] = useState(false);
+    const [updatedTask, setUpdatedTask] = useState({})
     
     // Misc
     const [errors, setErrors] = useState(false);
@@ -53,6 +59,12 @@ const TaskPage = () => {
     useEffect(() => {
         getTask(taskID).then(data => {
             setTask(data);
+            setUpdatedTask({
+                title: data.title,
+                description: data.description,
+                type: data.type,
+                project: data.project
+            });
             getTasksByProject(data.project).then(data => {
                 setTasksByProject(data);
                 setSearchResults(data)
@@ -85,12 +97,34 @@ const TaskPage = () => {
         setSearch(event.target.value);
     };
 
+    const submitUpdateTask = () => {
+        const finalTask = {
+            ...task,
+            title: updatedTask.title,
+            description: updatedTask.description,
+            type: updatedTask.type,
+            project: updatedTask.project
+        }
+        updateTask(task.taskID, finalTask, user.token).then(data => {
+            updateTaskState(task.project, task.taskID, data);
+            setEditingTask(false);
+            setTask(data)
+        }).catch(err => {
+            if (err?.response.data) {
+                messageApi.error(err.response.data);
+            }
+            else {
+                messageApi.error(err);
+            }
+        });
+    }
+
     const handleDeleteTask = () => {
         deleteTask(task.taskID, user.token).then(data => {
             deleteTaskState(task.project, task.taskID);
             navigate('/');
         }).catch(err => {
-            if (err.response.data) {
+            if (err?.response.data) {
                 messageApi.error(err.response.data);
             }
             else {
@@ -125,7 +159,7 @@ const TaskPage = () => {
                     )}
                     <Layout>
                         <div id="task-content">
-                            <div id="task-action-buttons">
+                            <div className="task-action-buttons">
                                 <Button
                                     onClick={() => setShowTasksDrawer(true)}
                                     className="task-page-action-buttons"
@@ -140,6 +174,13 @@ const TaskPage = () => {
                                 >
                                     Link Task
                                 </Button>
+                                <Button
+                                    onClick={() => setEditingTask(!editingTask)}
+                                    className="task-page-action-buttons"
+                                    id="link-tasks"
+                                >
+                                    Edit Task
+                                </Button>
                                 {contextHolder}
                                 <Popconfirm
                                     title={`Delete ${task.taskID}`}
@@ -152,8 +193,43 @@ const TaskPage = () => {
                                 </Popconfirm>
                             </div>
                             <Content>
-                                <h1>{task.title}</h1>
-                                <div dangerouslySetInnerHTML={{__html: task.description}} />
+                                {editingTask ? (
+                                    <>
+                                        <Input
+                                            className="edit-task-title"
+                                            onChange={event => setUpdatedTask({...updatedTask, title: event.target.value})}
+                                            value={updatedTask.title}
+                                        />
+                                        <CKEditor
+                                            data={task.description}
+                                            editor={ClassicEditor}
+                                            onChange={(event, editor) => {
+                                                const data = editor.getData();
+                                                setUpdatedTask({...updatedTask, description: data});
+                                            }}
+                                        />
+                                        <div className="task-action-buttons update-task">
+                                            <Button
+                                                onClick={() => setEditingTask(false)}
+                                                type="default"
+                                            >
+                                                Cancel
+                                            </Button>
+                                            <Button
+                                                htmlType="submit"
+                                                onClick={submitUpdateTask}
+                                                type="primary"
+                                            >
+                                                Submit Changes
+                                            </Button>
+                                        </div>
+                                    </>
+                                ) : 
+                                    <>
+                                        <h1>{task.title}</h1>
+                                        <div dangerouslySetInnerHTML={{__html: task.description}} />
+                                    </>
+                                }
                                 {showLinkTasks && (
                                     <LinkTasks
                                         taskID={taskID}

@@ -75,6 +75,23 @@
     margin-top: 6px;
 }
 
-#task-action-buttons button:not(:first-child) {
+.task-action-buttons button:not(:first-child) {
     margin-left: 7px;
+}
+
+.edit-task-title {
+    width: max-content;
+    margin: 30px auto;
+    padding: 10px 50px;
+    border-radius: 10px;
+    background-color: #3aa2f2;
+    color: #fff;
+    display: block;
+    font-weight: bold;
+    font-size: 1.5em;
+}
+
+.update-task {
+    float: right;
+    margin-top: 13px;
 }
