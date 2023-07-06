@@ -1,5 +1,5 @@
 import {useState, useEffect, useContext} from "react";
-import { Button, Drawer, Input, List } from "antd";
+import { Button, Drawer, Input, List, Pagination } from "antd";
 
 import TaskCard from '../components/task-card/TaskCard';
 import ProjectContext from "../contexts/ProjectContext";
@@ -11,6 +11,8 @@ const IndexPage = props => {
 
     const [tasksDisplayed, setTasksDisplayed] = useState([]);
     const [showProjects, setShowProjects] = useState(false);
+    const [pageNumber, setPageNumber] = useState(1);
+    const [numPerPage, setNumPerPage] = useState(10);
     const [searchResults, setSearchResults] = useState(projects);
     const [search, setSearch] = useState('');
 
@@ -31,6 +33,8 @@ const IndexPage = props => {
         projects.forEach(project => allTasks = allTasks.concat(project.tasks));
         setTasksDisplayed(allTasks);
     }, [projects]);
+    // TODO: Note: When projects state updates, this will then re-render all tasks,
+    // TODO: regardless of what filter state has been applied
 
     useEffect(() => {
         if (projectViewed === 'All') {
@@ -41,7 +45,7 @@ const IndexPage = props => {
         else {
             setTasksDisplayed(projectViewed.tasks);
         }
-    }, [projectViewed])
+    }, [projectViewed]);
 
     const handleSearch = event => {
         setSearch(event.target.value);
@@ -73,11 +77,25 @@ const IndexPage = props => {
                 />
             </Drawer>
             <div id="container">
-                <div id="project-controls">
+                <div className="project-controls">
                     <Button onClick={() => setShowProjects(!showProjects)}>Find Project</Button>
                     <Button onClick={() => setProjectViewed('All')}>View all Tasks</Button>
+                    <Pagination
+                        total={tasksDisplayed.length}
+                        defaultCurrent={1}
+                        onChange={page => setPageNumber(page)}
+                        // showSizeChanger
+                        // pageSize={numPerPage}
+                        // onShowSizeChange={(current, pageSize) => setNumPerPage(pageSize)}
+                        className="tasks-pagination"
+                    />
                 </div>
-                {tasksDisplayed.map(task => <TaskCard key={task.taskID} task={task} />)}
+                {tasksDisplayed
+                    .slice((pageNumber - 1) * numPerPage, pageNumber * numPerPage)
+                    .map(task => 
+                        <TaskCard key={task.taskID} task={task} />
+                    )
+                }
             </div>
         </>
     );

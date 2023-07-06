@@ -25,12 +25,15 @@ h1 {
   left: 80%;
 }
 
-#project-controls {
+.project-controls {
   margin-left: 142px;
   margin-bottom: 20px;
 }
-#project-controls :not(:last-child) {
+.project-controls :not(:last-child) {
   margin-right: 20px;
+}
+.tasks-pagination {
+  margin-top: 12px;
 }
 
 .ant-list-item {
