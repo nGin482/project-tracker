@@ -16,6 +16,17 @@ const newTask = {
     status: 'Backlog',
     project: 'Test Project',
 };
+const newTaskWithRelated = {
+    title: 'Task for testing',
+    description: 'A task created specifically for testing',
+    type: 'task',
+    status: 'Backlog',
+    project: 'Test Project',
+    linkedTasks: [
+        'RAND-2',
+        'RAND-4'
+    ]
+}
 
 beforeAll(async () => {
     const rawData = fs.readFileSync("tests/test_data.json");
@@ -48,7 +59,7 @@ describe('Tasks Endpoint', () => {
         const response = await api.get('/api/tasks');
         expect(response.statusCode).toBe(200);
         expect(response.headers['content-type']).toContain('application/json');
-        expect(response.body.length).toBe(6);
+        expect(response.body).toHaveLength(6);
     });
 
     it('should return a specific task', async () => {
@@ -69,7 +80,7 @@ describe('Tasks Endpoint', () => {
     it('should return tasks in a specific project', async () => {
         const response = await api.get('/api/tasks/project/Random Project');
         expect(response.statusCode).toEqual(200);
-        expect(response.body.length).toEqual(4);
+        expect(response.body).toHaveLength(4);
     })
 
     it('should return 404 if task is not found', async () => {
@@ -112,8 +123,28 @@ describe('Tasks Endpoint', () => {
         //check that task is added to project
         const projectsResponse = await api.get('/api/projects');
         const project = projectsResponse.body.find(proj => proj.projectName === newTask.project);
-        const task = project.tasks[project.tasks.length -1];
-        expect(taskCreated.taskID).toEqual(task.taskID);
+        const taskProject = project.tasks[project.tasks.length -1];
+        expect(taskCreated.taskID).toEqual(taskProject.taskID);
+
+        //check that task is added to user
+        const usersResponse = await api.get(`/api/users/${taskCreated.reporter}`);
+        const user = usersResponse.body;
+        const taskUser = user.tasks[user.tasks.length -1];
+        expect(taskCreated.taskID).toEqual(taskUser.taskID);
+    });
+
+    it('should link tasks when data is provided on POST request', async () => {
+        const response = await api.post('/api/tasks')
+            .set('Authorization', bearerToken)
+            .send(newTaskWithRelated);
+
+        expect(response.statusCode).toEqual(201);
+        const taskCreated = response.body.task;
+        expect(taskCreated.taskID).toEqual('TEST-4');
+        expect(taskCreated.reporter).toEqual('Natalie-Test');
+        expect(taskCreated.linkedTasks).toHaveLength(2);
+        expect(taskCreated.linkedTasks[0]).not.toEqual(newTaskWithRelated.linkedTasks[0]);
+        expect(taskCreated.linkedTasks[1]).not.toEqual(newTaskWithRelated.linkedTasks[1]);
     });
 });
 
@@ -122,7 +153,7 @@ describe('Projects Endpoint', () => {
         const response = await api.get('/api/projects');
         expect(response.statusCode).toEqual(200);
         expect(response.body.length).toEqual(2);
-    })
+    });
 })
 
 afterAll(async () => {
