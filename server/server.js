@@ -27,13 +27,12 @@ app.get('/', (request, response) => {
     response.send('<h1>Hello World</h1>')
 })
 
-app.get('/api/tasks', (request, response) => {
-    Task.find().lean().then(tasks => {
-        tasks.forEach(task => (
-            delete task._id
-        ))
-        response.json(tasks);
-    });
+app.get('/api/tasks', async (request, response) => {
+    const tasks = await Task.find({});
+    tasks.forEach(task => {
+        delete task._id;
+    })
+    response.status(200).json(tasks);
 })
 
 app.get('/api/tasks/:taskID', async (request, response) => {
@@ -58,41 +57,46 @@ app.get('/api/tasks/project/:project', (request, response) => {
 })
 
 app.post('/api/tasks', async (request, response) => {
-    if (!request.body) {
-        response.status(500).json('Something went wrong');
-    }
     if (!request.headers.authorization) {
-        response.status(401).send('The request was not completed due to an unauthorised user');
+        return response.status(401).send('The request was not completed due to an unauthorised user');
     }
-    else {
-        const { authorization } = request.headers;
-        const token = jwt.verify(Utils.checkToken(authorization), process.env.SECRET);
-        if (!token && !token?.username) {
-            response.status(401).send('The request was not completed due to an unauthorised user');
-        }
-        else {
-            const tasks = await Task.find({project: request.body.project});
-            const project = await Project.findOne({projectName: request.body.project});
-            let currentTaskIDs = tasks.map(task => task.taskID);
-            const taskID = TaskUtils.setTaskID(project.projectCode, currentTaskIDs);
-            const newTask = {...request.body, taskID, reporter: token.username};
-            if (request.body.linkedTasks) {
-                const linkedTasks = await Task.find({taskID: {$in: request.body.linkedTasks}});
-                const linkedTasksChecked = linkedTasks.filter(linkTask => linkTask._id);
-                newTask.linkedTasks = linkedTasksChecked;
-            }
-            const taskDoc = new Task(newTask);
-            const savedTask = await taskDoc.save();
-            
-            const user = await User.findOne({username: token.username});
-            user.tasks = user.tasks.concat(savedTask._id);
-            user.save();
+    const { authorization } = request.headers;
+    const token = Utils.checkToken(authorization);
+    let decodedToken = undefined;
+    try {
+        decodedToken = jwt.verify(token, process.env.SECRET);
+    }
+    catch(err) {
+        decodedToken = {username: undefined};
+    }
+    if (!token || !decodedToken.username) {
+        return response.status(401).send('The request was not completed due to an unauthorised user');
+    }
+
+    if (lodash.isEmpty(request.body)) {
+        return response.status(400).send('No Task details were provided');
+    }
+
+    const tasks = await Task.find({project: request.body.project});
+    const project = await Project.findOne({projectName: request.body.project});
+    let currentTaskIDs = tasks.map(task => task.taskID);
+    const taskID = TaskUtils.setTaskID(project.projectCode, currentTaskIDs);
+    const newTask = {taskID, ...request.body, reporter: decodedToken.username};
+    if (request.body.linkedTasks) {
+        const linkedTasks = await Task.find({taskID: {$in: request.body.linkedTasks}});
+        const linkedTasksChecked = linkedTasks.filter(linkTask => linkTask._id);
+        newTask.linkedTasks = linkedTasksChecked;
+    }
+    const taskDoc = new Task(newTask);
+    const savedTask = await taskDoc.save();
     
-            project.tasks = project.tasks.concat(savedTask._id);
-            project.save();
-            response.status(200).json({status: 'success', task: taskDoc});
-        }
-    }
+    const user = await User.findOne({username: decodedToken.username});
+    user.tasks = user.tasks.concat(savedTask._id);
+    user.save();
+
+    project.tasks = project.tasks.concat(savedTask._id);
+    project.save();
+    response.status(201).json({status: 'success', task: taskDoc});
 })
 
 app.put('/api/tasks/:taskID', async (request, response) => {
