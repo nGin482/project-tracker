@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const lodash = require("lodash");
 require("dotenv").config();
 
 const TaskUtils = require("../utilities/task_utils");
@@ -13,7 +14,11 @@ const Project = require("./models/projectSchema");
 
 const app = express();
 
-mongoConnection();
+const mongo_uri = process.env.NODE_ENV === 'test'
+    ? process.env.MONGO_TEST_URI
+    : process.env.MONGODB_URI;
+
+mongoConnection(mongo_uri);
 
 app.use(cors());
 app.use(express.json());

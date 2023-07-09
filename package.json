@@ -12,6 +12,7 @@
     "axios": "^1.4.0",
     "bcrypt": "^5.1.0",
     "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.0",
     "lodash": "^4.17.21",
@@ -25,11 +26,12 @@
   },
   "scripts": {
     "start": "set PORT=3000 && react-scripts start",
-    "server": "nodemon server/server.js",
+    "server": "cross-env NODE_ENV=production node server/server.js",
+    "dev-server": "cross-env NODE_ENV=development nodemon server/server.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "test-api": "jest --detectOpenHandles --coverage -- tests/server.test.js"
+    "test-api": "cross-env NODE_ENV=test jest --detectOpenHandles --coverage -- tests/server.test.js"
   },
   "eslintConfig": {
     "extends": [
