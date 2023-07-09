@@ -154,7 +154,23 @@ describe('Projects Endpoint', () => {
         expect(response.statusCode).toEqual(200);
         expect(response.body.length).toEqual(2);
     });
-})
+});
+
+describe('Users Endpoint', () => {
+    it('should return a user if found', async () => {
+        const response = await api.get('/api/users/Natalie-Test');
+        expect(response.statusCode).toEqual(200);
+
+        const user = response.body;
+        expect(user.username).toEqual('Natalie-Test');
+        expect(user.tasks.length).toBeGreaterThan(0);
+    });
+
+    it('should return 404 if user not found', async () => {
+        const response = await api.get('/api/users/some-random-person');
+        expect(response.statusCode).toEqual(404);
+    });
+});
 
 afterAll(async () => {
     await Project.deleteMany({});
