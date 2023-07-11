@@ -26,7 +26,7 @@ const newTaskWithRelated = {
         'RAND-2',
         'RAND-4'
     ]
-}
+};
 
 beforeAll(async () => {
     const rawData = fs.readFileSync("tests/test_data.json");
@@ -145,6 +145,79 @@ describe('Tasks Endpoint', () => {
         expect(taskCreated.linkedTasks).toHaveLength(2);
         expect(taskCreated.linkedTasks[0]).not.toEqual(newTaskWithRelated.linkedTasks[0]);
         expect(taskCreated.linkedTasks[1]).not.toEqual(newTaskWithRelated.linkedTasks[1]);
+    });
+
+    it('should respond with 401 if updating task with no auth', async () => {
+        const updatedTask = {
+            title: 'Updated Task for testing',
+            description: 'A task that is updated to perform some testing',
+            type: 'task',
+            status: 'Backlog',
+            project: 'Test Project',
+        };
+        
+        const response = await api.put('/api/tasks/RAND-1')
+            .send(updatedTask);
+        
+        expect(response.statusCode).toEqual(401);
+        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    });
+
+    it('should respond with 401 if updating task with invalid auth', async () => {
+        const updatedTask = {
+            title: 'Updated Task for testing',
+            description: 'A task that is updated to perform some testing',
+            type: 'task',
+            status: 'Backlog',
+            project: 'Test Project',
+        };
+        
+        const response = await api.put('/api/tasks/RAND-1')
+            .set('Authorization', 'invalid.token')
+            .send(updatedTask);
+
+        expect(response.statusCode).toEqual(401);
+        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    });
+
+    it('should respond with 400 if updating task without updated details sent', async () => {
+        const response = await api.put('/api/tasks/RAND-1')
+            .set('Authorization', bearerToken);
+        
+        expect(response.statusCode).toEqual(400);
+        expect(response.text).toEqual('No Task details were provided');
+    });
+
+    it('should respond with 404 if task does not exist to update', async () => {
+        const updatedTask = {
+            title: 'Updated Task for testing',
+            description: 'A task that is updated to perform some testing',
+            type: 'task',
+            status: 'Backlog',
+            project: 'Test Project',
+        };
+        const response = await api.put('/api/tasks/BLANK-1')
+            .set('Authorization', bearerToken)
+            .send(updatedTask);
+        
+        expect(response.statusCode).toEqual(404);
+        expect(response.text).toEqual(`Unable to find a task with ID BLANK-1`);
+    });
+
+    it('should respond with 200 when successfully updating task', async () => {
+        const updatedTask = {
+            title: 'Updated Task for testing',
+            description: 'A task that is updated to perform some testing',
+            type: 'task',
+            status: 'Backlog',
+            project: 'Test Project',
+        };
+        const response = await api.put('/api/tasks/RAND-3')
+            .set('Authorization', bearerToken)
+            .send(updatedTask);
+        
+        expect(response.statusCode).toEqual(200);
+        expect(response.body).toMatchObject(updatedTask);
     });
 });
 
