@@ -219,6 +219,72 @@ describe('Tasks Endpoint', () => {
         expect(response.statusCode).toEqual(200);
         expect(response.body).toMatchObject(updatedTask);
     });
+
+    it('UPDATE TASK FIELD - respond with 401 if no auth provided', async () => {
+        const update = {
+            field: 'title',
+            value: 'Task for testing something in the Test Project'
+        }
+        const response = await api.patch('/api/tasks/TEST-2')
+            .send(update);
+        
+        expect(response.statusCode).toEqual(401);
+        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to update this task');
+
+        const taskResponse = await api.get('/api/tasks/TEST-2');
+        const task = taskResponse.body;
+        expect(task.title).not.toEqual(update.value);
+    });
+
+    it('UPDATE TASK FIELD - respond with 401 if invalid auth provided', async () => {
+        const update = {
+            field: 'title',
+            value: 'Task for testing something in the Test Project'
+        }
+        const response = await api.patch('/api/tasks/TEST-2')
+            .set('Authorization', 'invalid.token')
+            .send(update);
+        
+        expect(response.statusCode).toEqual(401);
+        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to update this task');
+
+        const taskResponse = await api.get('/api/tasks/TEST-2');
+        const task = taskResponse.body;
+        expect(task.title).not.toEqual(update.value);
+    });
+
+    it('UPDATE TASK FIELD - respond with 404 if unable to find task to update', async () => {
+        const update = {
+            field: 'title',
+            value: 'Task for testing something in the Test Project'
+        }
+        const response = await api.patch('/api/tasks/TESTING-2')
+            .set('Authorization', bearerToken)
+            .send(update);
+        
+        expect(response.statusCode).toEqual(404);
+        expect(response.text).toEqual('Unable to find a task with ID TESTING-2');
+
+        const taskResponse = await api.get('/api/tasks/TESTING-2');
+        const task = taskResponse.body;
+        expect(task).toStrictEqual({});
+    });
+
+    it('UPDATE TASK FIELD - successfully update', async () => {
+        const update = {
+            field: 'title',
+            value: 'Task for testing something in the Test Project'
+        }
+        const response = await api.patch('/api/tasks/TEST-2')
+            .set('Authorization', bearerToken)
+            .send(update);
+        
+        expect(response.statusCode).toEqual(200);
+
+        const taskResponse = await api.get('/api/tasks/TEST-2');
+        const task = taskResponse.body;
+        expect(task.title).toEqual(update.value);
+    });
 });
 
 describe('Projects Endpoint', () => {
