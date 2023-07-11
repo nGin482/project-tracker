@@ -134,30 +134,33 @@ app.put('/api/tasks/:taskID', async (request, response) => {
 })
 
 app.patch('/api/tasks/:taskID', async (request, response) => {
+    if (!request.headers.authorization) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
     const { authorization } = request.headers;
-    if (!authorization) {
-        response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    const token = Utils.checkToken(authorization);
+    let decodedToken = undefined;
+    try {
+        decodedToken = jwt.verify(token, process.env.SECRET);
+    }
+    catch(err) {
+        decodedToken = {username: undefined};
+    }
+    if (!token || !decodedToken.username) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
+    const taskID = request.params.taskID;
+    const { field, value } = request.body;
+    const updatedTask = await Task.findOneAndUpdate(
+        {taskID: taskID},
+        {[field]: value},
+        {new: true}
+    );
+    if (updatedTask) {
+        response.status(200).json(updatedTask);
     }
     else {
-        const token = jwt.verify(Utils.checkToken(authorization), process.env.SECRET);
-        if (!token && !token.username) {
-            response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
-        }
-        else {
-            const taskID = request.params.taskID;
-            const { field, value } = request.body;
-            const updatedTask = await Task.findOneAndUpdate(
-                {taskID: taskID},
-                {[field]: value},
-                {new: true}
-            );
-            if (updatedTask) {
-                response.status(200).json(updatedTask);
-            }
-            else {
-                response.status(404).send(`Unable to find a task with ID ${taskID}`);
-            }
-        }
+        response.status(404).send(`Unable to find a task with ID ${taskID}`);
     }
 })
 
