@@ -479,6 +479,65 @@ describe('Projects Endpoint', () => {
         expect(response.statusCode).toEqual(200);
         expect(response.body.length).toEqual(2);
     });
+
+    it('CREATE PROJECT - should respond with 401 if no auth provided', async () => {
+        const newProject = {
+            projectCode: 'THIP',
+            projectName: 'Third Project'
+        }
+        const response = await api.post('/api/projects')
+            .send({ newProject });
+        
+        expect(response.statusCode).toEqual(401);
+        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to update this task');
+
+        const projectsResponse = await api.get('/api/projects');
+        expect(projectsResponse.body).toHaveLength(2);
+    });
+
+    it('CREATE PROJECT - should respond with 401 if invalid auth provided', async () => {
+        const newProject = {
+            projectCode: 'THIP',
+            projectName: 'Third Project'
+        }
+        const response = await api.post('/api/projects')
+            .set('Authorization', 'Bearer invalid.token')
+            .send({ newProject });
+        
+        expect(response.statusCode).toEqual(401);
+        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to update this task');
+
+        const projectsResponse = await api.get('/api/projects');
+        expect(projectsResponse.body).toHaveLength(2);
+    });
+
+    it('CREATE PROJECT - should respond with 400 if no project provided', async () => {
+        const response = await api.post('/api/projects')
+            .set('Authorization', bearerToken);
+        
+        expect(response.statusCode).toEqual(400);
+        expect(response.text).toEqual('Please provide details of a new project');
+
+        const projectsResponse = await api.get('/api/projects');
+        expect(projectsResponse.body).toHaveLength(2);
+    });
+
+    it('CREATE PROJECT - should respond with 200 if successfully creating a project', async () => {
+        const newProject = {
+            projectCode: 'THIP',
+            projectName: 'Third Project'
+        }
+        const response = await api.post('/api/projects')
+            .set('Authorization', bearerToken)
+            .send({ newProject });
+        
+        expect(response.statusCode).toEqual(200);
+        expect(response.body).toHaveProperty('dateCreated');
+        expect(response.body).toHaveProperty('tasks');
+
+        const projectsResponse = await api.get('/api/projects');
+        expect(projectsResponse.body).toHaveLength(3);
+    });
 });
 
 describe('Users Endpoint', () => {

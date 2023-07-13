@@ -239,16 +239,28 @@ app.get('/api/projects', async (request, response) => {
 })
 
 app.post('/api/projects', async (request, response) => {
+    if (!request.headers.authorization) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
     const { authorization } = request.headers;
-    const token = jwt.verify(Utils.checkToken(authorization), process.env.SECRET);
-    if (!token && !token?.username) {
-        response.status(401).send('The request was not completed due to an unauthorised user')
+    const token = Utils.checkToken(authorization);
+    let decodedToken = undefined;
+    try {
+        decodedToken = jwt.verify(token, process.env.SECRET);
     }
-    else {
-        const newProject = new Project({...request.body, creator: token.username});
-        const savedProject = await newProject.save();
-        response.status(200).json(savedProject);
+    catch(err) {
+        decodedToken = {username: undefined};
     }
+    if (!token || !decodedToken.username) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
+
+    if (!request.body || lodash.isEmpty(request.body)) {
+        return response.status(400).send('Please provide details of a new project');
+    }
+    const newProject = new Project({...request.body, creator: token.username});
+    const savedProject = await newProject.save();
+    return response.status(200).json(savedProject);
 })
 
 app.post('/api/register', async (request, response) => {
