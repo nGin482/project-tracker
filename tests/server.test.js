@@ -330,7 +330,7 @@ describe('Tasks Endpoint', () => {
     it("LINK RELATED TASKS - respond with 404 if one or more of the task(s) to link can't be found", async () => {
         const response = await api.patch('/api/tasks/RAND-4/link')
             .set('Authorization', bearerToken)
-            .send({ linkedTasks: linkedTasksOneNotFound, });
+            .send({ linkedTasks: linkedTasksOneNotFound });
         
         expect(response.statusCode).toEqual(404);
         expect(response.text).toEqual('The server cannot find all the tasks to link');
