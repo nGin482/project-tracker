@@ -556,6 +556,72 @@ describe('Users Endpoint', () => {
     });
 });
 
+describe('Login/Register', () => {
+    it('REGISTER - should respond with 409 if username already taken', async () => {
+        const loginDetails = {
+            username: 'Natalie-Test',
+            password: 'Randompassword'
+        }
+        const response = await api.post('/api/register')
+            .send({ ...loginDetails });
+
+        expect(response.statusCode).toEqual(409);
+        expect(response.text).toEqual('The username is already in use');
+    });
+
+    it('REGISTER - should respond with 200 on successful registration', async () => {
+        const loginDetails = {
+            username: 'New Account',
+            password: 'Randompassword',
+            email: 'random.email@gmail.com'
+        }
+        const response = await api.post('/api/register')
+            .send({ ...loginDetails });
+
+        expect(response.statusCode).toEqual(200);
+
+        const userResponse = await api.get('/api/users/New account');
+        expect(userResponse.body.password).not.toEqual(loginDetails.password);
+    });
+
+    it('LOGIN - should respond with 401 if user not found', async () => {
+        const loginDetails = {
+            username: 'Random Account',
+            password: 'Randompassword'
+        }
+        const response = await api.post('/api/login')
+            .send({ ...loginDetails });
+
+        expect(response.statusCode).toEqual(401);
+        expect(response.text).toEqual('The username or password is incorrect');
+    });
+
+    it('LOGIN - should respond with 401 if password is incorrect', async () => {
+        const loginDetails = {
+            username: 'New Account',
+            password: 'Randompasswod'
+        }
+        const response = await api.post('/api/login')
+            .send({ ...loginDetails });
+
+        expect(response.statusCode).toEqual(401);
+        expect(response.text).toEqual('The username or password is incorrect');
+    });
+
+    it('LOGIN - should respond with 200 on successful login', async () => {
+        const loginDetails = {
+            username: 'New Account',
+            password: 'Randompassword'
+        }
+        const response = await api.post('/api/login')
+            .send({ ...loginDetails });
+
+        expect(response.statusCode).toEqual(200);
+        expect(response.body).toHaveProperty('username');
+        expect(response.body).toHaveProperty('token');
+    });
+});
+
 afterAll(async () => {
     await Project.deleteMany({});
     await Task.deleteMany({});

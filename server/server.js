@@ -265,39 +265,32 @@ app.post('/api/projects', async (request, response) => {
 
 app.post('/api/register', async (request, response) => {
     const { username, password, email, image } = request.body;
-    const checkUser = User.findOne({username: username});
+    const checkUser = await User.findOne({username: username});
     if (checkUser) {
-        response.status(409).send("The username is already in use");
+        return response.status(409).send("The username is already in use");
     }
-    else {
-        const pwHash = await bcrypt.hash(password, 14);
-        const user = { username, password: pwHash, email, image };
-        const newUser = new User(user);
-        newUser.save();
-        response.status(200).json({username, image});
-    }
-
+    const pwHash = await bcrypt.hash(password, 14);
+    const user = { username, password: pwHash, email, image };
+    const newUser = new User(user);
+    newUser.save();
+    return response.status(200).json({username, image});
 })
 
 app.post('/api/login', async (request, response) => {
     const { username, password } = request.body;
     const user = await User.findOne({username: username}).populate('tasks').exec();
-    if (user) {
-        if (bcrypt.compareSync(password, user.password)) {
-            const userForToken = {
-                username: user.username,
-                id: user._id
-            }
-            const token = jwt.sign(userForToken, process.env.SECRET);
-            response.status(200).send({username: user.username, email: user.email, avatar: user.image, token});
-        }
-        else {
-            response.status(401).send('The username or password is incorrect');
-        }
+    if (!user) {
+        return response.status(401).send('The username or password is incorrect');
     }
-    else {
-        response.status(401).send('The username or password is incorrect');
+    if (!bcrypt.compareSync(password, user.password)) {
+        return response.status(401).send('The username or password is incorrect');
     }
+    const userForToken = {
+        username: user.username,
+        id: user._id
+    }
+    const token = jwt.sign(userForToken, process.env.SECRET);
+    return response.status(200).send({username: user.username, email: user.email, avatar: user.image, token});
 })
 
 app.get('/api/users/:username', async (request, response) => {
