@@ -285,6 +285,141 @@ describe('Tasks Endpoint', () => {
         const task = taskResponse.body;
         expect(task.title).toEqual(update.value);
     });
+
+    it('LINK RELATED TASKS - respond with 401 if no auth provided', async () => {
+        const linkedTasks = [
+            'TEST-1',
+            'RAND-2'
+        ];
+        const response = await api.patch('/api/tasks/RAND-4/link')
+            .send({ linkedTasks });
+        
+        expect(response.statusCode).toEqual(401);
+        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to update this task');
+
+        const taskResponse = await api.get('/api/tasks/RAND-4');
+        const task = taskResponse.body;
+        expect(task.linkedTasks).toHaveLength(0);
+    });
+
+    it('LINK RELATED TASKS - respond with 401 if invalid auth provided', async () => {
+        const linkedTasks = [
+            'TEST-1',
+            'RAND-2'
+        ];
+        const response = await api.patch('/api/tasks/RAND-4/link')
+            .set('Authorization', 'Bearer invalid.token')
+            .send({ linkedTasks });
+        
+        expect(response.statusCode).toEqual(401);
+        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to update this task');
+
+        const taskResponse = await api.get('/api/tasks/RAND-4');
+        const task = taskResponse.body;
+        expect(task.linkedTasks).toHaveLength(0);
+    });
+
+    it('LINK RELATED TASKS - respond with 400 if request body does not contain linkedTasks key', async () => {
+        const someKey = [
+            'TEST-1',
+            'RAND-2'
+        ];
+        const response = await api.patch('/api/tasks/RAND-4/link')
+            .set('Authorization', bearerToken)
+            .send({ someKey });
+        
+        expect(response.statusCode).toEqual(400);
+        expect(response.text).toEqual('The request was sent without data. Please ensure that tasks are selected to be linked');
+
+        const taskResponse = await api.get('/api/tasks/RAND-4');
+        const task = taskResponse.body;
+        expect(task.linkedTasks).toHaveLength(0);
+    });
+
+    it('LINK RELATED TASKS - respond with 400 if linkedTasks array in request body is empty', async () => {
+        const linkedTasks = [];
+        const response = await api.patch('/api/tasks/RAND-4/link')
+            .set('Authorization', bearerToken)
+            .send({ linkedTasks });
+        
+        expect(response.statusCode).toEqual(400);
+        expect(response.text).toEqual('The request was sent without data. Please ensure that tasks are selected to be linked');
+
+        const taskResponse = await api.get('/api/tasks/RAND-4');
+        const task = taskResponse.body;
+        expect(task.linkedTasks).toHaveLength(0);
+    });
+
+    it('LINK RELATED TASKS - respond with 404 if the task being linked is not found', async () => {
+        const linkedTasks = [
+            'TEST-1',
+            'RAND-2'
+        ];
+        const response = await api.patch('/api/tasks/RAND-52/link')
+            .set('Authorization', bearerToken)
+            .send({ linkedTasks });
+        
+        expect(response.statusCode).toEqual(404);
+        expect(response.text).toEqual('The server cannot link these tasks together as the task being linked does not exist');
+
+        const taskResponse = await api.get('/api/tasks');
+        const tasks = taskResponse.body;
+        expect(tasks).toHaveLength(8);
+    });
+
+    it('LINK RELATED TASKS - respond with 404 if none of the task(s) to link can be found', async () => {
+        const linkedTasks = [
+            'TEST-57',
+            'RAND-58'
+        ];
+        const response = await api.patch('/api/tasks/RAND-4/link')
+            .set('Authorization', bearerToken)
+            .send({ linkedTasks });
+        
+        expect(response.statusCode).toEqual(404);
+        expect(response.text).toEqual('The server cannot find the tasks to link');
+
+        const taskResponse = await api.get('/api/tasks');
+        const tasks = taskResponse.body;
+        expect(tasks).toHaveLength(8);
+    });
+
+    it("LINK RELATED TASKS - respond with 404 if one or more of the task(s) to link can't be found", async () => {
+        const linkedTasks = [
+            'TEST-3',
+            'RAND-58'
+        ];
+        const response = await api.patch('/api/tasks/RAND-4/link')
+            .set('Authorization', bearerToken)
+            .send({ linkedTasks });
+        
+        expect(response.statusCode).toEqual(404);
+        expect(response.text).toEqual('The server cannot find all the tasks to link');
+
+        const tasksResponse = await api.get('/api/tasks');
+        const tasks = tasksResponse.body;
+        expect(tasks).toHaveLength(8);
+
+        const taskResponse = await api.get('/api/tasks/RAND-4');
+        const task = taskResponse.body;
+        expect(task.linkedTasks).toHaveLength(0);
+    });
+
+    it("LINK RELATED TASKS - respond with 200 if able to successfully link all tasks", async () => {
+        const linkedTasks = [
+            'TEST-3',
+            'RAND-2'
+        ];
+        const response = await api.patch('/api/tasks/RAND-4/link')
+            .set('Authorization', bearerToken)
+            .send({ linkedTasks });
+        
+        expect(response.statusCode).toEqual(200);
+
+        const taskResponse = await api.get('/api/tasks/RAND-4');
+        const task = taskResponse.body;
+        expect(task.linkedTasks).toHaveLength(linkedTasks.length);
+    });
 });
 
 describe('Projects Endpoint', () => {

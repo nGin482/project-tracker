@@ -194,13 +194,16 @@ app.patch('/api/tasks/:taskID/link', async (request, response) => {
 
     const linkedTasks = await Task.find({taskID: {$in: request.body.linkedTasks}});
     const linkedTasksChecked = linkedTasks.filter(linkTask => linkTask._id);
-    if (linkedTasksChecked.length > 0) {
+    if (linkedTasksChecked.length === request.body.linkedTasks.length) {
         taskBeingLinked.linkedTasks = taskBeingLinked.linkedTasks.concat(linkedTasksChecked);
         taskBeingLinked.save();
         return response.status(200).json({taskBeingLinked, linkedTasks});
     }
-    else {
+    else if (linkedTasksChecked.length === 0) {
         return response.status(404).send('The server cannot find the tasks to link');
+    }
+    else {
+        return response.status(404).send('The server cannot find all the tasks to link');
    }        
 })
 
