@@ -165,45 +165,43 @@ app.patch('/api/tasks/:taskID', async (request, response) => {
 })
 
 app.patch('/api/tasks/:taskID/link', async (request, response) => {
+    if (!request.headers.authorization) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
     const { authorization } = request.headers;
-    if (!authorization) {
-        response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to link these tasks');
+    const token = Utils.checkToken(authorization);
+    let decodedToken = undefined;
+    try {
+        decodedToken = jwt.verify(token, process.env.SECRET);
+    }
+    catch(err) {
+        decodedToken = {username: undefined};
+    }
+    if (!token || !decodedToken.username) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
+
+    if (!request.body.linkedTasks || lodash.isEmpty(request.body.linkedTasks)) {
+        return response.status(400).send('The request was sent without data. Please ensure that tasks are selected to be linked');
+    }
+
+    const { taskID } = request.params;
+    const taskBeingLinked = await Task.findOne({taskID: taskID});
+    
+    if (!taskBeingLinked || lodash.isEmpty(taskBeingLinked)) {
+        return response.status(404).send('The server cannot link these tasks together as the task being linked does not exist');
+    }
+
+    const linkedTasks = await Task.find({taskID: {$in: request.body.linkedTasks}});
+    const linkedTasksChecked = linkedTasks.filter(linkTask => linkTask._id);
+    if (linkedTasksChecked.length > 0) {
+        taskBeingLinked.linkedTasks = taskBeingLinked.linkedTasks.concat(linkedTasksChecked);
+        taskBeingLinked.save();
+        return response.status(200).json({taskBeingLinked, linkedTasks});
     }
     else {
-        const token = jwt.verify(Utils.checkToken(authorization), process.env.SECRET);
-        if (!token && !token.username) {
-            response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to link these tasks');
-        }
-        else {
-            if (request.body.linkedTasks) {
-                const { taskID } = request.params;
-                const taskBeingLinked = await Task.findOne({taskID: taskID});
-                const linkedTasks = await Task.find({taskID: {$in: request.body.linkedTasks}});
-                const linkedTasksChecked = linkedTasks.filter(linkTask => linkTask._id);
-                if (taskBeingLinked && linkedTasksChecked.length > 0) {
-                    if (taskBeingLinked.linkedTasks) {
-                        taskBeingLinked.linkedTasks = taskBeingLinked.linkedTasks.concat(linkedTasksChecked);
-                        taskBeingLinked.save();
-                        response.status(200).json({taskBeingLinked, linkedTasks});
-                    }
-                }
-                else {
-                    if (!taskBeingLinked && linkedTasksChecked.length > 0) {
-                        response.status(404).send('The server cannot link these tasks together as the task being linked does not exist');
-                    }
-                    else if (taskBeingLinked && linkedTasksChecked.length === 0) {
-                        response.status(404).send('The server cannot link these tasks together as there are no tasks to link');
-                    }
-                    else {
-                        response.status(404).send('Unable to link these tasks together as they both do not exist');
-                    }
-                }
-            }
-            else {
-                response.status(400).send('The request was sent without data. Please ensure that tasks are selected to be linked')
-            }
-        } 
-    }
+        return response.status(404).send('The server cannot find the tasks to link');
+   }        
 })
 
 app.delete('/api/tasks/:taskID', async (request, response) => {
