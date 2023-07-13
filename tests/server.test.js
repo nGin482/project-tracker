@@ -6,27 +6,24 @@ const app = require("../server/server");
 const Project = require("../server/models/ProjectSchema");
 const Task = require("../server/models/TaskSchema");
 const User = require("../server/models/UserSchema");
+const {
+    newTask,
+    newTaskWithRelated,
+    updatedTask,
+    update,
+    linkedTasksDefault,
+    linkedTasksBothNotFound,
+    linkedTasksOneNotFound,
+    newProject,
+    loginDetailsAlreadyExist,
+    loginDetailsNew,
+    loginDetailsFailedUser,
+    loginDetailsFailedPassword,
+    loginDetailsSuccess,
+    bearerToken,
+} = require("./testUtils");
 
 const api = supertest(app);
-const bearerToken = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Ik5hdGFsaWUtVGVzdCIsImlhdCI6MTY4ODg3Mzk0OH0.qgnrxTvvhIa13LH2AwNX_lUJD1R5PAwDNRV5Io9deOw'
-const newTask = {
-    title: 'Task for testing',
-    description: 'A task created specifically for testing',
-    type: 'task',
-    status: 'Backlog',
-    project: 'Test Project',
-};
-const newTaskWithRelated = {
-    title: 'Task for testing',
-    description: 'A task created specifically for testing',
-    type: 'task',
-    status: 'Backlog',
-    project: 'Test Project',
-    linkedTasks: [
-        'RAND-2',
-        'RAND-4'
-    ]
-};
 
 beforeAll(async () => {
     const rawData = fs.readFileSync("tests/test_data.json");
@@ -164,14 +161,6 @@ describe('Tasks Endpoint', () => {
     });
 
     it('should respond with 401 if updating task with invalid auth', async () => {
-        const updatedTask = {
-            title: 'Updated Task for testing',
-            description: 'A task that is updated to perform some testing',
-            type: 'task',
-            status: 'Backlog',
-            project: 'Test Project',
-        };
-        
         const response = await api.put('/api/tasks/RAND-1')
             .set('Authorization', 'invalid.token')
             .send(updatedTask);
@@ -189,13 +178,6 @@ describe('Tasks Endpoint', () => {
     });
 
     it('should respond with 404 if task does not exist to update', async () => {
-        const updatedTask = {
-            title: 'Updated Task for testing',
-            description: 'A task that is updated to perform some testing',
-            type: 'task',
-            status: 'Backlog',
-            project: 'Test Project',
-        };
         const response = await api.put('/api/tasks/BLANK-1')
             .set('Authorization', bearerToken)
             .send(updatedTask);
@@ -205,13 +187,6 @@ describe('Tasks Endpoint', () => {
     });
 
     it('should respond with 200 when successfully updating task', async () => {
-        const updatedTask = {
-            title: 'Updated Task for testing',
-            description: 'A task that is updated to perform some testing',
-            type: 'task',
-            status: 'Backlog',
-            project: 'Test Project',
-        };
         const response = await api.put('/api/tasks/RAND-3')
             .set('Authorization', bearerToken)
             .send(updatedTask);
@@ -221,10 +196,6 @@ describe('Tasks Endpoint', () => {
     });
 
     it('UPDATE TASK FIELD - respond with 401 if no auth provided', async () => {
-        const update = {
-            field: 'title',
-            value: 'Task for testing something in the Test Project'
-        }
         const response = await api.patch('/api/tasks/TEST-2')
             .send(update);
         
@@ -237,10 +208,6 @@ describe('Tasks Endpoint', () => {
     });
 
     it('UPDATE TASK FIELD - respond with 401 if invalid auth provided', async () => {
-        const update = {
-            field: 'title',
-            value: 'Task for testing something in the Test Project'
-        }
         const response = await api.patch('/api/tasks/TEST-2')
             .set('Authorization', 'invalid.token')
             .send(update);
@@ -254,10 +221,6 @@ describe('Tasks Endpoint', () => {
     });
 
     it('UPDATE TASK FIELD - respond with 404 if unable to find task to update', async () => {
-        const update = {
-            field: 'title',
-            value: 'Task for testing something in the Test Project'
-        }
         const response = await api.patch('/api/tasks/TESTING-2')
             .set('Authorization', bearerToken)
             .send(update);
@@ -271,10 +234,6 @@ describe('Tasks Endpoint', () => {
     });
 
     it('UPDATE TASK FIELD - successfully update', async () => {
-        const update = {
-            field: 'title',
-            value: 'Task for testing something in the Test Project'
-        }
         const response = await api.patch('/api/tasks/TEST-2')
             .set('Authorization', bearerToken)
             .send(update);
@@ -287,12 +246,8 @@ describe('Tasks Endpoint', () => {
     });
 
     it('LINK RELATED TASKS - respond with 401 if no auth provided', async () => {
-        const linkedTasks = [
-            'TEST-1',
-            'RAND-2'
-        ];
         const response = await api.patch('/api/tasks/RAND-4/link')
-            .send({ linkedTasks });
+            .send({ linkedTasks: linkedTasksDefault });
         
         expect(response.statusCode).toEqual(401);
         expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to update this task');
@@ -303,13 +258,9 @@ describe('Tasks Endpoint', () => {
     });
 
     it('LINK RELATED TASKS - respond with 401 if invalid auth provided', async () => {
-        const linkedTasks = [
-            'TEST-1',
-            'RAND-2'
-        ];
         const response = await api.patch('/api/tasks/RAND-4/link')
             .set('Authorization', 'Bearer invalid.token')
-            .send({ linkedTasks });
+            .send({ linkedTasks: linkedTasksDefault });
         
         expect(response.statusCode).toEqual(401);
         expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to update this task');
@@ -351,13 +302,9 @@ describe('Tasks Endpoint', () => {
     });
 
     it('LINK RELATED TASKS - respond with 404 if the task being linked is not found', async () => {
-        const linkedTasks = [
-            'TEST-1',
-            'RAND-2'
-        ];
         const response = await api.patch('/api/tasks/RAND-52/link')
             .set('Authorization', bearerToken)
-            .send({ linkedTasks });
+            .send({ linkedTasks: linkedTasksDefault });
         
         expect(response.statusCode).toEqual(404);
         expect(response.text).toEqual('The server cannot link these tasks together as the task being linked does not exist');
@@ -368,30 +315,22 @@ describe('Tasks Endpoint', () => {
     });
 
     it('LINK RELATED TASKS - respond with 404 if none of the task(s) to link can be found', async () => {
-        const linkedTasks = [
-            'TEST-57',
-            'RAND-58'
-        ];
         const response = await api.patch('/api/tasks/RAND-4/link')
             .set('Authorization', bearerToken)
-            .send({ linkedTasks });
+            .send({ linkedTasks: linkedTasksBothNotFound });
         
         expect(response.statusCode).toEqual(404);
         expect(response.text).toEqual('The server cannot find the tasks to link');
 
-        const taskResponse = await api.get('/api/tasks');
-        const tasks = taskResponse.body;
-        expect(tasks).toHaveLength(8);
+        const taskResponse = await api.get('/api/tasks/RAND-4');
+        const task = taskResponse.body;
+        expect(task.linkedTasks).toHaveLength(0);
     });
 
     it("LINK RELATED TASKS - respond with 404 if one or more of the task(s) to link can't be found", async () => {
-        const linkedTasks = [
-            'TEST-3',
-            'RAND-58'
-        ];
         const response = await api.patch('/api/tasks/RAND-4/link')
             .set('Authorization', bearerToken)
-            .send({ linkedTasks });
+            .send({ linkedTasks: linkedTasksOneNotFound, });
         
         expect(response.statusCode).toEqual(404);
         expect(response.text).toEqual('The server cannot find all the tasks to link');
@@ -406,19 +345,15 @@ describe('Tasks Endpoint', () => {
     });
 
     it("LINK RELATED TASKS - respond with 200 if able to successfully link all tasks", async () => {
-        const linkedTasks = [
-            'TEST-3',
-            'RAND-2'
-        ];
         const response = await api.patch('/api/tasks/RAND-4/link')
             .set('Authorization', bearerToken)
-            .send({ linkedTasks });
+            .send({ linkedTasks: linkedTasksDefault });
         
         expect(response.statusCode).toEqual(200);
 
         const taskResponse = await api.get('/api/tasks/RAND-4');
         const task = taskResponse.body;
-        expect(task.linkedTasks).toHaveLength(linkedTasks.length);
+        expect(task.linkedTasks).toHaveLength(linkedTasksDefault.length);
     });
 
     it("DELETE TASK - respond with 401 if no auth provided", async () => {
@@ -481,10 +416,6 @@ describe('Projects Endpoint', () => {
     });
 
     it('CREATE PROJECT - should respond with 401 if no auth provided', async () => {
-        const newProject = {
-            projectCode: 'THIP',
-            projectName: 'Third Project'
-        }
         const response = await api.post('/api/projects')
             .send({ newProject });
         
@@ -496,10 +427,6 @@ describe('Projects Endpoint', () => {
     });
 
     it('CREATE PROJECT - should respond with 401 if invalid auth provided', async () => {
-        const newProject = {
-            projectCode: 'THIP',
-            projectName: 'Third Project'
-        }
         const response = await api.post('/api/projects')
             .set('Authorization', 'Bearer invalid.token')
             .send({ newProject });
@@ -523,10 +450,6 @@ describe('Projects Endpoint', () => {
     });
 
     it('CREATE PROJECT - should respond with 200 if successfully creating a project', async () => {
-        const newProject = {
-            projectCode: 'THIP',
-            projectName: 'Third Project'
-        }
         const response = await api.post('/api/projects')
             .set('Authorization', bearerToken)
             .send({ newProject });
@@ -558,63 +481,42 @@ describe('Users Endpoint', () => {
 
 describe('Login/Register', () => {
     it('REGISTER - should respond with 409 if username already taken', async () => {
-        const loginDetails = {
-            username: 'Natalie-Test',
-            password: 'Randompassword'
-        }
         const response = await api.post('/api/register')
-            .send({ ...loginDetails });
+            .send({ ...loginDetailsAlreadyExist });
 
         expect(response.statusCode).toEqual(409);
         expect(response.text).toEqual('The username is already in use');
     });
 
     it('REGISTER - should respond with 200 on successful registration', async () => {
-        const loginDetails = {
-            username: 'New Account',
-            password: 'Randompassword',
-            email: 'random.email@gmail.com'
-        }
         const response = await api.post('/api/register')
-            .send({ ...loginDetails });
+            .send({ ...loginDetailsNew });
 
         expect(response.statusCode).toEqual(200);
 
         const userResponse = await api.get('/api/users/New account');
-        expect(userResponse.body.password).not.toEqual(loginDetails.password);
+        expect(userResponse.body.password).not.toEqual(loginDetailsNew.password);
     });
 
     it('LOGIN - should respond with 401 if user not found', async () => {
-        const loginDetails = {
-            username: 'Random Account',
-            password: 'Randompassword'
-        }
         const response = await api.post('/api/login')
-            .send({ ...loginDetails });
+            .send({ ...loginDetailsFailedUser });
 
         expect(response.statusCode).toEqual(401);
         expect(response.text).toEqual('The username or password is incorrect');
     });
 
     it('LOGIN - should respond with 401 if password is incorrect', async () => {
-        const loginDetails = {
-            username: 'New Account',
-            password: 'Randompasswod'
-        }
         const response = await api.post('/api/login')
-            .send({ ...loginDetails });
+            .send({ ...loginDetailsFailedPassword });
 
         expect(response.statusCode).toEqual(401);
         expect(response.text).toEqual('The username or password is incorrect');
     });
 
     it('LOGIN - should respond with 200 on successful login', async () => {
-        const loginDetails = {
-            username: 'New Account',
-            password: 'Randompassword'
-        }
         const response = await api.post('/api/login')
-            .send({ ...loginDetails });
+            .send({ ...loginDetailsSuccess });
 
         expect(response.statusCode).toEqual(200);
         expect(response.body).toHaveProperty('username');
