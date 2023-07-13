@@ -420,6 +420,57 @@ describe('Tasks Endpoint', () => {
         const task = taskResponse.body;
         expect(task.linkedTasks).toHaveLength(linkedTasks.length);
     });
+
+    it("DELETE TASK - respond with 401 if no auth provided", async () => {
+        const response = await api.delete('/api/tasks/RAND-4');
+        
+        expect(response.statusCode).toEqual(401);
+        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to update this task');
+
+        const taskResponse = await api.get('/api/tasks/RAND-4');
+        expect(taskResponse.body).toBeDefined();
+    });
+
+    it("DELETE TASK - respond with 401 if invalid auth provided", async () => {
+        const response = await api.delete('/api/tasks/RAND-4')
+            .set('Authorization', 'Bearer invalid.token');
+        
+        expect(response.statusCode).toEqual(401);
+        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to update this task');
+
+        const taskResponse = await api.get('/api/tasks/RAND-4');
+        expect(taskResponse.body).toBeDefined();
+    });
+
+    it("DELETE TASK - respond with 400 if no task provided to delete", async () => {
+        const response = await api.delete('/api/tasks/')
+            .set('Authorization', bearerToken);
+        
+        expect(response.statusCode).toEqual(404);
+
+        const taskResponse = await api.get('/api/tasks/RAND-4');
+        expect(taskResponse.body).toBeDefined();
+    });
+
+    it("DELETE TASK - respond with 404 if can't find the task to delete", async () => {
+        const response = await api.delete('/api/tasks/RAND-58')
+            .set('Authorization', bearerToken);
+        
+        expect(response.statusCode).toEqual(404);
+
+        const taskResponse = await api.get('/api/tasks');
+        expect(taskResponse.body).toHaveLength(8);
+    });
+
+    it("DELETE TASK - respond with 200 if successfully deleting task", async () => {
+        const response = await api.delete('/api/tasks/RAND-4')
+            .set('Authorization', bearerToken);
+        
+        expect(response.statusCode).toEqual(200);
+
+        const taskResponse = await api.get('/api/tasks/RAND-4');
+        expect(taskResponse.statusCode).toEqual(404);
+    });
 });
 
 describe('Projects Endpoint', () => {

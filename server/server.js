@@ -208,21 +208,29 @@ app.patch('/api/tasks/:taskID/link', async (request, response) => {
 })
 
 app.delete('/api/tasks/:taskID', async (request, response) => {
+    if (!request.headers.authorization) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
     const { authorization } = request.headers;
-    if (!authorization) {
-        response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to link these tasks');
+    const token = Utils.checkToken(authorization);
+    let decodedToken = undefined;
+    try {
+        decodedToken = jwt.verify(token, process.env.SECRET);
     }
-    else {
-        const token = jwt.verify(Utils.checkToken(authorization), process.env.SECRET);
-        if (!token && !token.username) {
-            response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to link these tasks');
-        }
-        else {
-            const { taskID } = request.params;
-            await Task.findOneAndDelete({taskID: taskID});
-            response.status(200).send('The task was successfully deleted');
-        }
+    catch(err) {
+        decodedToken = {username: undefined};
     }
+    if (!token || !decodedToken.username) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
+    
+    const { taskID } = request.params;
+    const taskExists = await Task.exists({taskID: taskID});
+    if (!taskExists) {
+        return response.status(404).send('Unable to find the task to delete');
+    }
+    await Task.findOneAndDelete({taskID: taskID});
+    response.status(200).send('The task was successfully deleted');
 })
 
 app.get('/api/projects', async (request, response) => {
