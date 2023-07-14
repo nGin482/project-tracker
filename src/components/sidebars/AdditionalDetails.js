@@ -14,7 +14,7 @@ const AdditionalDetails = props => {
         <Sider width={width} className="additional-details">
             {showHeader && <h4>Task Details</h4>}
             <Space direction="vertical" size="small">
-                <StatusTag status={status} taskID={taskDetails.taskID} showDescription={true}/>
+                <StatusTag project={project} status={status} taskID={taskDetails.taskID} showDescription={true}/>
                 <span className="project">Project: <Tag color="blue-inverse">{project}</Tag></span>
                 <span className="created">Created: <Tag color="#e57200">{created}</Tag></span>
                 <span className="reporter">Reporter: <Tag>{reporter}</Tag></span>
