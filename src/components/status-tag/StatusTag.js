@@ -5,7 +5,7 @@ import useTaskStatus from "../../hooks/useTaskStatus";
 
 
 const StatusTag = props => {
-    const { status, taskID, showDescription } = props;
+    const { status, project, taskID, showDescription } = props;
     const [colour, setColour] = useState('#A0A0A0');
     const { taskStatus, changeStatus } = useTaskStatus(status);
     const [error, setError] = useState(false);
@@ -55,7 +55,7 @@ const StatusTag = props => {
     }, [taskStatus]);
 
     const onClick = event => {
-        changeStatus(taskID, event.domEvent.target.innerText).catch(err => {
+        changeStatus(project, taskID, event.domEvent.target.innerText).catch(err => {
             setError(true);
             if (err.response.data) {
                 setErrorMessage(err.response.data);

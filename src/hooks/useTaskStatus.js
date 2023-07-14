@@ -9,14 +9,13 @@ const useTaskStatus = status => {
     const { setProjects } = useContext(ProjectContext);
     const { user } = useContext(UserContext);
 
-    const changeStatus = (taskID, newStatus) => {
+    const changeStatus = (taskProject, taskID, newStatus) => {
         return updateTaskDetail(taskID, {field: 'status', value: newStatus}, user.token).then(() => {
             setTaskStatus(newStatus);
             setProjects(projects => {
-                projects.forEach(project => {
-                    const updateTask = project.tasks.find(task => task.taskID === taskID);
-                    updateTask.status = newStatus;
-                })
+                const project = projects.find(proj => proj.projectName === taskProject);
+                const updateTask = project.tasks.find(task => task.taskID === taskID);
+                updateTask.status = newStatus;
                 return projects;
             })
             return Promise.resolve();
