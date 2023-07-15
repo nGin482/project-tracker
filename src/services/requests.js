@@ -37,6 +37,9 @@ const getProjects = () => {
 const createProject = (project, token) => {
     return axios.post(`${baseURL}projects`, project, authHeader(token)).then(response => response.data);
 }
+const deleteProject = (project, token) => {
+    return axios.delete(`${baseURL}projects/${project}`, authHeader(token)).then(response => response.data);
+}
 
 const register = newUser => {
     return axios.post(`${baseURL}register`, newUser).then(response => response.data)
@@ -60,6 +63,7 @@ export {
     deleteTask,
     getProjects,
     createProject,
+    deleteProject,
     register,
     login,
     fetchUser
