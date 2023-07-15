@@ -1,13 +1,18 @@
 import {useState, useEffect, useContext} from "react";
-import { Button, Drawer, Input, List, Pagination } from "antd";
+import { Button, Drawer, Input, List, Modal, Pagination } from "antd";
 
 import TaskCard from '../components/task-card/TaskCard';
 import ProjectContext from "../contexts/ProjectContext";
+import UserContext from "../contexts/UserContext";
 import Navbar from "../components/navbar/Navbar";
+import useProjects from "../hooks/useProjects";
+import { deleteProject } from "../services/requests";
 
 
 const IndexPage = props => {
     const { projects, projectViewed, setProjectViewed } = useContext(ProjectContext);
+    const { user } = useContext(UserContext);
+    const { deleteProjectState } = useProjects();
 
     const [tasksDisplayed, setTasksDisplayed] = useState([]);
     const [showProjects, setShowProjects] = useState(false);
@@ -15,6 +20,8 @@ const IndexPage = props => {
     const [numPerPage, setNumPerPage] = useState(10);
     const [searchResults, setSearchResults] = useState(projects);
     const [search, setSearch] = useState('');
+    const [projectDeletedModal, setProjectDeletedModal] = useState(false);
+    const [projectDeletedMessage, setProjectDeletedMessage] = useState('');
 
     useEffect(() => {
         if (search !== '') {
@@ -54,6 +61,18 @@ const IndexPage = props => {
     const switchProjectViewed = item => {
         setProjectViewed(item);
         setShowProjects(false);
+    };
+
+    const handleDeleteProject = project => {
+        deleteProject(project, user.token).then(data => {
+            setProjectDeletedModal(true);
+            setProjectDeletedMessage(data);
+            deleteProjectState(project);
+        })
+        .catch(err => {
+            setProjectDeletedModal(true);
+            setProjectDeletedMessage(err?.response.data ? err.response.data : err);
+        });
     }
 
     return  (
@@ -80,6 +99,21 @@ const IndexPage = props => {
                 <div className="project-controls">
                     <Button onClick={() => setShowProjects(!showProjects)}>Find Project</Button>
                     <Button onClick={() => setProjectViewed('All')}>View all Tasks</Button>
+                    {projects.map(project => (
+                        <Button
+                            onClick={() => handleDeleteProject(project.projectName)}
+                            key={`project-${project.projectName}`}
+                        >
+                            Delete {project.projectName}
+                        </Button>
+                    ))}
+                    <Modal
+                        open={projectDeletedModal}
+                        onOk={() => setProjectDeletedModal(false)}
+                        onCancel={() => setProjectDeletedModal(false)}  
+                    >
+                        {projectDeletedMessage}
+                    </Modal>
                     <Pagination
                         total={tasksDisplayed.length}
                         defaultCurrent={1}
