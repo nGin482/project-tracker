@@ -97,19 +97,6 @@ const TaskCard = props => {
                 taskDetails={task}
                 width={200}    
             />
-
-            {comments && comments.length > 0 &&
-                <>
-                    <Divider />
-                    <ul>
-                        {comments.map((comment, i) => (
-                            <li key={i}>
-                                <p>{comment}</p>
-                            </li>    
-                        ))}
-                    </ul>
-                </>
-            }
         </Card>
     );
 };
