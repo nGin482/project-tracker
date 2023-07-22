@@ -24,9 +24,8 @@ const taskSchema = new Schema({
     }],
     comments: [
         {
-            comment: String,
-            commenter: String,
-            date: Date
+            type: Schema.Types.ObjectId,
+            ref: 'Comment'
         }
     ]
 });
