@@ -10,6 +10,7 @@ const mongoConnection = require("./mongo");
 const Task = require("./models/TaskSchema");
 const User = require("./models/UserSchema");
 const Project = require("./models/projectSchema");
+const Comment = require("./models/CommentsSchema");
 
 const app = express();
 
@@ -34,7 +35,16 @@ app.get('/api/tasks', (request, response) => {
 app.get('/api/tasks/:taskID', async (request, response) => {
     const { taskID } = request.params;
 
-    const task = await Task.findOne({taskID: taskID}).populate('linkedTasks').exec();
+    const task = await Task.findOne({taskID: taskID})
+        .populate('linkedTasks')
+        .populate({
+            path: 'comments',
+            populate: {
+                path: 'commenter',
+                select: 'username'
+            }
+        })
+        .exec();
 
     if (task) {
         response.status(200).json(task)
@@ -186,6 +196,47 @@ app.patch('/api/tasks/:taskID/link', async (request, response) => {
             }
         } 
     }
+})
+
+app.put('/api/tasks/:taskID/comment', async (request, response) => {
+    if (!request.headers.authorization) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
+    const { authorization } = request.headers;
+    const token = Utils.checkToken(authorization);
+    let decodedToken = undefined;
+    try {
+        decodedToken = jwt.verify(token, process.env.SECRET);
+    }
+    catch(err) {
+        decodedToken = {username: undefined};
+    }
+    if (!token || !decodedToken.username) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
+
+    const { taskID } = request.params;
+    const task = await Task.findOne({taskID: taskID});
+    if (!task) {
+        return response.status(404).send('The server is unable to find the task to comment on');
+    }
+
+    const comment = new Comment({
+        ...request.body,
+        commenter: decodedToken.id,
+        task: task._id
+    });
+    const savedComment = await comment.save();
+
+    task.comments = task.comments.concat(savedComment._id);
+    await task.save();
+
+    // add to user's comments
+    const user = await User.findOne({username: decodedToken.username});
+    user.comments = user.comments.concat(savedComment._id);
+    await user.save();
+
+    return response.status(201).json(task);
 })
 
 app.delete('/api/tasks/:taskID', async (request, response) => {
