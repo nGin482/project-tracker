@@ -15,6 +15,7 @@ import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { isEmpty, omit } from "lodash";
 
+import CommentsDisplay from "../components/comments/CommentsDisplay";
 import AdditionalDetails from "../components/sidebars/AdditionalDetails";
 import LinkTasks from "../components/link-tasks/LinkTasks";
 import StatusTag from "../components/status-tag/StatusTag";
@@ -90,7 +91,7 @@ const TaskPage = () => {
         else {
             setSearchResults(tasksByProject);
         }
-    }, [search]);
+    }, [search, tasksByProject]);
 
     useEffect(() => {
         console.log(task)
@@ -284,17 +285,10 @@ const TaskPage = () => {
                                 }}
                             />
                             <Button onClick={addComment}>Comment</Button>
-                            {task.comments && task.comments.length > 0 &&
-                                <>
-                                    <h4>Comments</h4>
-                                    {task.comments.map((comment, i) => (
-                                        <div className="comment" key={`task-${task.taskID}_comment-${i}`}>
-                                            <span className="commenter">{comment.commenter?.username}</span>
-                                            <span className="comment-date">{comment.commentDate}</span>
-                                            <div dangerouslySetInnerHTML={{__html: comment.content}} />
-                                        </div>    
-                                    ))}
-                                </>
+                            {
+                                task.comments &&
+                                task.comments.length > 0 &&
+                                <CommentsDisplay comments={task.comments} taskID={taskID} />
                             }
                         </div>
                         <AdditionalDetails
