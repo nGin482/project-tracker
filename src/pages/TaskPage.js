@@ -23,7 +23,7 @@ import ErrorPage from "./ErrorPage";
 import ErrorsContext from "../contexts/ErrorsContext";
 import UserContext from "../contexts/UserContext";
 import useProjects from "../hooks/useProjects";
-import { getTask, getTasksByProject, updateTask, deleteTask } from "../services/requests";
+import { getTask, getTasksByProject, updateTask, commentTask, deleteTask } from "../services/requests";
 import "./styles/TaskPage.css";
 
 
@@ -50,7 +50,10 @@ const TaskPage = () => {
 
     // Edit Task
     const [editingTask, setEditingTask] = useState(false);
-    const [updatedTask, setUpdatedTask] = useState({})
+    const [updatedTask, setUpdatedTask] = useState({});
+    
+    // Comment
+    const [comment, setComment] = useState('');
     
     // Misc
     const [errors, setErrors] = useState(false);
@@ -108,16 +111,28 @@ const TaskPage = () => {
         updateTask(task.taskID, finalTask, user.token).then(data => {
             updateTaskState(task.project, task.taskID, data);
             setEditingTask(false);
-            setTask(data)
+            setTask(data);
         }).catch(err => {
-            if (err?.response.data) {
-                messageApi.error(err.response.data);
-            }
-            else {
-                messageApi.error(err);
-            }
+            const error = err?.response.data ? err.response.data : err;
+            messageApi.error(error);
         });
-    }
+    };
+
+    const addComment = () => {
+        if(comment === '') {
+            messageApi.error('Please add a comment before submitting.');
+        }
+        else {
+            commentTask(task.taskID, comment, user.token).then(data => {
+                updateTaskState(task.project, task.taskID, data);
+                setTask(data);
+                setComment('');
+            })
+            .catch(err => {
+                err.response ? console.log(err.response.data) : console.log(err)
+            })
+        }
+    };
 
     const handleDeleteTask = () => {
         deleteTask(task.taskID, user.token).then(data => {
@@ -261,6 +276,14 @@ const TaskPage = () => {
                                     )}
                                 </Content>
                             </div>
+                            <CKEditor
+                                editor={ClassicEditor}
+                                onChange={(event, editor) => {
+                                    const data = editor.getData();
+                                    setComment(data);
+                                }}
+                            />
+                            <Button onClick={addComment}>Comment</Button>
                             {task.comments && task.comments.length > 0 &&
                                 <>
                                     <h4>Comments</h4>
@@ -268,7 +291,7 @@ const TaskPage = () => {
                                         <div className="comment" key={`task-${task.taskID}_comment-${i}`}>
                                             <span className="commenter">{comment.commenter?.username}</span>
                                             <span className="comment-date">{comment.commentDate}</span>
-                                            <p>{comment.content}</p>
+                                            <div dangerouslySetInnerHTML={{__html: comment.content}} />
                                         </div>    
                                     ))}
                                 </>
