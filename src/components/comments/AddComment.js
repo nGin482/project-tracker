@@ -9,6 +9,7 @@ import { commentTask } from "../../services/requests";
 const AddComment = props => {
     const { messageApi, setTask, task, user } = props;
     const [comment, setComment] = useState('');
+    const [makingComment, setMakingComment] = useState(false);
     
     const { updateTaskState } = useProjects();
 
@@ -29,16 +30,25 @@ const AddComment = props => {
     };
 
     return (
-        <>
-            <CKEditor
-                editor={ClassicEditor}
-                onChange={(event, editor) => {
-                    const data = editor.getData();
-                    setComment(data);
-                }}
-            />
-            <Button onClick={addComment}>Comment</Button>
-        </>
+        <div id="add-comment-wrapper">
+            {makingComment ? (
+                <>
+                    <CKEditor
+                        editor={ClassicEditor}
+                        onChange={(event, editor) => {
+                            const data = editor.getData();
+                            setComment(data);
+                        }}
+                    />
+                    <Button id="add-comment" onClick={addComment}>Comment</Button>
+                    <Button id="cancel-comment" onClick={() => setMakingComment(false)}>Cancel</Button>
+                </>
+            ) : (
+                <div id="comment-placeholder" onClick={() => setMakingComment(true)}>
+                    <span>Add a comment</span>
+                </div>
+            )}
+        </div>
     );
 };
 

@@ -27,6 +27,7 @@ import UserContext from "../contexts/UserContext";
 import useProjects from "../hooks/useProjects";
 import { getTask, getTasksByProject, updateTask, deleteTask } from "../services/requests";
 import "./styles/TaskPage.css";
+import "../components/comments/comments.css";
 
 
 const TaskPage = () => {

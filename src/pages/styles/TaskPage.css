@@ -98,24 +98,3 @@
     float: right;
     margin-top: 13px;
 }
-
-.comment {
-    background-color: #fff;
-    border-radius: 5px;
-    padding: 5px;
-    margin: 10px 10px 10px 0;
-    width: 924px;
-}
-.comment p {
-    margin-left: 20px;
-}
-.comment .comment-date {
-    float: right;
-    margin-right: 7px;
-}
-.comment .commenter {
-    margin-left: 7px;
-}
-.comment-date, .commenter {
-    color: #727272;
-}
