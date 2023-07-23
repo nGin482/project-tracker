@@ -15,6 +15,7 @@ import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { isEmpty, omit } from "lodash";
 
+import AddComment from "../components/comments/AddComment";
 import CommentsDisplay from "../components/comments/CommentsDisplay";
 import AdditionalDetails from "../components/sidebars/AdditionalDetails";
 import LinkTasks from "../components/link-tasks/LinkTasks";
@@ -24,7 +25,7 @@ import ErrorPage from "./ErrorPage";
 import ErrorsContext from "../contexts/ErrorsContext";
 import UserContext from "../contexts/UserContext";
 import useProjects from "../hooks/useProjects";
-import { getTask, getTasksByProject, updateTask, commentTask, deleteTask } from "../services/requests";
+import { getTask, getTasksByProject, updateTask, deleteTask } from "../services/requests";
 import "./styles/TaskPage.css";
 
 
@@ -52,9 +53,6 @@ const TaskPage = () => {
     // Edit Task
     const [editingTask, setEditingTask] = useState(false);
     const [updatedTask, setUpdatedTask] = useState({});
-    
-    // Comment
-    const [comment, setComment] = useState('');
     
     // Misc
     const [errors, setErrors] = useState(false);
@@ -117,22 +115,6 @@ const TaskPage = () => {
             const error = err?.response.data ? err.response.data : err;
             messageApi.error(error);
         });
-    };
-
-    const addComment = () => {
-        if(comment === '') {
-            messageApi.error('Please add a comment before submitting.');
-        }
-        else {
-            commentTask(task.taskID, comment, user.token).then(data => {
-                updateTaskState(task.project, task.taskID, data);
-                setTask(data);
-                setComment('');
-            })
-            .catch(err => {
-                err.response ? console.log(err.response.data) : console.log(err)
-            })
-        }
     };
 
     const handleDeleteTask = () => {
@@ -277,14 +259,12 @@ const TaskPage = () => {
                                     )}
                                 </Content>
                             </div>
-                            <CKEditor
-                                editor={ClassicEditor}
-                                onChange={(event, editor) => {
-                                    const data = editor.getData();
-                                    setComment(data);
-                                }}
+                            <AddComment
+                                messageApi={messageApi}
+                                setTask={setTask}
+                                task={task}
+                                user={user}
                             />
-                            <Button onClick={addComment}>Comment</Button>
                             {
                                 task.comments &&
                                 task.comments.length > 0 &&
