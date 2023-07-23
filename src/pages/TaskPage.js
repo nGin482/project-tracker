@@ -250,6 +250,7 @@ const TaskPage = () => {
                                                         {linkedTask.taskID}: {linkedTask.title}
                                                     </NavLink>
                                                     <StatusTag
+                                                        project={linkedTask.project}
                                                         status={linkedTask.status}
                                                         taskID={linkedTask.taskID}
                                                     />
