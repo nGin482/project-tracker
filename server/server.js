@@ -231,6 +231,15 @@ app.put('/api/tasks/:taskID/comment', async (request, response) => {
     task.comments = task.comments.concat(savedComment._id);
     await task.save();
 
+    await Task.populate(task, 'linkedTasks')
+    await Task.populate(task, {
+        path: 'comments',
+        populate: {
+            path: 'commenter',
+            select: 'username'
+        }
+    });
+
     // add to user's comments
     const user = await User.findOne({username: decodedToken.username});
     user.comments = user.comments.concat(savedComment._id);
