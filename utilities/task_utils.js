@@ -13,9 +13,7 @@ const setTaskID = (projectCode, currentTaskIDs) => {
 }
 
 const setCommentID = currentComments => {
-    console.log(currentComments)
     const latestComment = lodash.last(currentComments);
-    console.log(latestComment)
     const latestCommentID = latestComment.commentID;
     const incrementedID = Number(latestCommentID.slice(latestCommentID.indexOf('-')+1))++;
 
