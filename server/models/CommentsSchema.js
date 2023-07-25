@@ -6,6 +6,10 @@ const Utils = require("../../utilities/utils");
 const { model, Schema} = mongoose;
 
 const commentSchema = new Schema({
+    commentID: {
+        type: String,
+        required: true
+    },
     content: {
         type: String,
         required: true
