@@ -198,7 +198,7 @@ app.patch('/api/tasks/:taskID/link', async (request, response) => {
     }
 })
 
-app.put('/api/tasks/:taskID/comment', async (request, response) => {
+app.post('/api/tasks/:taskID/comment', async (request, response) => {
     if (!request.headers.authorization) {
         return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
     }
@@ -221,7 +221,9 @@ app.put('/api/tasks/:taskID/comment', async (request, response) => {
         return response.status(404).send('The server is unable to find the task to comment on');
     }
 
+    const allComments = await Comment.find({});
     const comment = new Comment({
+        commentID: TaskUtils.setCommentID(allComments),
         ...request.body,
         commenter: decodedToken.id,
         task: task._id
