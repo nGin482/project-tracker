@@ -22,9 +22,11 @@ const AddComment = props => {
                 updateTaskState(task.project, task.taskID, data);
                 setTask(data);
                 setComment('');
+                setMakingComment(false);
             })
             .catch(err => {
-                err.response ? console.log(err.response.data) : console.log(err)
+                const errorMessage = err.response ? err.response.data : err;
+                messageApi.error(errorMessage);
             })
         }
     };
