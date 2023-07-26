@@ -250,6 +250,47 @@ app.post('/api/tasks/:taskID/comment', async (request, response) => {
     return response.status(201).json(task);
 })
 
+app.patch('/api/tasks/:taskID/comment/:commentID', async (request, response) => {
+    if (!request.headers.authorization) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
+    const { authorization } = request.headers;
+    const token = Utils.checkToken(authorization);
+    let decodedToken = undefined;
+    try {
+        decodedToken = jwt.verify(token, process.env.SECRET);
+    }
+    catch(err) {
+        decodedToken = {username: undefined};
+    }
+    if (!token || !decodedToken.username) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
+    
+    const { taskID, commentID} = request.params;
+
+    const task = await Task.findOne({taskID: taskID});
+    if (!task) {
+        return response.status(404).send('The task you were looking for does not exist');
+    }
+    const comment = await Comment.findOne({commentID: commentID});
+    if (!comment) {
+        return response.status(404).send('The comment you were looking for does not exist');
+    }
+    comment.set('content', request.body.content);
+    await comment.save();
+
+    await Task.populate(task, 'linkedTasks')
+    await Task.populate(task, {
+        path: 'comments',
+        populate: {
+            path: 'commenter',
+            select: 'username'
+        }
+    });
+    return response.status(200).json(task);
+})
+
 app.delete('/api/tasks/:taskID', async (request, response) => {
     const { authorization } = request.headers;
     if (!authorization) {
