@@ -31,7 +31,7 @@ const commentTask = (taskID, comment, token) => {
     return axios.post(`${baseURL}tasks/${taskID}/comment`, {content: comment}, authHeader(token)).then(response => response.data);
 }
 const editComment = (taskID, commentID, newContent, token) =>  {
-    return axios.patch(`${baseURL}tasks/${taskID}/comment/${commentID}`, newContent, authHeader(token)).then(response => response.data);
+    return axios.patch(`${baseURL}tasks/${taskID}/comment/${commentID}`, {content: newContent}, authHeader(token)).then(response => response.data);
 }
 const deleteTask = (taskID, token) => {
     return axios.delete(`${baseURL}tasks/${taskID}`, authHeader(token)).then(response => response.data);
