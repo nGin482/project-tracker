@@ -270,7 +270,7 @@ const TaskPage = () => {
                             {
                                 task.comments &&
                                 task.comments.length > 0 &&
-                                <CommentsDisplay comments={task.comments} taskID={taskID} />
+                                <CommentsDisplay comments={task.comments} task={task} setTask={setTask} />
                             }
                         </div>
                         <AdditionalDetails
