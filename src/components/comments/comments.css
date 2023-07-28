@@ -9,6 +9,12 @@
 .comment p {
     margin-left: 20px;
 }
+.comment-content {
+    box-shadow: 2px 2px 2px 2px #727272;
+    border-radius: 5px;
+    padding: 7px;
+    margin-top: 5px;
+}
 .comment .comment-date {
     float: right;
     margin-right: 7px;
@@ -50,4 +56,23 @@
 }
 #comment-placeholder span {
     opacity: 0.8;
+}
+
+.comment-actions {
+    margin-top: 9px;
+}
+.comment-actions:hover {
+    cursor: pointer;
+    opacity: 0.8;
+}
+
+.edit-comment:hover {
+    color: #49bc49;
+}
+
+.delete-comment {
+    margin-left: 15px;
+}
+.delete-comment:hover {
+    color: #f95e5e;
 }

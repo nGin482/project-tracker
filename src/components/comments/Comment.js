@@ -58,7 +58,7 @@ const Comment = ({comment, task, setTask, messageApi}) => {
                     }}
                 />
             ) :
-                <div dangerouslySetInnerHTML={{__html: comment.content}} />
+                <div className="comment-content" dangerouslySetInnerHTML={{__html: comment.content}} />
             }
 
             <div className="comment-actions">
