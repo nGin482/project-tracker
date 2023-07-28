@@ -7,7 +7,7 @@ import UserContext from "../../contexts/UserContext";
 import useProjects from "../../hooks/useProjects";
 import { editComment } from "../../services/requests";
 
-const Comment = ({comment, task, setTask}) => {
+const Comment = ({comment, task, setTask, messageApi}) => {
     const [newCommentContent, setNewCommentContent] = useState('');
     const [editingComment, setEditingComment] = useState(false);
 
@@ -15,16 +15,22 @@ const Comment = ({comment, task, setTask}) => {
     const { updateTaskState } = useProjects();
     
     const editCommentContent = () => {
-        editComment(task.taskID, comment.commentID, newCommentContent, user.token).then(data => {
-            updateTaskState(task.project, task.taskID, data);
-            setTask(data);
-            setEditingComment(false);
-            setNewCommentContent('');
-        })
-        .catch(err => {
-            
-        })
-    }
+        if (newCommentContent === '') {
+            messageApi.error('Please enter a comment before updating.');
+        }
+        else {
+            editComment(task.taskID, comment.commentID, newCommentContent, user.token).then(data => {
+                updateTaskState(task.project, task.taskID, data);
+                setTask(data);
+                setEditingComment(false);
+                setNewCommentContent('');
+            })
+            .catch(err => {
+                const errorMessage = err.response ? err.response.data : err;
+                messageApi.error(errorMessage);
+            });
+        }
+    };
 
     return (
         <div className="comment">
@@ -51,10 +57,10 @@ const Comment = ({comment, task, setTask}) => {
                     </>
                 ) :
                 <>
-                    <span className="edit-comment" onClick={() => setEditingComment(true)}>
+                    <span className="comment-actions edit-comment" onClick={() => setEditingComment(true)}>
                         Edit Comment
                     </span>
-                    <span className="delete-comment">Delete Comment</span>
+                    <span className="comment-actions delete-comment">Delete Comment</span>
                 </>
                 }
             </div>

@@ -1,7 +1,7 @@
 import Comment from "./Comment";
 
 const CommentsDisplay = props => {
-    const { task, setTask } = props;
+    const { task, setTask, messageApi } = props;
     let { comments } = props;
 
     comments = comments.reverse();
@@ -15,6 +15,7 @@ const CommentsDisplay = props => {
                     comment={comment}
                     task={task}
                     setTask={setTask}
+                    messageApi={messageApi}
                 />
             ))}
         </>
