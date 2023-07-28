@@ -291,6 +291,56 @@ app.patch('/api/tasks/:taskID/comment/:commentID', async (request, response) => 
     return response.status(200).json(task);
 })
 
+app.delete('/api/tasks/:taskID/comment/:commentID', async (request, response) => {
+    if (!request.headers.authorization) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
+    const { authorization } = request.headers;
+    const token = Utils.checkToken(authorization);
+    let decodedToken = undefined;
+    try {
+        decodedToken = jwt.verify(token, process.env.SECRET);
+    }
+    catch(err) {
+        decodedToken = {username: undefined};
+    }
+    if (!token || !decodedToken.username) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
+
+    const { taskID, commentID } = request.params;
+
+    const task = await Task.findOne({taskID: taskID});
+    if (!task) {
+        return response.status(404).send('The task you were looking for does not exist');
+    }
+
+    const comment = await Comment.findOne({commentID: commentID});
+    if (!comment) {
+        return response.status(404).send('The comment you were looking for does not exist');
+    }
+
+    const user = await User.findOne({username: decodedToken.username});
+    const updatedUserComments = user.comments.filter(comment => comment.commentID !== commentID);
+    user.set('comments', updatedUserComments);
+    await user.save();
+
+    const updatedTaskComments = task.comments.filter(comment => comment.commentID !== commentID);
+    task.set('comments', updatedTaskComments);
+    await task.save();
+
+    await Comment.findOneAndDelete({commentID: commentID});
+    await Task.populate(task, 'linkedTasks')
+    await Task.populate(task, {
+        path: 'comments',
+        populate: {
+            path: 'commenter',
+            select: 'username'
+        }
+    });
+    return response.status(200).json({message: 'The comment was successfully deleted', task});
+})
+
 app.delete('/api/tasks/:taskID', async (request, response) => {
     const { authorization } = request.headers;
     if (!authorization) {
