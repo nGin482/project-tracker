@@ -30,10 +30,22 @@ const useComments = (task, setTask, setEditingComment) => {
         }
     };
 
+    const removeComment = comment => {
+        deleteComment(task.taskID, comment.commentID, user.token).then(data => {
+            messageApi.success(data.message);
+            updateTaskState(task.project, task.taskID, data.task);
+            setTask(data.task);
+        })
+        .catch(err => {
+            const errorMessage = err.response ? err.response.data : err;
+            messageApi.error(errorMessage);
+        });
+    };
+
     return {
         setNewCommentContent,
-        setEditingComment,
         updateComment,
+        removeComment,
         contextHolder
     };
 };

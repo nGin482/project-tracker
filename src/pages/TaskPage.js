@@ -274,7 +274,6 @@ const TaskPage = () => {
                                     comments={task.comments}
                                     task={task}
                                     setTask={setTask}
-                                    messageApi={messageApi}
                                 />
                             }
                         </div>
