@@ -87,6 +87,11 @@ app.post('/api/tasks', async (request, response) => {
                 newTask.linkedTasks = linkedTasksChecked;
             }
             const taskDoc = new Task(newTask);
+            for (const linkedTaskID of taskDoc.linkedTasks) {
+                const linkedTask = await Task.findById(linkedTaskID);
+                linkedTask.linkedTasks = linkedTask.linkedTasks.concat(taskDoc._id);
+                linkedTask.save();
+            }
             const savedTask = await taskDoc.save();
             
             const user = await User.findOne({username: token.username});
