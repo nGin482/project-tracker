@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const multer = require("multer");
 require("dotenv").config();
 
 const TaskUtils = require("../utilities/task_utils");
@@ -10,6 +11,7 @@ const mongoConnection = require("./mongo");
 const Task = require("./models/TaskSchema");
 const User = require("./models/UserSchema");
 const Project = require("./models/projectSchema");
+const uploadHandle = require("./services/fileUploadService");
 
 const app = express();
 
@@ -254,6 +256,29 @@ app.delete('/api/projects/:project', async (request, response) => {
     await Task.deleteMany({project: project});
     await Project.findOneAndDelete({projectName: project});
     return response.status(200).send('The project was deleted');
+})
+
+app.post('/api/upload-avatar', multer().single('avatar'), async (request, response) => {
+    const file_upload_buffer = request.file.buffer;
+    const fullFileName = request.file.originalname;
+    const filenameWithoutExtension = fullFileName.slice(0, fullFileName.lastIndexOf('.'));
+    const file_type = fullFileName.slice(fullFileName.lastIndexOf('.'));
+
+    if (!uploadHandle.VALID_FILE_TYPES.includes(file_type)) {
+        return response.status(400).send('An invalid file was uploaded')
+    }
+
+    try {
+        const uploadResult = await uploadHandle.fileUpload(file_upload_buffer, filenameWithoutExtension);
+        return response.status(200).send(uploadResult.url);
+    }
+    catch(error) {
+        const responseJSON = {
+            message: 'An error occurred when uploading your image, please try again',
+            error: error.message
+        };
+        return response.status(500).json(responseJSON)
+    }
 })
 
 app.post('/api/register', async (request, response) => {
