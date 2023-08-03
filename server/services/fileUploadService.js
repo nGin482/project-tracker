@@ -29,11 +29,26 @@ const fileUpload = (fileBuffer, filename) => {
             }
         }).end(fileBuffer);
     });    
-}
+};
 
-// function to create folders
+const getPublicIDFromURL = imageURL => {
+    let imageName = imageURL.slice(imageURL.lastIndexOf('/') + 1);
+    imageName = imageName.slice(0, imageName.lastIndexOf('.'));
+    return imageName;
+};
+
+const createFolder = folderName => {
+    return cloudinary.api.create_folder(folderName);
+};
+
+const moveImage = (imageToMove, newDestination) => {
+    return cloudinary.uploader.rename(imageToMove, newDestination);
+}
 
 module.exports = {
     VALID_FILE_TYPES,
-    fileUpload
+    fileUpload,
+    getPublicIDFromURL,
+    createFolder,
+    moveImage
 }

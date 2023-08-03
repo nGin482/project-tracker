@@ -292,7 +292,15 @@ app.post('/api/register', async (request, response) => {
         const user = { username, password: pwHash, email, image };
         const newUser = new User(user);
         newUser.save();
-        response.status(200).json({username, image});
+        try {
+            await uploadHandle.createFolder(`Users/${username}`);
+            const imageName = uploadHandle.getPublicIDFromURL(image);
+            await uploadHandle.moveImage(imageName, `Users/${username}/${imageName}`);
+            response.status(200).json({username, image});
+        }
+        catch(err) {
+            response.status(500).json(err.message);
+        }
     }
 
 })
