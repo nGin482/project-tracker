@@ -283,7 +283,7 @@ app.post('/api/upload-avatar', multer().single('avatar'), async (request, respon
 
 app.post('/api/register', async (request, response) => {
     const { username, password, email, image } = request.body;
-    const checkUser = User.findOne({username: username});
+    const checkUser = await User.findOne({username: username});
     if (checkUser) {
         response.status(409).send("The username is already in use");
     }
