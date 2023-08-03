@@ -4,6 +4,9 @@ const baseURL = 'http://localhost:3001/api/'
 const authHeader = token => {
     return {headers: {"Authorization": `Bearer ${token}`}}
 }
+const formDataHeader = () => {
+    return {headers: {"content-type": "multipart/form-data"}}
+}
 
 
 const getTasks = () => {
@@ -42,13 +45,16 @@ const deleteProject = (project, token) => {
 }
 
 const register = newUser => {
-    return axios.post(`${baseURL}register`, newUser).then(response => response.data)
+    return axios.post(`${baseURL}register`, newUser).then(response => response.data);
 }
 const login = (username, password) => {
-    return axios.post(`${baseURL}login`, {username, password}).then(response => response.data)
+    return axios.post(`${baseURL}login`, {username, password}).then(response => response.data);
 }
 const fetchUser = username => {
-    return axios.get(`${baseURL}users/${username}`).then(response => response.data)
+    return axios.get(`${baseURL}users/${username}`).then(response => response.data);
+}
+const uploadAvatar = file => {
+    return axios.post(`${baseURL}upload-avatar`, file, formDataHeader).then(response => response.data);
 }
 
 
@@ -66,5 +72,6 @@ export {
     deleteProject,
     register,
     login,
-    fetchUser
+    fetchUser,
+    uploadAvatar
 }
