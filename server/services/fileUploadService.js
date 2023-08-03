@@ -5,7 +5,8 @@ const VALID_FILE_TYPES = [
     '.jpg',
     '.gif',
     '.png',
-    '.tiff'
+    '.tiff',
+    '.webp'
 ];
 
 cloudinary.config({ 
@@ -29,6 +30,8 @@ const fileUpload = (fileBuffer, filename) => {
         }).end(fileBuffer);
     });    
 }
+
+// function to create folders
 
 module.exports = {
     VALID_FILE_TYPES,
