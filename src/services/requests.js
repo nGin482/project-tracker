@@ -56,6 +56,9 @@ const fetchUser = username => {
 const uploadAvatar = file => {
     return axios.post(`${baseURL}upload-avatar`, file, formDataHeader).then(response => response.data);
 }
+const uploadTaskImage = (file, token) => {
+    return axios.post(`${baseURL}task-uploads`, file, authHeader(token)).then(response => response.data);
+}
 
 
 export {
@@ -73,5 +76,6 @@ export {
     register,
     login,
     fetchUser,
-    uploadAvatar
+    uploadAvatar,
+    uploadTaskImage
 }
