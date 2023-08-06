@@ -3,6 +3,7 @@ import { Form, Input, Select, Alert, Modal } from "antd";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
+import FileUploadAdapter from "./FileUploadAdapter";
 import { createTask } from "../../services/requests";
 import ProjectContext from "../../contexts/ProjectContext";
 import UserContext from "../../contexts/UserContext";
@@ -106,7 +107,7 @@ const NewTask = (props) => {
     // TODO: might be able to update this to only execute in development
     const renderDescriptionEditor = () => {
         showForm ? setDelayEditorLoad(true) : setDelayEditorLoad(false);
-    }
+    };
 
     return (
         <Modal
@@ -175,6 +176,10 @@ const NewTask = (props) => {
                     {delayEditorLoad ? (
                         <CKEditor
                             editor={ClassicEditor}
+                            onReady={editor => {
+                                editor.plugins.get('FileRepository')
+                                .createUploadAdapter = loader => new FileUploadAdapter(loader, user.token);
+                            }}
                         />
                     ) :
                         <Input.TextArea />
