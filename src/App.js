@@ -1,7 +1,6 @@
 import React, {useState, useEffect } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { CookiesProvider } from "react-cookie";
-import { useCookies } from "react-cookie";
+import { CookiesProvider, useCookies } from "react-cookie";
 
 import IndexPage from "./pages/IndexPage";
 import TaskPage from "./pages/TaskPage";

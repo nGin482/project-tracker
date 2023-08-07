@@ -88,6 +88,11 @@ app.post('/api/tasks', async (request, response) => {
         newTask.linkedTasks = linkedTasksChecked;
     }
     const taskDoc = new Task(newTask);
+    for (const linkedTaskID of taskDoc.linkedTasks) {
+        const linkedTask = await Task.findById(linkedTaskID);
+        linkedTask.linkedTasks = linkedTask.linkedTasks.concat(taskDoc._id);
+        linkedTask.save();
+    }
     const savedTask = await taskDoc.save();
     
     const user = await User.findOne({username: decodedToken.username});
@@ -261,6 +266,33 @@ app.post('/api/projects', async (request, response) => {
     const newProject = new Project({...request.body, creator: token.username});
     const savedProject = await newProject.save();
     return response.status(200).json(savedProject);
+})
+
+app.delete('/api/projects/:project', async (request, response) => {
+    if (!request.headers.authorization) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
+    const { authorization } = request.headers;
+    const token = Utils.checkToken(authorization);
+    let decodedToken = undefined;
+    try {
+        decodedToken = jwt.verify(token, process.env.SECRET);
+    }
+    catch(err) {
+        decodedToken = {username: undefined};
+    }
+    if (!token || !decodedToken.username) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
+
+    const { project } = request.params;
+    const checkProjectExists = await Project.exists({projectName: project});
+    if (!checkProjectExists) {
+        return response.status(404).send('Unable to find this project');
+    }
+    await Task.deleteMany({project: project});
+    await Project.findOneAndDelete({projectName: project});
+    return response.status(200).send('The project was deleted');
 })
 
 app.post('/api/register', async (request, response) => {

@@ -29,12 +29,17 @@ const useProjects = () => {
         });
     };
 
+    const deleteProjectState = projectName => {
+        const updatedProjects = projects.filter(project => project.projectName !== projectName);
+        setProjects(updatedProjects);
+    };
 
     return {
         projects,
         addTask,
         updateTaskState,
-        deleteTaskState
+        deleteTaskState,
+        deleteProjectState
     };
 };
 

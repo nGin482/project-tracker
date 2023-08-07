@@ -52,7 +52,7 @@ const NewTask = (props) => {
                 setErrorMessage('');
             })
             .catch(err => {
-                if (err.response.data) {
+                if (err?.response.data) {
                     setErrorMessage(err.response.data);
                 }
                 else {
@@ -138,7 +138,7 @@ const NewTask = (props) => {
                     ]}
                 >
                     <Select>
-                        <Option value="tv-guide">TV Guide</Option>
+                        <Option value="TV Guide">TV Guide</Option>
                         <Option value="tv-guide-ui">TV Guide UI</Option>
                         <Option value="Project Tracker">Project Tracker</Option>
                         <Option value="read-list">Read List</Option>
