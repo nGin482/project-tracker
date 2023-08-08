@@ -63,10 +63,10 @@ const fetchUser = username => {
     return axios.get(`${baseURL}users/${username}`).then(response => response.data);
 }
 const uploadAvatar = file => {
-    return axios.post(`${baseURL}upload-avatar`, file, formDataHeader).then(response => response.data);
+    return axios.post(`${baseURL}uploads/avatar`, file, formDataHeader).then(response => response.data);
 }
 const uploadTaskImage = (file, token) => {
-    return axios.post(`${baseURL}task-uploads`, file, authHeader(token)).then(response => response.data);
+    return axios.post(`${baseURL}uploads/task-image`, file, authHeader(token)).then(response => response.data);
 }
 
 
