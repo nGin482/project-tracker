@@ -54,10 +54,10 @@ const deleteProject = (project, token) => {
 }
 
 const register = newUser => {
-    return axios.post(`${baseURL}register`, newUser).then(response => response.data);
+    return axios.post(`${baseURL}auth/register`, newUser).then(response => response.data);
 }
 const login = (username, password) => {
-    return axios.post(`${baseURL}login`, {username, password}).then(response => response.data);
+    return axios.post(`${baseURL}auth/login`, {username, password}).then(response => response.data);
 }
 const fetchUser = username => {
     return axios.get(`${baseURL}users/${username}`).then(response => response.data);

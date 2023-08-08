@@ -1,12 +1,11 @@
 const express = require("express");
 const cors = require("cors");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const lodash = require("lodash");
 require("dotenv").config();
 
 const projectsRoutes = require("./routes/projectsRoutes");
+const authRoutes = require("./routes/authRoutes");
 
 const TaskUtils = require("../utilities/task_utils");
 const Utils = require("../utilities/utils");
@@ -29,6 +28,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api/projects', projectsRoutes);
+app.use('/api/auth', authRoutes);
 
 app.get('/', (request, response) => {
     response.send('<h1>Hello World</h1>')
@@ -346,46 +346,46 @@ app.post('/api/task-uploads', multer().single('upload'), async (request, respons
     }
 })
 
-app.post('/api/register', async (request, response) => {
-    const { username, password, email, image } = request.body;
-    const checkUser = await User.findOne({username: username});
-    if (checkUser) {
-        return response.status(409).send("The username is already in use");
-    }
-    else {
-        const pwHash = await bcrypt.hash(password, 14);
-        const user = { username, password: pwHash, email, image };
-        const newUser = new User(user);
-        newUser.save();
-        try {
-            await uploadHandle.createFolder(`Users/${username}`);
-            const imageName = uploadHandle.getPublicIDFromURL(image);
-            await uploadHandle.moveImage(imageName, `Users/${username}/${imageName}`);
-            return response.status(200).json({username, image});
-        }
-        catch(err) {
-            return response.status(500).json(err.message);
-        }
-    }
+// app.post('/api/register', async (request, response) => {
+//     const { username, password, email, image } = request.body;
+//     const checkUser = await User.findOne({username: username});
+//     if (checkUser) {
+//         return response.status(409).send("The username is already in use");
+//     }
+//     else {
+//         const pwHash = await bcrypt.hash(password, 14);
+//         const user = { username, password: pwHash, email, image };
+//         const newUser = new User(user);
+//         newUser.save();
+//         try {
+//             await uploadHandle.createFolder(`Users/${username}`);
+//             const imageName = uploadHandle.getPublicIDFromURL(image);
+//             await uploadHandle.moveImage(imageName, `Users/${username}/${imageName}`);
+//             return response.status(200).json({username, image});
+//         }
+//         catch(err) {
+//             return response.status(500).json(err.message);
+//         }
+//     }
 
-})
+// })
 
-app.post('/api/login', async (request, response) => {
-    const { username, password } = request.body;
-    const user = await User.findOne({username: username}).populate('tasks').exec();
-    if (!user) {
-        return response.status(401).send('The username or password is incorrect');
-    }
-    if (!bcrypt.compareSync(password, user.password)) {
-        return response.status(401).send('The username or password is incorrect');
-    }
-    const userForToken = {
-        username: user.username,
-        id: user._id
-    }
-    const token = jwt.sign(userForToken, process.env.SECRET);
-    return response.status(200).send({username: user.username, email: user.email, avatar: user.image, token});
-})
+// app.post('/api/login', async (request, response) => {
+//     const { username, password } = request.body;
+//     const user = await User.findOne({username: username}).populate('tasks').exec();
+//     if (!user) {
+//         return response.status(401).send('The username or password is incorrect');
+//     }
+//     if (!bcrypt.compareSync(password, user.password)) {
+//         return response.status(401).send('The username or password is incorrect');
+//     }
+//     const userForToken = {
+//         username: user.username,
+//         id: user._id
+//     }
+//     const token = jwt.sign(userForToken, process.env.SECRET);
+//     return response.status(200).send({username: user.username, email: user.email, avatar: user.image, token});
+// })
 
 app.get('/api/users/:username', async (request, response) => {
     const { username } = request.params;
