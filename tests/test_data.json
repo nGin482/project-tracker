@@ -1,0 +1,82 @@
+{
+    "projects": [
+        {
+            "projectCode": "RAND",
+            "projectName": "Random Project"
+        },
+        {
+            "projectCode": "TEST",
+            "projectName": "Test Project"
+        }
+    ],
+    "tasks": [
+        {
+            "taskID": "RAND-1",
+            "title": "Task for testing",
+            "description": "A task created specifically for testing",
+            "type": "task",
+            "status": "Complete",
+            "project": "Random Project",
+            "reporter": "Natalie-Test"
+        },
+        {
+            "taskID": "RAND-2",
+            "title": "Task for testing",
+            "description": "Fix something",
+            "type": "bug",
+            "status": "Complete",
+            "project": "Random Project",
+            "reporter": "Hayley-Test"
+        },
+        {
+            "taskID": "RAND-3",
+            "title": "Task for testing",
+            "description": "Investigate something",
+            "type": "investigation",
+            "status": "Testing",
+            "project": "Random Project",
+            "reporter": "Hayley-Test"
+        },
+        {
+            "taskID": "TEST-1",
+            "title": "Task for testing",
+            "description": "Investigate something to improve its use in the Test Project",
+            "type": "investigation",
+            "status": "In Progress",
+            "project": "Test Project",
+            "reporter": "Natalie-Test"
+        },
+        {
+            "taskID": "TEST-2",
+            "title": "Task for testing",
+            "description": "Fix something - Test",
+            "type": "bug",
+            "status": "Testing",
+            "project": "Test Project",
+            "reporter": "Natalie-Test"
+        },
+        {
+            "taskID": "RAND-4",
+            "title": "Task with related tasks",
+            "description": "This task will have some linked tasks",
+            "type": "task",
+            "status": "In Progress",
+            "project": "Random Project",
+            "reporter": "Natalie-Test"
+        }
+    ],
+    "users": [
+        {
+            "username": "Natalie-Test",
+            "password": "$2b$14$CD4RoTgcWxuUh.sLxawYIuMVE.Xkwpj5TKNj6Eje8.hU/XcAQArHm",
+            "email": "natalie-test@gmail.com",
+            "image": ""
+        },
+        {
+            "username": "Hayley-Test",
+            "password": "$2b$14$wCFmOQeoF5QDfEUD7RHkGO66F9P8xNlrqJ3g02fCb5D7axJ/1UNxG",
+            "email": "hayley-test@gmail.com",
+            "image": ""
+        }
+    ]
+}
