@@ -6,12 +6,14 @@ const multer = require("multer");
 const lodash = require("lodash");
 require("dotenv").config();
 
+const projectsRoutes = require("./routes/projectsRoutes");
+
 const TaskUtils = require("../utilities/task_utils");
 const Utils = require("../utilities/utils");
 const mongoConnection = require("./mongo");
 const Task = require("./models/TaskSchema");
 const User = require("./models/UserSchema");
-const Project = require("./models/projectSchema");
+const Project = require("./models/ProjectSchema");
 const uploadHandle = require("./services/fileUploadService");
 const Comment = require("./models/CommentsSchema");
 
@@ -25,6 +27,8 @@ mongoConnection(mongo_uri);
 
 app.use(cors());
 app.use(express.json());
+
+app.use('/api/projects', projectsRoutes);
 
 app.get('/', (request, response) => {
     response.send('<h1>Hello World</h1>')
@@ -296,39 +300,6 @@ app.delete('/api/tasks/:taskID', async (request, response) => {
     }
     await Task.findOneAndDelete({taskID: taskID});
     return response.status(200).send('The task was successfully deleted');
-})
-
-app.get('/api/projects', async (request, response) => {
-    const projects = await Project.find({}).populate('tasks').exec();
-    return response.status(200).json(projects);
-})
-
-app.post('/api/projects', async (request, response) => {
-    if (!Utils.isAuthorised(request.headers)) {
-        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
-    }
-
-    if (!request.body || lodash.isEmpty(request.body)) {
-        return response.status(400).send('Please provide details of a new project');
-    }
-    const newProject = new Project({...request.body, creator: token.username});
-    const savedProject = await newProject.save();
-    return response.status(200).json(savedProject);
-})
-
-app.delete('/api/projects/:project', async (request, response) => {
-    if (!Utils.isAuthorised(request.headers)) {
-        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
-    }
-
-    const { project } = request.params;
-    const checkProjectExists = await Project.exists({projectName: project});
-    if (!checkProjectExists) {
-        return response.status(404).send('Unable to find this project');
-    }
-    await Task.deleteMany({project: project});
-    await Project.findOneAndDelete({projectName: project});
-    return response.status(200).send('The project was deleted');
 })
 
 app.post('/api/upload-avatar', multer().single('avatar'), async (request, response) => {
