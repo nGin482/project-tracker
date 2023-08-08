@@ -35,7 +35,7 @@ app.get('/api/tasks', async (request, response) => {
     tasks.forEach(task => {
         delete task._id;
     })
-    response.status(200).json(tasks);
+    return response.status(200).json(tasks);
 })
 
 app.get('/api/tasks/:taskID', async (request, response) => {
@@ -53,10 +53,10 @@ app.get('/api/tasks/:taskID', async (request, response) => {
         .exec();
 
     if (task) {
-        response.status(200).json(task)
+        return response.status(200).json(task)
     }
     else {
-        response.status(404).send('This Task does not exist.')
+        return response.status(404).send('This Task does not exist.')
     }
 })
 
@@ -64,27 +64,15 @@ app.get('/api/tasks/project/:project', (request, response) => {
     const { project } = request.params;
 
     Task.find({project: project}).then(result => {
-        response.status(200).json(result);
+        return response.status(200).json(result);
     })
 })
 
 app.post('/api/tasks', async (request, response) => {
-    if (!request.headers.authorization) {
-        return response.status(401).send('The request was not completed due to an unauthorised user');
+    if (!Utils.isAuthorised(request.headers)) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
     }
-    const { authorization } = request.headers;
-    const token = Utils.checkToken(authorization);
-    let decodedToken = undefined;
-    try {
-        decodedToken = jwt.verify(token, process.env.SECRET);
-    }
-    catch(err) {
-        decodedToken = {username: undefined};
-    }
-    if (!token || !decodedToken.username) {
-        return response.status(401).send('The request was not completed due to an unauthorised user');
-    }
-
+    
     if (lodash.isEmpty(request.body)) {
         return response.status(400).send('No Task details were provided');
     }
@@ -113,23 +101,11 @@ app.post('/api/tasks', async (request, response) => {
 
     project.tasks = project.tasks.concat(savedTask._id);
     project.save();
-    response.status(201).json({status: 'success', task: taskDoc});
+    return response.status(201).json({status: 'success', task: taskDoc});
 })
 
 app.put('/api/tasks/:taskID', async (request, response) => {
-    if (!request.headers.authorization) {
-        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
-    }
-    const { authorization } = request.headers;
-    const token = Utils.checkToken(authorization);
-    let decodedToken = undefined;
-    try {
-        decodedToken = jwt.verify(token, process.env.SECRET);
-    }
-    catch(err) {
-        decodedToken = {username: undefined};
-    }
-    if (!token || !decodedToken.username) {
+    if (!Utils.isAuthorised(request.headers)) {
         return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
     }
 
@@ -143,29 +119,18 @@ app.put('/api/tasks/:taskID', async (request, response) => {
         {new: true}
     );
     if (updatedTask) {
-        response.status(200).json(updatedTask);
+        return response.status(200).json(updatedTask);
     }
     else {
-        response.status(404).send(`Unable to find a task with ID ${taskID}`);
+        return response.status(404).send(`Unable to find a task with ID ${taskID}`);
     }
 })
 
 app.patch('/api/tasks/:taskID', async (request, response) => {
-    if (!request.headers.authorization) {
+    if (!Utils.isAuthorised(request.headers)) {
         return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
     }
-    const { authorization } = request.headers;
-    const token = Utils.checkToken(authorization);
-    let decodedToken = undefined;
-    try {
-        decodedToken = jwt.verify(token, process.env.SECRET);
-    }
-    catch(err) {
-        decodedToken = {username: undefined};
-    }
-    if (!token || !decodedToken.username) {
-        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
-    }
+
     const taskID = request.params.taskID;
     const { field, value } = request.body;
     const updatedTask = await Task.findOneAndUpdate(
@@ -174,27 +139,15 @@ app.patch('/api/tasks/:taskID', async (request, response) => {
         {new: true}
     );
     if (updatedTask) {
-        response.status(200).json(updatedTask);
+        return response.status(200).json(updatedTask);
     }
     else {
-        response.status(404).send(`Unable to find a task with ID ${taskID}`);
+        return response.status(404).send(`Unable to find a task with ID ${taskID}`);
     }
 })
 
 app.patch('/api/tasks/:taskID/link', async (request, response) => {
-    if (!request.headers.authorization) {
-        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
-    }
-    const { authorization } = request.headers;
-    const token = Utils.checkToken(authorization);
-    let decodedToken = undefined;
-    try {
-        decodedToken = jwt.verify(token, process.env.SECRET);
-    }
-    catch(err) {
-        decodedToken = {username: undefined};
-    }
-    if (!token || !decodedToken.username) {
+    if (!Utils.isAuthorised(request.headers)) {
         return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
     }
 
@@ -225,19 +178,7 @@ app.patch('/api/tasks/:taskID/link', async (request, response) => {
 })
 
 app.post('/api/tasks/:taskID/comment', async (request, response) => {
-    if (!request.headers.authorization) {
-        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
-    }
-    const { authorization } = request.headers;
-    const token = Utils.checkToken(authorization);
-    let decodedToken = undefined;
-    try {
-        decodedToken = jwt.verify(token, process.env.SECRET);
-    }
-    catch(err) {
-        decodedToken = {username: undefined};
-    }
-    if (!token || !decodedToken.username) {
+    if (!Utils.isAuthorised(request.headers)) {
         return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
     }
 
@@ -277,19 +218,7 @@ app.post('/api/tasks/:taskID/comment', async (request, response) => {
 })
 
 app.patch('/api/tasks/:taskID/comment/:commentID', async (request, response) => {
-    if (!request.headers.authorization) {
-        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
-    }
-    const { authorization } = request.headers;
-    const token = Utils.checkToken(authorization);
-    let decodedToken = undefined;
-    try {
-        decodedToken = jwt.verify(token, process.env.SECRET);
-    }
-    catch(err) {
-        decodedToken = {username: undefined};
-    }
-    if (!token || !decodedToken.username) {
+    if (!Utils.isAuthorised(request.headers)) {
         return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
     }
     
@@ -318,19 +247,7 @@ app.patch('/api/tasks/:taskID/comment/:commentID', async (request, response) => 
 })
 
 app.delete('/api/tasks/:taskID/comment/:commentID', async (request, response) => {
-    if (!request.headers.authorization) {
-        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
-    }
-    const { authorization } = request.headers;
-    const token = Utils.checkToken(authorization);
-    let decodedToken = undefined;
-    try {
-        decodedToken = jwt.verify(token, process.env.SECRET);
-    }
-    catch(err) {
-        decodedToken = {username: undefined};
-    }
-    if (!token || !decodedToken.username) {
+    if (!Utils.isAuthorised(request.headers)) {
         return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
     }
 
@@ -368,19 +285,7 @@ app.delete('/api/tasks/:taskID/comment/:commentID', async (request, response) =>
 })
 
 app.delete('/api/tasks/:taskID', async (request, response) => {
-    if (!request.headers.authorization) {
-        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
-    }
-    const { authorization } = request.headers;
-    const token = Utils.checkToken(authorization);
-    let decodedToken = undefined;
-    try {
-        decodedToken = jwt.verify(token, process.env.SECRET);
-    }
-    catch(err) {
-        decodedToken = {username: undefined};
-    }
-    if (!token || !decodedToken.username) {
+    if (!Utils.isAuthorised(request.headers)) {
         return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
     }
     
@@ -390,28 +295,16 @@ app.delete('/api/tasks/:taskID', async (request, response) => {
         return response.status(404).send('Unable to find the task to delete');
     }
     await Task.findOneAndDelete({taskID: taskID});
-    response.status(200).send('The task was successfully deleted');
+    return response.status(200).send('The task was successfully deleted');
 })
 
 app.get('/api/projects', async (request, response) => {
     const projects = await Project.find({}).populate('tasks').exec();
-    response.status(200).json(projects);
+    return response.status(200).json(projects);
 })
 
 app.post('/api/projects', async (request, response) => {
-    if (!request.headers.authorization) {
-        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
-    }
-    const { authorization } = request.headers;
-    const token = Utils.checkToken(authorization);
-    let decodedToken = undefined;
-    try {
-        decodedToken = jwt.verify(token, process.env.SECRET);
-    }
-    catch(err) {
-        decodedToken = {username: undefined};
-    }
-    if (!token || !decodedToken.username) {
+    if (!Utils.isAuthorised(request.headers)) {
         return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
     }
 
@@ -424,19 +317,7 @@ app.post('/api/projects', async (request, response) => {
 })
 
 app.delete('/api/projects/:project', async (request, response) => {
-    if (!request.headers.authorization) {
-        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
-    }
-    const { authorization } = request.headers;
-    const token = Utils.checkToken(authorization);
-    let decodedToken = undefined;
-    try {
-        decodedToken = jwt.verify(token, process.env.SECRET);
-    }
-    catch(err) {
-        decodedToken = {username: undefined};
-    }
-    if (!token || !decodedToken.username) {
+    if (!Utils.isAuthorised(request.headers)) {
         return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
     }
 
@@ -474,19 +355,7 @@ app.post('/api/upload-avatar', multer().single('avatar'), async (request, respon
 })
 
 app.post('/api/task-uploads', multer().single('upload'), async (request, response) => {
-    if (!request.headers.authorization) {
-        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
-    }
-    const { authorization } = request.headers;
-    const token = Utils.checkToken(authorization);
-    let decodedToken = undefined;
-    try {
-        decodedToken = jwt.verify(token, process.env.SECRET);
-    }
-    catch(err) {
-        decodedToken = {username: undefined};
-    }
-    if (!token || !decodedToken.username) {
+    if (!Utils.isAuthorised(request.headers)) {
         return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
     }
 
@@ -552,10 +421,10 @@ app.get('/api/users/:username', async (request, response) => {
 
     const user = await User.findOne({username: username}).populate('tasks').exec();
     if (user) {
-        response.status(200).json(user);
+        return response.status(200).json(user);
     }
     else {
-        response.status(404).send(`The server cannot find a user with the username ${username}`)
+        return response.status(404).send(`The server cannot find a user with the username ${username}`)
     }
 })
 
