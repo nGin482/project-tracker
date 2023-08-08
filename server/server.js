@@ -1,7 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-const multer = require("multer");
-const lodash = require("lodash");
 require("dotenv").config();
 
 const projectsRoutes = require("./routes/projectsRoutes");
@@ -11,14 +9,7 @@ const authRoutes = require("./routes/authRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const userRouter = require("./routes/userRoutes");
 
-const TaskUtils = require("../utilities/task_utils");
-const Utils = require("../utilities/utils");
 const mongoConnection = require("./mongo");
-const Task = require("./models/TaskSchema");
-const User = require("./models/UserSchema");
-const Project = require("./models/ProjectSchema");
-const uploadHandle = require("./services/fileUploadService");
-const Comment = require("./models/CommentsSchema");
 
 const app = express();
 
