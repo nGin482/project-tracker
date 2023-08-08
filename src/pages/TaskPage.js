@@ -15,6 +15,8 @@ import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { isEmpty, omit } from "lodash";
 
+import AddComment from "../components/comments/AddComment";
+import CommentsDisplay from "../components/comments/CommentsDisplay";
 import AdditionalDetails from "../components/sidebars/AdditionalDetails";
 import LinkTasks from "../components/link-tasks/LinkTasks";
 import StatusTag from "../components/status-tag/StatusTag";
@@ -25,6 +27,7 @@ import UserContext from "../contexts/UserContext";
 import useProjects from "../hooks/useProjects";
 import { getTask, getTasksByProject, updateTask, deleteTask } from "../services/requests";
 import "./styles/TaskPage.css";
+import "../components/comments/comments.css";
 
 
 const TaskPage = () => {
@@ -50,7 +53,7 @@ const TaskPage = () => {
 
     // Edit Task
     const [editingTask, setEditingTask] = useState(false);
-    const [updatedTask, setUpdatedTask] = useState({})
+    const [updatedTask, setUpdatedTask] = useState({});
     
     // Misc
     const [errors, setErrors] = useState(false);
@@ -87,7 +90,7 @@ const TaskPage = () => {
         else {
             setSearchResults(tasksByProject);
         }
-    }, [search]);
+    }, [search, tasksByProject]);
 
     useEffect(() => {
         console.log(task)
@@ -108,16 +111,12 @@ const TaskPage = () => {
         updateTask(task.taskID, finalTask, user.token).then(data => {
             updateTaskState(task.project, task.taskID, data);
             setEditingTask(false);
-            setTask(data)
+            setTask(data);
         }).catch(err => {
-            if (err?.response.data) {
-                messageApi.error(err.response.data);
-            }
-            else {
-                messageApi.error(err);
-            }
+            const error = err?.response.data ? err.response.data : err;
+            messageApi.error(error);
         });
-    }
+    };
 
     const handleDeleteTask = () => {
         deleteTask(task.taskID, user.token).then(data => {
@@ -158,107 +157,125 @@ const TaskPage = () => {
                         </Drawer>
                     )}
                     <Layout>
-                        <div id="task-content">
-                            <div className="task-action-buttons">
-                                <Button
-                                    onClick={() => setShowTasksDrawer(true)}
-                                    className="task-page-action-buttons"
-                                    id="tasks-drawer-button"
-                                >
-                                    Show Tasks in this Project
-                                </Button>
-                                <Button
-                                    onClick={() => setShowLinkTasks(!showLinkTasks)}
-                                    className="task-page-action-buttons"
-                                    id="link-tasks"
-                                >
-                                    Link Task
-                                </Button>
-                                <Button
-                                    onClick={() => setEditingTask(!editingTask)}
-                                    className="task-page-action-buttons"
-                                    id="link-tasks"
-                                >
-                                    Edit Task
-                                </Button>
-                                {contextHolder}
-                                <Popconfirm
-                                    title={`Delete ${task.taskID}`}
-                                    description="Are you sure you want to delete this task?"
-                                    onConfirm={handleDeleteTask}
-                                    okText="Yes"
-                                    cancelText="No"
-                                >
-                                    <Button danger>Delete Task</Button>
-                                </Popconfirm>
-                            </div>
-                            <Content>
-                                {editingTask ? (
-                                    <>
-                                        <Input
-                                            className="edit-task-title"
-                                            onChange={event => setUpdatedTask({...updatedTask, title: event.target.value})}
-                                            value={updatedTask.title}
-                                        />
-                                        <CKEditor
-                                            data={task.description}
-                                            editor={ClassicEditor}
-                                            onChange={(event, editor) => {
-                                                const data = editor.getData();
-                                                setUpdatedTask({...updatedTask, description: data});
-                                            }}
-                                        />
-                                        <div className="task-action-buttons update-task">
-                                            <Button
-                                                onClick={() => setEditingTask(false)}
-                                                type="default"
-                                            >
-                                                Cancel
-                                            </Button>
-                                            <Button
-                                                htmlType="submit"
-                                                onClick={submitUpdateTask}
-                                                type="primary"
-                                            >
-                                                Submit Changes
-                                            </Button>
-                                        </div>
-                                    </>
-                                ) : 
-                                    <>
-                                        <h1>{task.title}</h1>
-                                        <div dangerouslySetInnerHTML={{__html: task.description}} />
-                                    </>
-                                }
-                                {showLinkTasks && (
-                                    <LinkTasks
-                                        taskID={taskID}
-                                        tasksByProject={tasksByProject}
-                                        setVisible={setShowLinkTasks}
-                                        setTask={setTask}
-                                    />
-                                )}
-                                {task.linkedTasks.length > 0 && (
-                                    <div id="related-tasks-section">
-                                        <Divider orientation="left">Related Tasks</Divider>
-                                        {task.linkedTasks.map(linkedTask => (
-                                            <div key={linkedTask.taskID} className="related-task">
-                                                <NavLink
-                                                    to={`/task/${linkedTask.taskID}`}
-                                                    className="linked-task"
+                        <div id="task-main-content">
+                            <div id="task-content">
+                                <div className="task-action-buttons">
+                                    <Button
+                                        onClick={() => setShowTasksDrawer(true)}
+                                        className="task-page-action-buttons"
+                                        id="tasks-drawer-button"
+                                    >
+                                        Show Tasks in this Project
+                                    </Button>
+                                    <Button
+                                        onClick={() => setShowLinkTasks(!showLinkTasks)}
+                                        className="task-page-action-buttons"
+                                        id="link-tasks"
+                                    >
+                                        Link Task
+                                    </Button>
+                                    <Button
+                                        onClick={() => setEditingTask(!editingTask)}
+                                        className="task-page-action-buttons"
+                                        id="link-tasks"
+                                    >
+                                        Edit Task
+                                    </Button>
+                                    {contextHolder}
+                                    <Popconfirm
+                                        title={`Delete ${task.taskID}`}
+                                        description="Are you sure you want to delete this task?"
+                                        onConfirm={handleDeleteTask}
+                                        okText="Yes"
+                                        cancelText="No"
+                                    >
+                                        <Button danger>Delete Task</Button>
+                                    </Popconfirm>
+                                </div>
+                                <Content>
+                                    {editingTask ? (
+                                        <>
+                                            <Input
+                                                className="edit-task-title"
+                                                onChange={event => setUpdatedTask({...updatedTask, title: event.target.value})}
+                                                value={updatedTask.title}
+                                            />
+                                            <CKEditor
+                                                data={task.description}
+                                                editor={ClassicEditor}
+                                                onChange={(event, editor) => {
+                                                    const data = editor.getData();
+                                                    setUpdatedTask({...updatedTask, description: data});
+                                                }}
+                                            />
+                                            <div className="task-action-buttons update-task">
+                                                <Button
+                                                    onClick={() => setEditingTask(false)}
+                                                    type="default"
                                                 >
-                                                    {linkedTask.taskID}: {linkedTask.title}
-                                                </NavLink>
-                                                <StatusTag
-                                                    status={linkedTask.status}
-                                                    taskID={linkedTask.taskID}
-                                                />
+                                                    Cancel
+                                                </Button>
+                                                <Button
+                                                    htmlType="submit"
+                                                    onClick={submitUpdateTask}
+                                                    type="primary"
+                                                >
+                                                    Submit Changes
+                                                </Button>
                                             </div>
+                                        </>
+                                    ) : 
+                                        <>
+                                            <h1>{task.title}</h1>
+                                            <div dangerouslySetInnerHTML={{__html: task.description}} />
+                                        </>
+                                    }
+                                    {showLinkTasks && (
+                                        <LinkTasks
+                                            taskID={taskID}
+                                            tasksByProject={tasksByProject}
+                                            setVisible={setShowLinkTasks}
+                                            setTask={setTask}
+                                        />
+                                    )}
+                                    {task.linkedTasks.length > 0 && (
+                                        <div id="related-tasks-section">
+                                            <Divider orientation="left">Related Tasks</Divider>
+                                            {task.linkedTasks.map(linkedTask => (
+                                                <div key={linkedTask.taskID} className="related-task">
+                                                    <NavLink
+                                                        to={`/task/${linkedTask.taskID}`}
+                                                        className="linked-task"
+                                                    >
+                                                        {linkedTask.taskID}: {linkedTask.title}
+                                                    </NavLink>
+                                                    <StatusTag
+                                                        project={linkedTask.project}
+                                                        status={linkedTask.status}
+                                                        taskID={linkedTask.taskID}
+                                                    />
+                                                </div>
 
-                                        ))}
-                                    </div>
-                                )}
-                            </Content>
+                                            ))}
+                                        </div>
+                                    )}
+                                </Content>
+                            </div>
+                            <AddComment
+                                messageApi={messageApi}
+                                setTask={setTask}
+                                task={task}
+                                user={user}
+                            />
+                            {
+                                task.comments &&
+                                task.comments.length > 0 &&
+                                <CommentsDisplay
+                                    comments={task.comments}
+                                    task={task}
+                                    setTask={setTask}
+                                />
+                            }
                         </div>
                         <AdditionalDetails
                             taskDetails={omit(task, 'title', 'description', 'comments')}

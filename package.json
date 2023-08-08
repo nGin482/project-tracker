@@ -13,6 +13,7 @@
     "bcrypt": "^5.1.0",
     "cloudinary": "^1.39.0",
     "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
     "express": "^4.18.2",
     "form-data": "^4.0.0",
     "jsonwebtoken": "^9.0.0",
@@ -28,10 +29,12 @@
   },
   "scripts": {
     "start": "set PORT=3000 && react-scripts start",
-    "server": "nodemon server/server.js",
+    "server": "cross-env NODE_ENV=production node server/server.js",
+    "dev-server": "cross-env NODE_ENV=development nodemon server/server.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "test-api": "cross-env NODE_ENV=test jest --detectOpenHandles --coverage -- tests/server.test.js"
   },
   "eslintConfig": {
     "extends": [
@@ -52,6 +55,7 @@
     ]
   },
   "devDependencies": {
-    "nodemon": "^2.0.22"
+    "nodemon": "^2.0.22",
+    "supertest": "^6.3.3"
   }
 }

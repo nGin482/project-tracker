@@ -12,8 +12,18 @@ const setTaskID = (projectCode, currentTaskIDs) => {
     }
 }
 
+const setCommentID = currentComments => {
+    const latestComment = lodash.last(currentComments);
+    const latestCommentID = latestComment.commentID;
+    let commentID = Number(latestCommentID.slice(latestCommentID.indexOf('-')+1));
+    commentID = ++commentID;
+
+    return `comment-${commentID}`;
+}
+
 
 
 module.exports = {
-    setTaskID
+    setTaskID,
+    setCommentID
 }

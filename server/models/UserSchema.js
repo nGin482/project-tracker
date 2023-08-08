@@ -14,7 +14,12 @@ const userSchema = new Schema({
             ref: 'Task'
         }
     ],
-    comments: []
+    comments: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Comment'
+        }
+    ]
 });
 
 userSchema.set('toJSON', {

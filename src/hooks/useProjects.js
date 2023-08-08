@@ -17,7 +17,7 @@ const useProjects = () => {
             const taskIndex = projectToUpdate.tasks.findIndex(task => task.taskID === taskID);
             projectToUpdate.tasks[taskIndex] = updatedTask;
             return updatedProjects;
-        })
+        });
     };
 
     const deleteTaskState = (project, taskID) => {

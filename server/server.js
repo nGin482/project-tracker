@@ -3,6 +3,7 @@ const cors = require("cors");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
+const lodash = require("lodash");
 require("dotenv").config();
 
 const TaskUtils = require("../utilities/task_utils");
@@ -12,10 +13,15 @@ const Task = require("./models/TaskSchema");
 const User = require("./models/UserSchema");
 const Project = require("./models/projectSchema");
 const uploadHandle = require("./services/fileUploadService");
+const Comment = require("./models/CommentsSchema");
 
 const app = express();
 
-mongoConnection();
+const mongo_uri = process.env.NODE_ENV === 'test'
+    ? process.env.MONGO_TEST_URI
+    : process.env.MONGODB_URI;
+
+mongoConnection(mongo_uri);
 
 app.use(cors());
 app.use(express.json());
@@ -24,19 +30,27 @@ app.get('/', (request, response) => {
     response.send('<h1>Hello World</h1>')
 })
 
-app.get('/api/tasks', (request, response) => {
-    Task.find().lean().then(tasks => {
-        tasks.forEach(task => (
-            delete task._id
-        ))
-        response.json(tasks);
-    });
+app.get('/api/tasks', async (request, response) => {
+    const tasks = await Task.find({});
+    tasks.forEach(task => {
+        delete task._id;
+    })
+    response.status(200).json(tasks);
 })
 
 app.get('/api/tasks/:taskID', async (request, response) => {
     const { taskID } = request.params;
 
-    const task = await Task.findOne({taskID: taskID}).populate('linkedTasks').exec();
+    const task = await Task.findOne({taskID: taskID})
+        .populate('linkedTasks')
+        .populate({
+            path: 'comments',
+            populate: {
+                path: 'commenter',
+                select: 'username'
+            }
+        })
+        .exec();
 
     if (task) {
         response.status(200).json(task)
@@ -55,162 +69,328 @@ app.get('/api/tasks/project/:project', (request, response) => {
 })
 
 app.post('/api/tasks', async (request, response) => {
-    if (!request.body) {
-        response.status(500).json('Something went wrong');
-    }
     if (!request.headers.authorization) {
-        response.status(401).send('The request was not completed due to an unauthorised user');
+        return response.status(401).send('The request was not completed due to an unauthorised user');
     }
-    else {
-        const { authorization } = request.headers;
-        const token = jwt.verify(Utils.checkToken(authorization), process.env.SECRET);
-        if (!token && !token?.username) {
-            response.status(401).send('The request was not completed due to an unauthorised user');
-        }
-        else {
-            const tasks = await Task.find({project: request.body.project});
-            const project = await Project.findOne({projectName: request.body.project});
-            let currentTaskIDs = tasks.map(task => task.taskID);
-            const taskID = TaskUtils.setTaskID(project.projectCode, currentTaskIDs);
-            const newTask = {...request.body, taskID, reporter: token.username};
-            if (request.body.linkedTasks) {
-                const linkedTasks = await Task.find({taskID: {$in: request.body.linkedTasks}});
-                const linkedTasksChecked = linkedTasks.filter(linkTask => linkTask._id);
-                newTask.linkedTasks = linkedTasksChecked;
-            }
-            const taskDoc = new Task(newTask);
-            for (const linkedTaskID of taskDoc.linkedTasks) {
-                const linkedTask = await Task.findById(linkedTaskID);
-                linkedTask.linkedTasks = linkedTask.linkedTasks.concat(taskDoc._id);
-                linkedTask.save();
-            }
-            const savedTask = await taskDoc.save();
-            
-            const user = await User.findOne({username: token.username});
-            user.tasks = user.tasks.concat(savedTask._id);
-            user.save();
+    const { authorization } = request.headers;
+    const token = Utils.checkToken(authorization);
+    let decodedToken = undefined;
+    try {
+        decodedToken = jwt.verify(token, process.env.SECRET);
+    }
+    catch(err) {
+        decodedToken = {username: undefined};
+    }
+    if (!token || !decodedToken.username) {
+        return response.status(401).send('The request was not completed due to an unauthorised user');
+    }
+
+    if (lodash.isEmpty(request.body)) {
+        return response.status(400).send('No Task details were provided');
+    }
+
+    const tasks = await Task.find({project: request.body.project});
+    const project = await Project.findOne({projectName: request.body.project});
+    let currentTaskIDs = tasks.map(task => task.taskID);
+    const taskID = TaskUtils.setTaskID(project.projectCode, currentTaskIDs);
+    const newTask = {taskID, ...request.body, reporter: decodedToken.username};
+    if (request.body.linkedTasks) {
+        const linkedTasks = await Task.find({taskID: {$in: request.body.linkedTasks}});
+        const linkedTasksChecked = linkedTasks.filter(linkTask => linkTask._id);
+        newTask.linkedTasks = linkedTasksChecked;
+    }
+    const taskDoc = new Task(newTask);
+    for (const linkedTaskID of taskDoc.linkedTasks) {
+        const linkedTask = await Task.findById(linkedTaskID);
+        linkedTask.linkedTasks = linkedTask.linkedTasks.concat(taskDoc._id);
+        linkedTask.save();
+    }
+    const savedTask = await taskDoc.save();
     
-            project.tasks = project.tasks.concat(savedTask._id);
-            project.save();
-            response.status(200).json({status: 'success', task: taskDoc});
-        }
-    }
+    const user = await User.findOne({username: decodedToken.username});
+    user.tasks = user.tasks.concat(savedTask._id);
+    user.save();
+
+    project.tasks = project.tasks.concat(savedTask._id);
+    project.save();
+    response.status(201).json({status: 'success', task: taskDoc});
 })
 
 app.put('/api/tasks/:taskID', async (request, response) => {
+    if (!request.headers.authorization) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
     const { authorization } = request.headers;
-    if (!authorization) {
-        response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    const token = Utils.checkToken(authorization);
+    let decodedToken = undefined;
+    try {
+        decodedToken = jwt.verify(token, process.env.SECRET);
+    }
+    catch(err) {
+        decodedToken = {username: undefined};
+    }
+    if (!token || !decodedToken.username) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
+
+    if (lodash.isEmpty(request.body)) {
+        return response.status(400).send('No Task details were provided');
+    }
+    const { taskID } = request.params;
+    const updatedTask = await Task.findOneAndReplace(
+        {taskID: taskID},
+        {...request.body},
+        {new: true}
+    );
+    if (updatedTask) {
+        response.status(200).json(updatedTask);
     }
     else {
-        const token = jwt.verify(Utils.checkToken(authorization), process.env.SECRET);
-        if (!token && !token.username) {
-            response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
-        }
-        else {
-            const { taskID } = request.params;
-            const updatedTask = await Task.findOneAndReplace(
-                {taskID: taskID},
-                {...request.body},
-                {new: true}
-            );
-            console.log(updatedTask)
-            if (updatedTask) {
-                response.status(200).json(updatedTask);
-            }
-            else {
-                response.status(404).send(`Unable to find a task with ID ${taskID}`);
-            }
-        }
+        response.status(404).send(`Unable to find a task with ID ${taskID}`);
     }
 })
 
 app.patch('/api/tasks/:taskID', async (request, response) => {
+    if (!request.headers.authorization) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
     const { authorization } = request.headers;
-    if (!authorization) {
-        response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    const token = Utils.checkToken(authorization);
+    let decodedToken = undefined;
+    try {
+        decodedToken = jwt.verify(token, process.env.SECRET);
+    }
+    catch(err) {
+        decodedToken = {username: undefined};
+    }
+    if (!token || !decodedToken.username) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
+    const taskID = request.params.taskID;
+    const { field, value } = request.body;
+    const updatedTask = await Task.findOneAndUpdate(
+        {taskID: taskID},
+        {[field]: value},
+        {new: true}
+    );
+    if (updatedTask) {
+        response.status(200).json(updatedTask);
     }
     else {
-        const token = jwt.verify(Utils.checkToken(authorization), process.env.SECRET);
-        if (!token && !token.username) {
-            response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
-        }
-        else {
-            const taskID = request.params.taskID;
-            const { field, value } = request.body;
-            const updatedTask = await Task.findOneAndUpdate(
-                {taskID: taskID},
-                {[field]: value},
-                {new: true}
-            );
-            if (updatedTask) {
-                response.status(200).json(updatedTask);
-            }
-            else {
-                response.status(404).send(`Unable to find a task with ID ${taskID}`);
-            }
-        }
+        response.status(404).send(`Unable to find a task with ID ${taskID}`);
     }
 })
 
 app.patch('/api/tasks/:taskID/link', async (request, response) => {
+    if (!request.headers.authorization) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
     const { authorization } = request.headers;
-    if (!authorization) {
-        response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to link these tasks');
+    const token = Utils.checkToken(authorization);
+    let decodedToken = undefined;
+    try {
+        decodedToken = jwt.verify(token, process.env.SECRET);
+    }
+    catch(err) {
+        decodedToken = {username: undefined};
+    }
+    if (!token || !decodedToken.username) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
+
+    if (!request.body.linkedTasks || lodash.isEmpty(request.body.linkedTasks)) {
+        return response.status(400).send('The request was sent without data. Please ensure that tasks are selected to be linked');
+    }
+
+    const { taskID } = request.params;
+    const taskBeingLinked = await Task.findOne({taskID: taskID});
+    
+    if (!taskBeingLinked || lodash.isEmpty(taskBeingLinked)) {
+        return response.status(404).send('The server cannot link these tasks together as the task being linked does not exist');
+    }
+
+    const linkedTasks = await Task.find({taskID: {$in: request.body.linkedTasks}});
+    const linkedTasksChecked = linkedTasks.filter(linkTask => linkTask._id);
+    if (linkedTasksChecked.length === request.body.linkedTasks.length) {
+        taskBeingLinked.linkedTasks = taskBeingLinked.linkedTasks.concat(linkedTasksChecked);
+        taskBeingLinked.save();
+        return response.status(200).json({taskBeingLinked, linkedTasks});
+    }
+    else if (linkedTasksChecked.length === 0) {
+        return response.status(404).send('The server cannot find the tasks to link');
     }
     else {
-        const token = jwt.verify(Utils.checkToken(authorization), process.env.SECRET);
-        if (!token && !token.username) {
-            response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to link these tasks');
-        }
-        else {
-            if (request.body.linkedTasks) {
-                const { taskID } = request.params;
-                const taskBeingLinked = await Task.findOne({taskID: taskID});
-                const linkedTasks = await Task.find({taskID: {$in: request.body.linkedTasks}});
-                const linkedTasksChecked = linkedTasks.filter(linkTask => linkTask._id);
-                if (taskBeingLinked && linkedTasksChecked.length > 0) {
-                    if (taskBeingLinked.linkedTasks) {
-                        taskBeingLinked.linkedTasks = taskBeingLinked.linkedTasks.concat(linkedTasksChecked);
-                        taskBeingLinked.save();
-                        response.status(200).json({taskBeingLinked, linkedTasks});
-                    }
-                }
-                else {
-                    if (!taskBeingLinked && linkedTasksChecked.length > 0) {
-                        response.status(404).send('The server cannot link these tasks together as the task being linked does not exist');
-                    }
-                    else if (taskBeingLinked && linkedTasksChecked.length === 0) {
-                        response.status(404).send('The server cannot link these tasks together as there are no tasks to link');
-                    }
-                    else {
-                        response.status(404).send('Unable to link these tasks together as they both do not exist');
-                    }
-                }
-            }
-            else {
-                response.status(400).send('The request was sent without data. Please ensure that tasks are selected to be linked')
-            }
-        } 
+        return response.status(404).send('The server cannot find all the tasks to link');
+   }        
+})
+
+app.post('/api/tasks/:taskID/comment', async (request, response) => {
+    if (!request.headers.authorization) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
     }
+    const { authorization } = request.headers;
+    const token = Utils.checkToken(authorization);
+    let decodedToken = undefined;
+    try {
+        decodedToken = jwt.verify(token, process.env.SECRET);
+    }
+    catch(err) {
+        decodedToken = {username: undefined};
+    }
+    if (!token || !decodedToken.username) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
+
+    const { taskID } = request.params;
+    const task = await Task.findOne({taskID: taskID});
+    if (!task) {
+        return response.status(404).send('The server is unable to find the task to comment on');
+    }
+
+    const allComments = await Comment.find({});
+    const comment = new Comment({
+        commentID: TaskUtils.setCommentID(allComments),
+        ...request.body,
+        commenter: decodedToken.id,
+        task: task._id
+    });
+    const savedComment = await comment.save();
+
+    task.comments = task.comments.concat(savedComment._id);
+    await task.save();
+
+    await Task.populate(task, 'linkedTasks')
+    await Task.populate(task, {
+        path: 'comments',
+        populate: {
+            path: 'commenter',
+            select: 'username'
+        }
+    });
+
+    // add to user's comments
+    const user = await User.findOne({username: decodedToken.username});
+    user.comments = user.comments.concat(savedComment._id);
+    await user.save();
+
+    return response.status(201).json(task);
+})
+
+app.patch('/api/tasks/:taskID/comment/:commentID', async (request, response) => {
+    if (!request.headers.authorization) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
+    const { authorization } = request.headers;
+    const token = Utils.checkToken(authorization);
+    let decodedToken = undefined;
+    try {
+        decodedToken = jwt.verify(token, process.env.SECRET);
+    }
+    catch(err) {
+        decodedToken = {username: undefined};
+    }
+    if (!token || !decodedToken.username) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
+    
+    const { taskID, commentID} = request.params;
+
+    const task = await Task.findOne({taskID: taskID});
+    if (!task) {
+        return response.status(404).send('The task you were looking for does not exist');
+    }
+    const comment = await Comment.findOne({commentID: commentID});
+    if (!comment) {
+        return response.status(404).send('The comment you were looking for does not exist');
+    }
+    comment.set('content', request.body.content);
+    await comment.save();
+
+    await Task.populate(task, 'linkedTasks')
+    await Task.populate(task, {
+        path: 'comments',
+        populate: {
+            path: 'commenter',
+            select: 'username'
+        }
+    });
+    return response.status(200).json(task);
+})
+
+app.delete('/api/tasks/:taskID/comment/:commentID', async (request, response) => {
+    if (!request.headers.authorization) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
+    const { authorization } = request.headers;
+    const token = Utils.checkToken(authorization);
+    let decodedToken = undefined;
+    try {
+        decodedToken = jwt.verify(token, process.env.SECRET);
+    }
+    catch(err) {
+        decodedToken = {username: undefined};
+    }
+    if (!token || !decodedToken.username) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
+
+    const { taskID, commentID } = request.params;
+
+    const task = await Task.findOne({taskID: taskID});
+    if (!task) {
+        return response.status(404).send('The task you were looking for does not exist');
+    }
+
+    const comment = await Comment.findOne({commentID: commentID});
+    if (!comment) {
+        return response.status(404).send('The comment you were looking for does not exist');
+    }
+
+    const user = await User.findOne({username: decodedToken.username});
+    const updatedUserComments = user.comments.filter(comment => comment.commentID !== commentID);
+    user.set('comments', updatedUserComments);
+    await user.save();
+
+    const updatedTaskComments = task.comments.filter(comment => comment.commentID !== commentID);
+    task.set('comments', updatedTaskComments);
+    await task.save();
+
+    await Comment.findOneAndDelete({commentID: commentID});
+    await Task.populate(task, 'linkedTasks')
+    await Task.populate(task, {
+        path: 'comments',
+        populate: {
+            path: 'commenter',
+            select: 'username'
+        }
+    });
+    return response.status(200).json({message: 'The comment was successfully deleted', task});
 })
 
 app.delete('/api/tasks/:taskID', async (request, response) => {
+    if (!request.headers.authorization) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
     const { authorization } = request.headers;
-    if (!authorization) {
-        response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to link these tasks');
+    const token = Utils.checkToken(authorization);
+    let decodedToken = undefined;
+    try {
+        decodedToken = jwt.verify(token, process.env.SECRET);
     }
-    else {
-        const token = jwt.verify(Utils.checkToken(authorization), process.env.SECRET);
-        if (!token && !token.username) {
-            response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to link these tasks');
-        }
-        else {
-            const { taskID } = request.params;
-            await Task.findOneAndDelete({taskID: taskID});
-            response.status(200).send('The task was successfully deleted');
-        }
+    catch(err) {
+        decodedToken = {username: undefined};
     }
+    if (!token || !decodedToken.username) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
+    
+    const { taskID } = request.params;
+    const taskExists = await Task.exists({taskID: taskID});
+    if (!taskExists) {
+        return response.status(404).send('Unable to find the task to delete');
+    }
+    await Task.findOneAndDelete({taskID: taskID});
+    response.status(200).send('The task was successfully deleted');
 })
 
 app.get('/api/projects', async (request, response) => {
@@ -219,16 +399,28 @@ app.get('/api/projects', async (request, response) => {
 })
 
 app.post('/api/projects', async (request, response) => {
+    if (!request.headers.authorization) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
     const { authorization } = request.headers;
-    const token = jwt.verify(Utils.checkToken(authorization), process.env.SECRET);
-    if (!token && !token?.username) {
-        response.status(401).send('The request was not completed due to an unauthorised user')
+    const token = Utils.checkToken(authorization);
+    let decodedToken = undefined;
+    try {
+        decodedToken = jwt.verify(token, process.env.SECRET);
     }
-    else {
-        const newProject = new Project({...request.body, creator: token.username});
-        const savedProject = await newProject.save();
-        response.status(200).json(savedProject);
+    catch(err) {
+        decodedToken = {username: undefined};
     }
+    if (!token || !decodedToken.username) {
+        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+    }
+
+    if (!request.body || lodash.isEmpty(request.body)) {
+        return response.status(400).send('Please provide details of a new project');
+    }
+    const newProject = new Project({...request.body, creator: token.username});
+    const savedProject = await newProject.save();
+    return response.status(200).json(savedProject);
 })
 
 app.delete('/api/projects/:project', async (request, response) => {
@@ -318,7 +510,7 @@ app.post('/api/register', async (request, response) => {
     const { username, password, email, image } = request.body;
     const checkUser = await User.findOne({username: username});
     if (checkUser) {
-        response.status(409).send("The username is already in use");
+        return response.status(409).send("The username is already in use");
     }
     else {
         const pwHash = await bcrypt.hash(password, 14);
@@ -329,10 +521,10 @@ app.post('/api/register', async (request, response) => {
             await uploadHandle.createFolder(`Users/${username}`);
             const imageName = uploadHandle.getPublicIDFromURL(image);
             await uploadHandle.moveImage(imageName, `Users/${username}/${imageName}`);
-            response.status(200).json({username, image});
+            return response.status(200).json({username, image});
         }
         catch(err) {
-            response.status(500).json(err.message);
+            return response.status(500).json(err.message);
         }
     }
 
@@ -341,22 +533,18 @@ app.post('/api/register', async (request, response) => {
 app.post('/api/login', async (request, response) => {
     const { username, password } = request.body;
     const user = await User.findOne({username: username}).populate('tasks').exec();
-    if (user) {
-        if (bcrypt.compareSync(password, user.password)) {
-            const userForToken = {
-                username: user.username,
-                id: user._id
-            }
-            const token = jwt.sign(userForToken, process.env.SECRET);
-            response.status(200).send({username: user.username, email: user.email, avatar: user.image, token});
-        }
-        else {
-            response.status(401).send('The username or password is incorrect');
-        }
+    if (!user) {
+        return response.status(401).send('The username or password is incorrect');
     }
-    else {
-        response.status(401).send('The username or password is incorrect');
+    if (!bcrypt.compareSync(password, user.password)) {
+        return response.status(401).send('The username or password is incorrect');
     }
+    const userForToken = {
+        username: user.username,
+        id: user._id
+    }
+    const token = jwt.sign(userForToken, process.env.SECRET);
+    return response.status(200).send({username: user.username, email: user.email, avatar: user.image, token});
 })
 
 app.get('/api/users/:username', async (request, response) => {
@@ -372,6 +560,8 @@ app.get('/api/users/:username', async (request, response) => {
 })
 
 const PORT = 3001;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`)
 })
+
+module.exports = server;
