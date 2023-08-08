@@ -8,6 +8,7 @@ const projectsRoutes = require("./routes/projectsRoutes");
 const commentsRouter = require("./routes/commentsRoutes");
 const authRoutes = require("./routes/authRoutes");
 const taskRoutes = require("./routes/taskRoutes");
+const userRouter = require("./routes/userRoutes");
 
 const TaskUtils = require("../utilities/task_utils");
 const Utils = require("../utilities/utils");
@@ -31,8 +32,9 @@ app.use(express.json());
 
 app.use('/api/projects', projectsRoutes);
 app.use('/api/tasks', taskRoutes);
-app.use('/api/tasks/:taskID/comment', commentsRouter)
+app.use('/api/tasks/:taskID/comment', commentsRouter);
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRouter);
 
 app.get('/', (request, response) => {
     response.send('<h1>Hello World</h1>')
@@ -80,18 +82,6 @@ app.post('/api/task-uploads', multer().single('upload'), async (request, respons
             error: error.message
         };
         return response.status(500).json(responseJSON)
-    }
-})
-
-app.get('/api/users/:username', async (request, response) => {
-    const { username } = request.params;
-
-    const user = await User.findOne({username: username}).populate('tasks').exec();
-    if (user) {
-        return response.status(200).json(user);
-    }
-    else {
-        return response.status(404).send(`The server cannot find a user with the username ${username}`)
     }
 })
 
