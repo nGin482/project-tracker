@@ -6,13 +6,14 @@ const authRoutes = express.Router();
 
 const User = require("../models/UserSchema");
 const uploadHandle = require("../services/fileUploadService");
+const errorMessages = require("../config");
 
 
 authRoutes.post('/register', async (request, response) => {
     const { username, password, email, image } = request.body;
     const checkUser = await User.findOne({username: username});
     if (checkUser) {
-        return response.status(409).send("The username is already in use");
+        return response.status(409).send(errorMessages.INVALID_REGISTRATION);
     }
     else {
         const pwHash = await bcrypt.hash(password, 14);
@@ -35,10 +36,10 @@ authRoutes.post('/login', async (request, response) => {
     const { username, password } = request.body;
     const user = await User.findOne({username: username}).populate('tasks').exec();
     if (!user) {
-        return response.status(401).send('The username or password is incorrect');
+        return response.status(401).send(errorMessages.FAILED_LOGIN);
     }
     if (!bcrypt.compareSync(password, user.password)) {
-        return response.status(401).send('The username or password is incorrect');
+        return response.status(401).send(errorMessages.FAILED_LOGIN);
     }
     const userForToken = {
         username: user.username,

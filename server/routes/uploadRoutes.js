@@ -3,6 +3,7 @@ const multer = require("multer");
 
 const Utils = require("../../utilities/utils");
 const uploadHandle = require("../services/fileUploadService");
+const errorMessages = require("../config");
 
 const uploadRouter = express.Router();
 
@@ -13,7 +14,7 @@ uploadRouter.post('/avatar', multer().single('avatar'), async (request, response
     const file_type = fullFileName.slice(fullFileName.lastIndexOf('.'));
 
     if (!uploadHandle.VALID_FILE_TYPES.includes(file_type)) {
-        return response.status(400).send('An invalid file was uploaded')
+        return response.status(400).send(errorMessages.FILE_UPLOAD_FAILED.INVALID_FILE);
     }
 
     try {
@@ -22,16 +23,16 @@ uploadRouter.post('/avatar', multer().single('avatar'), async (request, response
     }
     catch(error) {
         const responseJSON = {
-            message: 'An error occurred when uploading your image, please try again',
+            message: errorMessages.FILE_UPLOAD_FAILED.UPLOAD_ERROR,
             error: error.message
         };
-        return response.status(500).json(responseJSON)
+        return response.status(500).json(responseJSON);
     }
 });
 
 uploadRouter.post('/task-image', multer().single('upload'), async (request, response) => {
     if (!Utils.isAuthorised(request.headers)) {
-        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+        return response.status(401).send(errorMessages.UNAUTHORISED_USER);
     }
 
     const file_upload_buffer = request.file.buffer;
@@ -43,7 +44,7 @@ uploadRouter.post('/task-image', multer().single('upload'), async (request, resp
     }
     catch(error) {
         const responseJSON = {
-            message: 'An error occurred when uploading your image, please try again',
+            message: errorMessages.FILE_UPLOAD_FAILED.UPLOAD_ERROR,
             error: error.message
         };
         return response.status(500).json(responseJSON);

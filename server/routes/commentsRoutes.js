@@ -5,19 +5,20 @@ const User = require("../models/UserSchema");
 const Comment = require("../models/CommentsSchema");
 const Utils = require("../../utilities/utils");
 const TaskUtils = require("../../utilities/task_utils");
+const responseMessages = require("../config");
 
 const commentsRouter = express.Router({mergeParams: true});
 
 commentsRouter.post('/', async (request, response) => {
     const isAuthorisedUser = Utils.isAuthorised(request.headers)
     if (!isAuthorisedUser) {
-        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+        return response.status(401).send(responseMessages.UNAUTHORISED_USER);
     }
 
     const { taskID } = request.params;
     const task = await Task.findOne({taskID: taskID});
     if (!task) {
-        return response.status(404).send('The server is unable to find the task to comment on');
+        return response.status(404).send(responseMessages.NOT_FOUND.TASK_NOT_FOUND);
     }
 
     const allComments = await Comment.find({});
@@ -52,18 +53,18 @@ commentsRouter.post('/', async (request, response) => {
 commentsRouter.patch('/:commentID', async (request, response) => {
     const isAuthorisedUser = Utils.isAuthorised(request.headers)
     if (!isAuthorisedUser) {
-        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+        return response.status(401).send(responseMessages.UNAUTHORISED_USER);
     }
     
     const { taskID, commentID} = request.params;
 
     const task = await Task.findOne({taskID: taskID});
     if (!task) {
-        return response.status(404).send('The task you were looking for does not exist');
+        return response.status(404).send(responseMessages.NOT_FOUND.TASK_NOT_FOUND);
     }
     const comment = await Comment.findOne({commentID: commentID});
     if (!comment) {
-        return response.status(404).send('The comment you were looking for does not exist');
+        return response.status(404).send(responseMessages.NOT_FOUND.COMMENT_NOT_FOUND);
     }
     comment.set('content', request.body.content);
     await comment.save();
@@ -82,19 +83,19 @@ commentsRouter.patch('/:commentID', async (request, response) => {
 commentsRouter.delete('/:commentID', async (request, response) => {
     const isAuthorisedUser = Utils.isAuthorised(request.headers)
     if (!isAuthorisedUser) {
-        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+        return response.status(401).send(responseMessages.UNAUTHORISED_USER);
     }
 
     const { taskID, commentID } = request.params;
 
     const task = await Task.findOne({taskID: taskID});
     if (!task) {
-        return response.status(404).send('The task you were looking for does not exist');
+        return response.status(404).send(responseMessages.NOT_FOUND.TASK_NOT_FOUND);
     }
 
     const comment = await Comment.findOne({commentID: commentID});
     if (!comment) {
-        return response.status(404).send('The comment you were looking for does not exist');
+        return response.status(404).send(responseMessages.NOT_FOUND.COMMENT_NOT_FOUND);
     }
 
     const user = await User.findOne({username: isAuthorisedUser.username});
@@ -115,7 +116,7 @@ commentsRouter.delete('/:commentID', async (request, response) => {
             select: 'username'
         }
     });
-    return response.status(200).json({message: 'The comment was successfully deleted', task});
+    return response.status(200).json({message: responseMessages.SUCCESS.COMMENT_DELETED, task});
 });
 
 module.exports = commentsRouter;

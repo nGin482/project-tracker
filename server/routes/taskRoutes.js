@@ -5,11 +5,11 @@ const taskRoutes = express.Router();
 
 const Task = require("../models/TaskSchema");
 const User = require("../models/UserSchema");
-const Comment = require("../models/CommentsSchema");
 const Project = require("../models/ProjectSchema");
 
 const Utils = require("../../utilities/utils");
 const TaskUtils = require("../../utilities/task_utils");
+const responseMessages = require("../config");
 
 taskRoutes.get('/', async (request, response) => {
     const tasks = await Task.find({});
@@ -37,18 +37,18 @@ taskRoutes.get('/:taskID', async (request, response) => {
         return response.status(200).json(task)
     }
     else {
-        return response.status(404).send('This Task does not exist.')
+        return response.status(404).send(responseMessages.NOT_FOUND.TASK_NOT_FOUND);
     }
 });
 
 taskRoutes.post('/', async (request, response) => {
     const isAuthorisedUser = Utils.isAuthorised(request.headers)
     if (!isAuthorisedUser) {
-        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+        return response.status(401).send(responseMessages.UNAUTHORISED_USER);
     }
     
     if (lodash.isEmpty(request.body)) {
-        return response.status(400).send('No Task details were provided');
+        return response.status(400).send(responseMessages.BAD_REQUEST.INVAID_TASK_DETAILS);
     }
 
     const tasks = await Task.find({project: request.body.project});
@@ -75,21 +75,25 @@ taskRoutes.post('/', async (request, response) => {
 
     project.tasks = project.tasks.concat(savedTask._id);
     project.save();
-    return response.status(201).json({status: 'success', task: taskDoc});
+    return response.status(201).json(taskDoc);
 });
 
 taskRoutes.put('/:taskID', async (request, response) => {
     const isAuthorisedUser = Utils.isAuthorised(request.headers)
     if (!isAuthorisedUser) {
-        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+        return response.status(401).send(responseMessages.UNAUTHORISED_USER);
     }
 
     if (lodash.isEmpty(request.body)) {
-        return response.status(400).send('No Task details were provided');
+        return response.status(400).send(responseMessages.BAD_REQUEST.INVAID_TASK_DETAILS);
     }
     const { taskID } = request.params;
-    const task = await Task.findOne({taskID: taskID});
-    request.body.linkedTasks = task.linkedTasks;
+    const taskCheck = await Task.exists({taskID: taskID});
+    if (!taskCheck) {
+        return response.status(404).send(responseMessages.NOT_FOUND.TASK_NOT_FOUND);
+    }
+
+    request.body.linkedTasks = taskCheck.linkedTasks;
     const updatedTask = await Task.findOneAndReplace(
         {taskID: taskID},
         {...request.body},
@@ -107,15 +111,12 @@ taskRoutes.put('/:taskID', async (request, response) => {
     if (updatedTask) {
         return response.status(200).json(updatedTask);
     }
-    else {
-        return response.status(404).send(`Unable to find a task with ID ${taskID}`);
-    }
 });
 
 taskRoutes.patch('/:taskID', async (request, response) => {
     const isAuthorisedUser = Utils.isAuthorised(request.headers)
     if (!isAuthorisedUser) {
-        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+        return response.status(401).send(responseMessages.UNAUTHORISED_USER);
     }
 
     const taskID = request.params.taskID;
@@ -129,25 +130,25 @@ taskRoutes.patch('/:taskID', async (request, response) => {
         return response.status(200).json(updatedTask);
     }
     else {
-        return response.status(404).send(`Unable to find a task with ID ${taskID}`);
+        return response.status(404).send(responseMessages.NOT_FOUND.TASK_NOT_FOUND);
     }
 });
 
 taskRoutes.patch('/:taskID/link', async (request, response) => {
     const isAuthorisedUser = Utils.isAuthorised(request.headers)
     if (!isAuthorisedUser) {
-        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+        return response.status(401).send(responseMessages.UNAUTHORISED_USER);
     }
 
     if (!request.body.linkedTasks || lodash.isEmpty(request.body.linkedTasks)) {
-        return response.status(400).send('The request was sent without data. Please ensure that tasks are selected to be linked');
+        return response.status(400).send(responseMessages.BAD_REQUEST.NO_TASKS_LINKED);
     }
 
     const { taskID } = request.params;
     const taskBeingLinked = await Task.findOne({taskID: taskID});
     
     if (!taskBeingLinked || lodash.isEmpty(taskBeingLinked)) {
-        return response.status(404).send('The server cannot link these tasks together as the task being linked does not exist');
+        return response.status(404).send(responseMessages.NOT_FOUND.TASK_NOT_FOUND);
     }
 
     const linkedTasks = await Task.find({taskID: {$in: request.body.linkedTasks}});
@@ -158,26 +159,26 @@ taskRoutes.patch('/:taskID/link', async (request, response) => {
         return response.status(200).json({taskBeingLinked, linkedTasks});
     }
     else if (linkedTasksChecked.length === 0) {
-        return response.status(404).send('The server cannot find the tasks to link');
+        return response.status(404).send(responseMessages.NOT_FOUND.TASKS_TO_LINK);
     }
     else {
-        return response.status(404).send('The server cannot find all the tasks to link');
+        return response.status(404).send(responseMessages.NOT_FOUND.ALL_TASKS_TO_LINK);
    }        
 });
 
 taskRoutes.delete('/:taskID', async (request, response) => {
     const isAuthorisedUser = Utils.isAuthorised(request.headers)
     if (!isAuthorisedUser) {
-        return response.status(401).send('This action can only be performed by a logged in user. Please login or create an account to update this task');
+        return response.status(401).send(responseMessages.UNAUTHORISED_USER);
     }
     
     const { taskID } = request.params;
     const taskExists = await Task.exists({taskID: taskID});
     if (!taskExists) {
-        return response.status(404).send('Unable to find the task to delete');
+        return response.status(404).send(responseMessages.NOT_FOUND.TASK_NOT_FOUND);
     }
     await Task.findOneAndDelete({taskID: taskID});
-    return response.status(200).send('The task was successfully deleted');
+    return response.status(200).send(responseMessages.SUCCESS.TASK_DELETED);
 });
 
 module.exports = taskRoutes;

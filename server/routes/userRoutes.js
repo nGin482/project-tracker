@@ -1,6 +1,7 @@
 const express = require("express");
 
 const User = require("../models/UserSchema");
+const errorMessages = require("../config");
 
 const userRouter = express.Router();
 
@@ -12,7 +13,7 @@ userRouter.get('/:username', async (request, response) => {
         return response.status(200).json(user);
     }
     else {
-        return response.status(404).send(`The server cannot find a user with the username ${username}`)
+        return response.status(404).send(errorMessages.NOT_FOUND.USER_NOT_FOUND);
     }
 });
 
