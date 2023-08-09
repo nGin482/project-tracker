@@ -17,8 +17,6 @@ const mongo_uri = process.env.NODE_ENV === 'test'
     ? process.env.MONGO_TEST_URI
     : process.env.MONGODB_URI;
 
-mongoConnection(mongo_uri);
-
 app.use(cors());
 app.use(express.json());
 
@@ -36,6 +34,7 @@ app.get('/', (request, response) => {
 const PORT = 3001;
 const server = app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`)
+    mongoConnection(mongo_uri);
 })
 
 module.exports = server;
