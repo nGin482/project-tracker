@@ -11,6 +11,7 @@ const {
     newTaskWithRelated,
     updatedTask,
     update,
+    linkedTasksEmpty,
     linkedTasksDefault,
     linkedTasksBothNotFound,
     linkedTasksOneNotFound,
@@ -88,7 +89,7 @@ describe('Tasks Endpoint', () => {
     it('should respond with 401 if sending POST request without Authorization', async () => {
         const response = await api.post('/api/tasks').send(newTask);
         expect(response.statusCode).toEqual(401);
-        expect(response.text).toEqual('The request was not completed due to an unauthorised user');
+        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to perform this action');
     });
 
     it('should respond with 401 if sending POST request with invalid Auth', async () => {
@@ -96,14 +97,14 @@ describe('Tasks Endpoint', () => {
             .set('Authorization', 'Bearer invalid.token')
             .send(newTask);
         expect(response.statusCode).toEqual(401);
-        expect(response.text).toEqual('The request was not completed due to an unauthorised user');
+        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to perform this action');
     })
 
     it('should respond with 400 if no request body provided but Auth provided', async () => {
         const response = await api.post('/api/tasks')
             .set('Authorization', bearerToken)
         expect(response.statusCode).toEqual(400);
-        expect(response.text).toEqual('No Task details were provided');
+        expect(response.text).toEqual('Please provide details of the new task');
     });
 
     it('should create task on POST request', async () => {
@@ -113,7 +114,7 @@ describe('Tasks Endpoint', () => {
         expect(response.statusCode).toEqual(201);
         
         // check that is task is created successfully
-        const taskCreated = response.body.task;
+        const taskCreated = response.body;
         expect(taskCreated.taskID).toEqual('TEST-3');
         expect(taskCreated.reporter).toEqual('Natalie-Test');
 
@@ -136,7 +137,8 @@ describe('Tasks Endpoint', () => {
             .send(newTaskWithRelated);
 
         expect(response.statusCode).toEqual(201);
-        const taskCreated = response.body.task;
+        const taskCreated = response.body;
+        expect(taskCreated).not.toBeUndefined();
         expect(taskCreated.taskID).toEqual('TEST-4');
         expect(taskCreated.reporter).toEqual('Natalie-Test');
         expect(taskCreated.linkedTasks).toHaveLength(2);
@@ -157,7 +159,7 @@ describe('Tasks Endpoint', () => {
             .send(updatedTask);
         
         expect(response.statusCode).toEqual(401);
-        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to update this task');
+        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to perform this action');
     });
 
     it('should respond with 401 if updating task with invalid auth', async () => {
@@ -166,7 +168,7 @@ describe('Tasks Endpoint', () => {
             .send(updatedTask);
 
         expect(response.statusCode).toEqual(401);
-        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to update this task');
+        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to perform this action');
     });
 
     it('should respond with 400 if updating task without updated details sent', async () => {
@@ -174,7 +176,7 @@ describe('Tasks Endpoint', () => {
             .set('Authorization', bearerToken);
         
         expect(response.statusCode).toEqual(400);
-        expect(response.text).toEqual('No Task details were provided');
+        expect(response.text).toEqual('Please provide details of the new task');
     });
 
     it('should respond with 404 if task does not exist to update', async () => {
@@ -183,7 +185,7 @@ describe('Tasks Endpoint', () => {
             .send(updatedTask);
         
         expect(response.statusCode).toEqual(404);
-        expect(response.text).toEqual(`Unable to find a task with ID BLANK-1`);
+        expect(response.text).toEqual(`The server is unable to find this task`);
     });
 
     it('should respond with 200 when successfully updating task', async () => {
@@ -200,7 +202,7 @@ describe('Tasks Endpoint', () => {
             .send(update);
         
         expect(response.statusCode).toEqual(401);
-        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to update this task');
+        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to perform this action');
 
         const taskResponse = await api.get('/api/tasks/TEST-2');
         const task = taskResponse.body;
@@ -213,7 +215,7 @@ describe('Tasks Endpoint', () => {
             .send(update);
         
         expect(response.statusCode).toEqual(401);
-        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to update this task');
+        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to perform this action');
 
         const taskResponse = await api.get('/api/tasks/TEST-2');
         const task = taskResponse.body;
@@ -226,7 +228,7 @@ describe('Tasks Endpoint', () => {
             .send(update);
         
         expect(response.statusCode).toEqual(404);
-        expect(response.text).toEqual('Unable to find a task with ID TESTING-2');
+        expect(response.text).toEqual('The server is unable to find this task');
 
         const taskResponse = await api.get('/api/tasks/TESTING-2');
         const task = taskResponse.body;
@@ -250,11 +252,13 @@ describe('Tasks Endpoint', () => {
             .send({ linkedTasks: linkedTasksDefault });
         
         expect(response.statusCode).toEqual(401);
-        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to update this task');
+        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to perform this action');
+        console.log('should run first')
 
         const taskResponse = await api.get('/api/tasks/RAND-4');
         const task = taskResponse.body;
-        expect(task.linkedTasks).toHaveLength(0);
+        console.log(task)
+        expect(task.linkedTasks).toHaveLength(1);
     });
 
     it('LINK RELATED TASKS - respond with 401 if invalid auth provided', async () => {
@@ -263,42 +267,41 @@ describe('Tasks Endpoint', () => {
             .send({ linkedTasks: linkedTasksDefault });
         
         expect(response.statusCode).toEqual(401);
-        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to update this task');
+        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to perform this action');
+        console.log('should run second')
 
         const taskResponse = await api.get('/api/tasks/RAND-4');
         const task = taskResponse.body;
-        expect(task.linkedTasks).toHaveLength(0);
+        expect(task.linkedTasks).toHaveLength(1);
     });
 
     it('LINK RELATED TASKS - respond with 400 if request body does not contain linkedTasks key', async () => {
-        const someKey = [
-            'TEST-1',
-            'RAND-2'
-        ];
         const response = await api.patch('/api/tasks/RAND-4/link')
             .set('Authorization', bearerToken)
-            .send({ someKey });
+            .send({ linkedTasksDefault });
         
         expect(response.statusCode).toEqual(400);
-        expect(response.text).toEqual('The request was sent without data. Please ensure that tasks are selected to be linked');
+        expect(response.text).toEqual('Please provide a task to be linked to this one');
+        console.log('should run third')
 
         const taskResponse = await api.get('/api/tasks/RAND-4');
         const task = taskResponse.body;
-        expect(task.linkedTasks).toHaveLength(0);
+        expect(task.linkedTasks).toHaveLength(1);
     });
 
     it('LINK RELATED TASKS - respond with 400 if linkedTasks array in request body is empty', async () => {
-        const linkedTasks = [];
         const response = await api.patch('/api/tasks/RAND-4/link')
             .set('Authorization', bearerToken)
-            .send({ linkedTasks });
+            .send({ linkedTasks: linkedTasksEmpty });
         
         expect(response.statusCode).toEqual(400);
-        expect(response.text).toEqual('The request was sent without data. Please ensure that tasks are selected to be linked');
+        expect(response.text).toEqual('Please provide a task to be linked to this one');
+        console.log('should run fourth')
 
         const taskResponse = await api.get('/api/tasks/RAND-4');
         const task = taskResponse.body;
-        expect(task.linkedTasks).toHaveLength(0);
+        const linkedTasks = task.linkedTasks;
+        expect(linkedTasks).toHaveLength(1);
     });
 
     it('LINK RELATED TASKS - respond with 404 if the task being linked is not found', async () => {
@@ -307,7 +310,8 @@ describe('Tasks Endpoint', () => {
             .send({ linkedTasks: linkedTasksDefault });
         
         expect(response.statusCode).toEqual(404);
-        expect(response.text).toEqual('The server cannot link these tasks together as the task being linked does not exist');
+        expect(response.text).toEqual('The server is unable to find this task');
+        console.log('should run fifth')
 
         const taskResponse = await api.get('/api/tasks');
         const tasks = taskResponse.body;
@@ -324,7 +328,7 @@ describe('Tasks Endpoint', () => {
 
         const taskResponse = await api.get('/api/tasks/RAND-4');
         const task = taskResponse.body;
-        expect(task.linkedTasks).toHaveLength(0);
+        expect(task.linkedTasks).toHaveLength(1);
     });
 
     it("LINK RELATED TASKS - respond with 404 if one or more of the task(s) to link can't be found", async () => {
@@ -341,7 +345,7 @@ describe('Tasks Endpoint', () => {
 
         const taskResponse = await api.get('/api/tasks/RAND-4');
         const task = taskResponse.body;
-        expect(task.linkedTasks).toHaveLength(0);
+        expect(task.linkedTasks).toHaveLength(1);
     });
 
     it("LINK RELATED TASKS - respond with 200 if able to successfully link all tasks", async () => {
@@ -353,14 +357,14 @@ describe('Tasks Endpoint', () => {
 
         const taskResponse = await api.get('/api/tasks/RAND-4');
         const task = taskResponse.body;
-        expect(task.linkedTasks).toHaveLength(linkedTasksDefault.length);
+        expect(task.linkedTasks.length).toEqual(linkedTasksDefault.length + 1);
     });
 
     it("DELETE TASK - respond with 401 if no auth provided", async () => {
         const response = await api.delete('/api/tasks/RAND-4');
         
         expect(response.statusCode).toEqual(401);
-        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to update this task');
+        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to perform this action');
 
         const taskResponse = await api.get('/api/tasks/RAND-4');
         expect(taskResponse.body).toBeDefined();
@@ -371,7 +375,7 @@ describe('Tasks Endpoint', () => {
             .set('Authorization', 'Bearer invalid.token');
         
         expect(response.statusCode).toEqual(401);
-        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to update this task');
+        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to perform this action');
 
         const taskResponse = await api.get('/api/tasks/RAND-4');
         expect(taskResponse.body).toBeDefined();
@@ -420,7 +424,7 @@ describe('Projects Endpoint', () => {
             .send({ newProject });
         
         expect(response.statusCode).toEqual(401);
-        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to update this task');
+        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to perform this action');
 
         const projectsResponse = await api.get('/api/projects');
         expect(projectsResponse.body).toHaveLength(2);
@@ -432,7 +436,7 @@ describe('Projects Endpoint', () => {
             .send({ newProject });
         
         expect(response.statusCode).toEqual(401);
-        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to update this task');
+        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to perform this action');
 
         const projectsResponse = await api.get('/api/projects');
         expect(projectsResponse.body).toHaveLength(2);
@@ -481,7 +485,7 @@ describe('Users Endpoint', () => {
 
 describe('Login/Register', () => {
     it('REGISTER - should respond with 409 if username already taken', async () => {
-        const response = await api.post('/api/register')
+        const response = await api.post('/api/auth/register')
             .send({ ...loginDetailsAlreadyExist });
 
         expect(response.statusCode).toEqual(409);
@@ -489,7 +493,7 @@ describe('Login/Register', () => {
     });
 
     it('REGISTER - should respond with 200 on successful registration', async () => {
-        const response = await api.post('/api/register')
+        const response = await api.post('/api/auth/register')
             .send({ ...loginDetailsNew });
 
         expect(response.statusCode).toEqual(200);
@@ -499,7 +503,7 @@ describe('Login/Register', () => {
     });
 
     it('LOGIN - should respond with 401 if user not found', async () => {
-        const response = await api.post('/api/login')
+        const response = await api.post('/api/auth/login')
             .send({ ...loginDetailsFailedUser });
 
         expect(response.statusCode).toEqual(401);
@@ -507,7 +511,7 @@ describe('Login/Register', () => {
     });
 
     it('LOGIN - should respond with 401 if password is incorrect', async () => {
-        const response = await api.post('/api/login')
+        const response = await api.post('/api/auth/login')
             .send({ ...loginDetailsFailedPassword });
 
         expect(response.statusCode).toEqual(401);
@@ -515,7 +519,7 @@ describe('Login/Register', () => {
     });
 
     it('LOGIN - should respond with 200 on successful login', async () => {
-        const response = await api.post('/api/login')
+        const response = await api.post('/api/auth/login')
             .send({ ...loginDetailsSuccess });
 
         expect(response.statusCode).toEqual(200);

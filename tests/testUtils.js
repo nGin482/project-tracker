@@ -34,6 +34,8 @@ const update = {
     value: 'Task for testing something in the Test Project'
 };
 
+const linkedTasksEmpty = [];
+
 const linkedTasksDefault = [
     'TEST-1',
     'RAND-2'
@@ -88,6 +90,7 @@ module.exports = {
     newTaskWithRelated,
     updatedTask,
     update,
+    linkedTasksEmpty,
     linkedTasksDefault,
     linkedTasksBothNotFound,
     linkedTasksOneNotFound,
