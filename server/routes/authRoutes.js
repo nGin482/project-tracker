@@ -2,24 +2,25 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-const authRoutes = express.Router();
-
 const User = require("../models/UserSchema");
 const uploadHandle = require("../services/fileUploadService");
 const errorMessages = require("../config");
 
+const authRouter = express.Router();
 
-authRoutes.post('/register', async (request, response) => {
+
+authRouter.post('/register', async (request, response) => {
     const { username, password, email, image } = request.body;
     const checkUser = await User.findOne({username: username});
     if (checkUser) {
         return response.status(409).send(errorMessages.INVALID_REGISTRATION);
     }
-    else {
-        const pwHash = await bcrypt.hash(password, 14);
-        const user = { username, password: pwHash, email, image };
-        const newUser = new User(user);
-        newUser.save();
+    const pwHash = await bcrypt.hash(password, 14);
+    const user = { username, password: pwHash, email, image };
+    const newUser = new User(user);
+    newUser.save();
+
+    if (image && image !== '' && image !== '//ssl.gstatic.com/accounts/ui/avatar_2x.png') {
         try {
             await uploadHandle.createFolder(`Users/${username}`);
             const imageName = uploadHandle.getPublicIDFromURL(image);
@@ -30,9 +31,10 @@ authRoutes.post('/register', async (request, response) => {
             return response.status(500).json(err.message);
         }
     }
+    return response.status(200).json({username, image});
 });
 
-authRoutes.post('/login', async (request, response) => {
+authRouter.post('/login', async (request, response) => {
     const { username, password } = request.body;
     const user = await User.findOne({username: username}).populate('tasks').exec();
     if (!user) {
@@ -49,4 +51,4 @@ authRoutes.post('/login', async (request, response) => {
     return response.status(200).send({username: user.username, email: user.email, avatar: user.image, token});
 });
 
-module.exports = authRoutes;
+module.exports = authRouter;
