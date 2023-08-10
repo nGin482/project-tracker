@@ -3,14 +3,33 @@ import { message } from "antd";
 
 import UserContext from "../../contexts/UserContext";
 import useProjects from "../../hooks/useProjects";
-import { editComment, deleteComment } from "../../requests/commentRequests";
+import { commentTask, editComment, deleteComment } from "../../requests/commentRequests";
 
-const useComments = (task, setTask, setEditingComment) => {
+const useComments = (task, setTask, setEditingComment, setMakingComment) => {
     const [messageApi, contextHolder] = message.useMessage();
 
     const [newCommentContent, setNewCommentContent] = useState('');
+    const [comment, setComment] = useState('');
     const { user } = useContext(UserContext);
     const { updateTaskState } = useProjects();
+
+    const addComment = () => {
+        if(comment === '') {
+            messageApi.error('Please add a comment before submitting.');
+        }
+        else {
+            commentTask(task.taskID, comment, user.token).then(data => {
+                updateTaskState(task.project, task.taskID, data);
+                setTask(data);
+                setComment('');
+                setMakingComment(false);
+            })
+            .catch(err => {
+                const errorMessage = err.response ? err.response.data : err;
+                messageApi.error(errorMessage);
+            })
+        }
+    };
 
     const updateComment = comment => {
         if (newCommentContent === '') {
@@ -44,6 +63,8 @@ const useComments = (task, setTask, setEditingComment) => {
 
     return {
         setNewCommentContent,
+        setComment,
+        addComment,
         updateComment,
         removeComment,
         contextHolder

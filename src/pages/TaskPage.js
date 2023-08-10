@@ -262,10 +262,8 @@ const TaskPage = () => {
                                 </Content>
                             </div>
                             <AddComment
-                                messageApi={messageApi}
                                 setTask={setTask}
                                 task={task}
-                                user={user}
                             />
                             {
                                 task.comments &&
