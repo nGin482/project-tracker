@@ -10,7 +10,8 @@ import UserContext from "./contexts/UserContext";
 import TasksContext from "./contexts/TasksContext";
 import ErrorsContext from "./contexts/ErrorsContext";
 import ProjectContext from "./contexts/ProjectContext";
-import { getTasks, getProjects } from "./services/requests";
+import { getTasks } from "./requests/taskRequests";
+import { getProjects } from "./requests/projectRequests";
 import './App.css';
 
 function App() {
