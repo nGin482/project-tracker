@@ -7,15 +7,12 @@ import TaskPage from "./pages/TaskPage";
 import LoginPage from "./pages/LoginPage";
 import ProfilePage from "./pages/ProfilePage";
 import UserContext from "./contexts/UserContext";
-import TasksContext from "./contexts/TasksContext";
 import ErrorsContext from "./contexts/ErrorsContext";
 import ProjectContext from "./contexts/ProjectContext";
-import { getTasks } from "./requests/taskRequests";
 import { getProjects } from "./requests/projectRequests";
 import './App.css';
 
 function App() {
-  const [tasks, setTasks] = useState([]);
   const [projects, setProjects] = useState([]);
   const [projectViewed, setProjectViewed] = useState('All');
   const [cookie] = useCookies(['user']);
@@ -24,12 +21,9 @@ function App() {
   const [errorType, setErrorType] = useState('');
 
   useEffect(() => {
-    getTasks().then(tasks => {
-      setTasks(tasks);
-    });
     getProjects().then(data => {
       setProjects(data);
-  })
+    })
   }, []);
 
   const router = createBrowserRouter([
@@ -52,19 +46,16 @@ function App() {
   ]);
 
   return (
-
     <CookiesProvider>
       <UserContext.Provider value={{user, setUser}}>
         <ProjectContext.Provider value={{projects, setProjects, projectViewed, setProjectViewed}}>
-          <TasksContext.Provider value={{tasks, setTasks}}>
-            <ErrorsContext.Provider value={{errorMessage, setErrorMessage, errorType, setErrorType}}>
-              <RouterProvider router={router} />
-            </ErrorsContext.Provider>
-          </TasksContext.Provider>
+          <ErrorsContext.Provider value={{errorMessage, setErrorMessage, errorType, setErrorType}}>
+            <RouterProvider router={router} />
+          </ErrorsContext.Provider>
         </ProjectContext.Provider>
       </UserContext.Provider>
     </CookiesProvider>
   );
-}
+};
 
 export default App;
