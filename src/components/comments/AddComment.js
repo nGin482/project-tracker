@@ -4,7 +4,7 @@ import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 import useProjects from "../../hooks/useProjects";
-import { commentTask } from "../../services/requests";
+import { commentTask } from "../../requests/commentRequests";
 
 const AddComment = props => {
     const { messageApi, setTask, task, user } = props;

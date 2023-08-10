@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Form, Input, Alert, Button, Space, Upload } from "antd";
 
 import useRegister from "./useRegister";
-import { register } from "../../services/requests";
+import { register } from "../../requests/authRequests";
 import "./Registration.css";
 
 

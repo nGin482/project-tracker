@@ -4,7 +4,7 @@ import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 import FileUploadAdapter from "./FileUploadAdapter";
-import { createTask } from "../../services/requests";
+import { createTask } from "../../requests/taskRequests";
 import ProjectContext from "../../contexts/ProjectContext";
 import UserContext from "../../contexts/UserContext";
 import "./NewTask.css";

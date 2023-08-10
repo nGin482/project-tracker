@@ -2,7 +2,7 @@ import { useState } from "react";
 import { message } from "antd";
 import FormData from "form-data";
 
-import { uploadAvatar } from "../../services/requests";
+import { uploadAvatar } from "../../requests/uploadRequests";
 
 const useRegister = () => {
     const [messageApi, contextHandler] = message.useMessage();

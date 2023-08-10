@@ -3,7 +3,7 @@ import { Alert, Form, Input, Modal } from "antd";
 
 import UserContext from "../../contexts/UserContext";
 import ProjectContext from "../../contexts/ProjectContext";
-import { createProject } from "../../services/requests";
+import { createProject } from "../../requests/projectRequests";
 
 const CreateProject = props => {
     const { showForm, setShowForm } = props;

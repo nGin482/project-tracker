@@ -4,7 +4,7 @@ import { Alert, Button, Form, Input, Space } from "antd";
 import { useCookies } from "react-cookie";
 
 import UserContext from "../../contexts/UserContext";
-import { login } from "../../services/requests";
+import { login } from "../../requests/authRequests";
 import "./Login.css";
 
 const Login = props => {

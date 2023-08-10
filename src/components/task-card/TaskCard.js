@@ -9,7 +9,7 @@ import AdditionalDetails from "../sidebars/AdditionalDetails";
 import TaskType from "../task-type-icon/TaskType";
 import useProjects from "../../hooks/useProjects";
 import UserContext from "../../contexts/UserContext";
-import { updateTaskDetail, deleteTask } from "../../services/requests";
+import { updateTaskDetail, deleteTask } from "../../requests/taskRequests";
 import "./TaskCard.css";
 
 const TaskCard = props => {

@@ -3,7 +3,7 @@ import { message } from "antd";
 
 import UserContext from "../../contexts/UserContext";
 import useProjects from "../../hooks/useProjects";
-import { editComment, deleteComment } from "../../services/requests";
+import { editComment, deleteComment } from "../../requests/commentRequests";
 
 const useComments = (task, setTask, setEditingComment) => {
     const [messageApi, contextHolder] = message.useMessage();
