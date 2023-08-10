@@ -1,50 +1,16 @@
-import { useState, useContext } from "react";
-import { Alert, Form, Input, Modal } from "antd";
+import { Form, Input, Modal } from "antd";
 
-import UserContext from "../../contexts/UserContext";
-import ProjectContext from "../../contexts/ProjectContext";
-import { createProject } from "../../requests/projectRequests";
+import useCreateProject from "./useCreateProject";
 
 const CreateProject = props => {
     const { showForm, setShowForm } = props;
-    const { user } = useContext(UserContext);
-    const { projects, setProjects } = useContext(ProjectContext);
-
-    const [form] = Form.useForm();
-    const [errorsExist, setErrorsExist] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
-
-    const createNewProject = () => {
-        form.validateFields().then(values => {
-            setErrorsExist(false);
-            createProject(values, user.token).then(data => {
-                form.resetFields();
-                setShowForm(false);
-                setProjects([...projects, data]);
-            }).catch(err => {
-                if (err.response.data) {
-                    setErrorMessage(err.response.data);
-                }
-                else {
-                    setErrorMessage('Please try again later');
-                }
-            })
-        })
-        .catch(err => {
-            setErrorsExist(true);
-            setErrorMessage('Please ensure all fields are filled out correctly');
-        })
-    };
-
-    const cancelCreateProject = () => {
-        setShowForm(false);
-        setErrorsExist(false);
-        form.resetFields();
-    }
-
-    const onProjectCodeChange = value => {
-        form.setFieldsValue({projectCode: value.toUpperCase()});
-    }
+    const {
+        form,
+        contextHolder,
+        createNewProject,
+        cancelCreateProject,
+        onProjectCodeChange
+    } = useCreateProject(setShowForm);
 
     return (
         <Modal
@@ -59,11 +25,7 @@ const CreateProject = props => {
             <Form
                 form={form}
             >
-                {errorsExist && <Alert
-                    type="error"
-                    message={errorMessage}
-                    showIcon
-                />}
+                {contextHolder}
                 <Form.Item
                     label="Project Name"
                     name="projectName"
