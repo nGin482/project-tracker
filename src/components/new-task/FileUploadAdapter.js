@@ -1,4 +1,4 @@
-import { uploadTaskImage } from "../../services/requests";
+import { uploadTaskImage } from "../../requests/uploadRequests";
 
 class FileUploadAdapter {
     constructor(loader, token) {

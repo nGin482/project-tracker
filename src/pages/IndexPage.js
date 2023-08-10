@@ -6,7 +6,7 @@ import ProjectContext from "../contexts/ProjectContext";
 import UserContext from "../contexts/UserContext";
 import Navbar from "../components/navbar/Navbar";
 import useProjects from "../hooks/useProjects";
-import { deleteProject } from "../services/requests";
+import { deleteProject } from "../requests/projectRequests";
 
 
 const IndexPage = props => {

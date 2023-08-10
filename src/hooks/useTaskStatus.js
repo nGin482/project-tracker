@@ -2,7 +2,7 @@ import { useState, useContext } from "react";
 
 import ProjectContext from "../contexts/ProjectContext";
 import UserContext from "../contexts/UserContext";
-import { updateTaskDetail } from "../services/requests";
+import { updateTaskDetail } from "../requests/taskRequests";
 
 const useTaskStatus = status => {
     const [taskStatus, setTaskStatus] = useState(status);

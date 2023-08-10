@@ -8,7 +8,7 @@ import ProfileDetails from "./profile-views/ProfileDetails";
 import UserContext from "../contexts/UserContext";
 import ErrorsContext from "../contexts/ErrorsContext";
 import ErrorPage from "./ErrorPage";
-import { fetchUser } from "../services/requests";
+import { fetchUser } from "../requests/userRequests";
 import "./styles/ProfilePage.css";
 
 

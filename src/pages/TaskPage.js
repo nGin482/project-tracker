@@ -25,7 +25,7 @@ import ErrorPage from "./ErrorPage";
 import ErrorsContext from "../contexts/ErrorsContext";
 import UserContext from "../contexts/UserContext";
 import useProjects from "../hooks/useProjects";
-import { getTask, getTasksByProject, updateTask, deleteTask } from "../services/requests";
+import { getTask, getTasksByProject, updateTask, deleteTask } from "../requests/taskRequests";
 import "./styles/TaskPage.css";
 import "../components/comments/comments.css";
 
