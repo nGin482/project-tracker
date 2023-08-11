@@ -1,6 +1,4 @@
-import { useState, useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";
-import { useCookies } from "react-cookie";
+import { useState, useContext } from "react";
 import { NavLink } from "react-router-dom";
 import { Button, Layout, Dropdown } from "antd";
 import { LoginOutlined, LogoutOutlined, DownOutlined } from "@ant-design/icons";
@@ -8,41 +6,36 @@ import { LoginOutlined, LogoutOutlined, DownOutlined } from "@ant-design/icons";
 import NewTask from "../new-task/NewTask";
 import CreateProject from "../create-project/CreateProject";
 import UserContext from "../../contexts/UserContext";
+import useAuth from "../../hooks/useAuth";
 import logo from "../../assets/Logo.png";
 import "./Navbar.css";
 
 
 const Navbar = props => {
     const { Header } = Layout;
-    const navigate = useNavigate();
 
     const [showTaskForm, setShowTaskForm] = useState(false);
     const [showProjectForm, setShowProjectForm] = useState(false);
     const { user } = useContext(UserContext);
-    const [_, __, removeCookie] = useCookies(['user']);
 
-    const logout = () => {
-        removeCookie('user', {path: '/'});
-        window.location.reload();
-        navigate('/'); 
-    }
+    const { logout } = useAuth();
 
     const items = [
         {
             label: <NavLink to={`/profile/${user?.username}`}>Profile</NavLink>,
             key: '0',
-          },
-          {
+        },
+        {
             label: <NavLink to={`/profile/${user?.username}/edit`}>Edit Details</NavLink>,
             key: '1',
-          },
-          {
+        },
+        {
             type: 'divider',
-          },
-          {
+        },
+        {
             label: <span onClick={() => logout()}>Logout <LogoutOutlined /></span>,
             key: '3',
-          }
+        }
     ];
 
     return (
@@ -83,7 +76,7 @@ const Navbar = props => {
                         className="user-dropdown"
                     >
                         <Button id="username">
-                            {user.avatar && <img src={user.avatar} id="avatar" width="30" height="240" />}
+                            {user.avatar && <img src={user.avatar} id="avatar" width="30" height="240" alt="avatar" />}
                             {user.username}<DownOutlined />
                         </Button>
                     </Dropdown>
@@ -95,8 +88,6 @@ const Navbar = props => {
                     </Button>
                 )}
             </div>
-
-            
         </Header>
     );
 };

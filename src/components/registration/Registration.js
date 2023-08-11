@@ -1,51 +1,25 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Form, Input, Alert, Button, Space, Upload } from "antd";
+import { useEffect } from "react";
+import { Button, Form, Input, message, Space, Upload } from "antd";
 
 import useRegister from "./useRegister";
-import { register } from "../../requests/authRequests";
+import useAuth from "../../hooks/useAuth";
 import "./Registration.css";
 
 
 const Registration = props => {
     const { setFormShown } = props;
     const [form] = Form.useForm();
-    const [imageSource, setImageSource] = useState('//ssl.gstatic.com/accounts/ui/avatar_2x.png');
-    const [errorMessage, setErrorMessage] = useState('');
-    const { onChange, uploadFile, contextHandler, avatarURL } = useRegister();
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        if (imageSource === '') {
-            setImageSource('//ssl.gstatic.com/accounts/ui/avatar_2x.png');
-        }
-    }, [imageSource]);
+    const [messageApi, contextHandler] = message.useMessage();
+    const { onChange, uploadFile, useAvatarURL, useImageSource } = useRegister(messageApi);
+    const { avatarURL } = useAvatarURL;
+    const { imageSource, setImageSource } = useImageSource;
+    
+    const { createNewUser } = useAuth(form, messageApi);
 
     useEffect(() => {
         form.setFieldValue('image', avatarURL);
         setImageSource(avatarURL);
-    }, [avatarURL]);
-
-    const createNewUser = () => {
-        form.validateFields().then(values => {
-            const { username, password, email, image } = values;
-            const newUserDetails = { username, password, email, image };
-            register(newUserDetails).then(data => {
-                navigate(`/profile/${username}`)
-            }).catch(err => {
-                const error = err?.response.data ? err.response.data : err;
-                setErrorMessage(error);
-            })
-        })
-        .catch(err => {
-            console.log(err)
-        })
-
-    }
-    const submitFailed = values => {
-        console.log(values)
-        setErrorMessage('Username or password was incorrect');
-    };
+    }, [avatarURL, form]);
 
     const getFile = () => {
         return avatarURL;    
@@ -55,7 +29,6 @@ const Registration = props => {
         <Form
             form={form}
             onFinish={createNewUser}
-            onFinishFailed={submitFailed}
             id="registration"
         >
             {contextHandler}
@@ -64,7 +37,6 @@ const Registration = props => {
                 alt="profile-img"
                 className="profile-img-card"
             />
-            {errorMessage !== '' ? <Alert type="error" message={errorMessage} showIcon /> : ''}
             <Form.Item
                 label="Username"
                 name="username"

@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { message } from "antd";
 import FormData from "form-data";
 
 import { uploadAvatar } from "../../requests/uploadRequests";
 
-const useRegister = () => {
-    const [messageApi, contextHandler] = message.useMessage();
+const useRegister = messageApi => {
     const [avatarURL, setAvatarURL] = useState('');
+    const [imageSource, setImageSource] = useState('//ssl.gstatic.com/accounts/ui/avatar_2x.png');
 
     const onChange = info => {
         if (info.file.status !== 'uploading') {
@@ -40,11 +39,21 @@ const useRegister = () => {
         });
     };
 
+    const useImageSource = {
+        imageSource,
+        setImageSource
+    };
+
+    const useAvatarURL = {
+        avatarURL,
+        setAvatarURL
+    }
+
     return {
         onChange,
         uploadFile,
-        contextHandler,
-        avatarURL
+        useImageSource,
+        useAvatarURL
     };
 };
 

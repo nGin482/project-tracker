@@ -1,38 +1,13 @@
-import { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
-import { Alert, Button, Form, Input, Space } from "antd";
-import { useCookies } from "react-cookie";
+import { Button, Form, Input, message, Space } from "antd";
 
-import UserContext from "../../contexts/UserContext";
-import { login } from "../../requests/authRequests";
+import useAuth from "../../hooks/useAuth";
 import "./Login.css";
 
 const Login = props => {
     const { setFormShown } = props;
     const [form] = Form.useForm();
-    const [errorMessage, setErrorMessage] = useState('');
-    const { setUser } = useContext(UserContext);
-    const [cookie, setCookie] = useCookies(['user']);
-    const navigate = useNavigate();
-
-    const loginUser = () => {
-        form.validateFields().then(values => {
-            const { username, password } = values;
-            login(username, password).then(data => {
-                setErrorMessage('');
-                setUser(data);
-                setCookie('user', JSON.stringify(data), {path: '/'})
-                form.resetFields();
-                navigate(`/profile/${data.username}`)
-            }).catch(err => {
-                console.log(err)
-                setErrorMessage(err.response.data);
-            })
-        }).catch(err => {
-            setErrorMessage(err);
-        })
-    }
-
+    const [messageApi, contextHolder] = message.useMessage();
+    const { loginUser } = useAuth(form, messageApi);
 
     return (
         <Form
@@ -40,6 +15,7 @@ const Login = props => {
             id="login-form"
             onFinish={loginUser}
         >
+            {contextHolder}
             <Form.Item
                 label="Username"
                 name="username"
@@ -64,15 +40,6 @@ const Login = props => {
             >
                 <Input.Password />
             </Form.Item>
-            {errorMessage !== '' ? (
-                <Alert 
-                    type="error"
-                    message={errorMessage}
-                    showIcon
-                    className="login-alert"
-                 /> 
-                )
-            : ''}
             <Form.Item>
                 <Button
                     type="primary"
