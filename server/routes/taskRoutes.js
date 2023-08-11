@@ -41,6 +41,17 @@ taskRoutes.get('/:taskID', async (request, response) => {
     }
 });
 
+taskRoutes.get('/project/:project', async (request, response) => {
+    const { project } = request.params;
+
+    if (!project) {
+        return response.status(404).send('Please specify a project to search for');
+    }
+
+    const tasksByProject = await Task.find({project: project});
+    return response.status(200).json(tasksByProject);
+});
+
 taskRoutes.post('/', async (request, response) => {
     const isAuthorisedUser = Utils.isAuthorised(request.headers)
     if (!isAuthorisedUser) {
