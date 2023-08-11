@@ -1,113 +1,26 @@
-import { useState, useEffect, useContext } from "react";
-import { Form, Input, Select, Alert, Modal } from "antd";
+import { Form, Input, Select, Modal } from "antd";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 import FileUploadAdapter from "./FileUploadAdapter";
-import { createTask } from "../../requests/taskRequests";
-import ProjectContext from "../../contexts/ProjectContext";
-import UserContext from "../../contexts/UserContext";
+import useNewTask from "./useNewTask";
 import "./NewTask.css";
 
 const NewTask = (props) => {
     const { showForm, setShowForm } = props;
     const { Option } = Select;
 
-    const [form] = Form.useForm();
-    const [relatedTasksFound, setRelatedTasksFound] = useState([]);
-    const [delayEditorLoad, setDelayEditorLoad] = useState(false);
-    const [errorsExist, setErrorsExist] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
-   
-    const { projects, setProjects } = useContext(ProjectContext);
-    const { user } = useContext(UserContext);
-
-    useEffect(() => {
-        let initialTasks = [];
-        projects.forEach(project => {
-            project.tasks.forEach(task => {
-                const searchItem = {
-                    label: `${task.taskID}: ${task.title}`,
-                    value: task.taskID
-                };
-                initialTasks = [...initialTasks, searchItem];                
-            })
-        })
-        setRelatedTasksFound(initialTasks);
-    }, [projects])
-
-    const createNewTask = () => {
-        form.validateFields().then(values => {
-            const task = {...values, status: 'Backlog'};
-            createTask(task, user.token).then(data => {
-                const { project } = task;
-                setProjects(projects => {
-                    const newProjects = [...projects];
-                    const updateProject = newProjects.find(proj => proj.projectName === project);
-                    updateProject.tasks = [...updateProject.tasks, data.task];
-                    return newProjects;
-                });
-                setShowForm(false);
-                form.resetFields();
-                setErrorsExist(false);
-                setErrorMessage('');
-            })
-            .catch(err => {
-                if (err?.response.data) {
-                    setErrorMessage(err.response.data);
-                }
-                else {
-                    setErrorMessage('Please try again later');
-                }
-                setErrorsExist(true);
-            })
-        })
-        .catch(err => {
-            setErrorMessage('Please ensure all fields are filled out correctly')
-            setErrorsExist(true);
-        })
-    };
-
-    const cancelCreateNewTask = () => {
-        setShowForm(false);
-        form.resetFields();
-        setErrorMessage('');
-        setErrorsExist(false);
-    }
-
-    const searchRelatedTasks = searchTerm => {
-        if (searchTerm === '') {
-            setRelatedTasksFound(projects);
-        }
-        else {
-            let searchResults = [];
-            projects.forEach(project => {
-                searchResults = searchResults.concat(
-                    project.tasks.filter(task => 
-                        task.title.toLowerCase().includes(searchTerm) ||
-                        task.taskID.toLowerCase().includes(searchTerm)
-                    )
-                );
-            });
-            setRelatedTasksFound(searchResults.map(result => (
-                {
-                    label: `${result.taskID}: ${result.title}`,
-                    value: result.taskID
-                }
-            )));
-        }
-    };
-
-    // Webpack throws a ResizeObserver loop limit exceeded error
-    // This was introduced when the CKEditor has been introduced into the Modal,
-    // where the resizing of the CKEditor as the Modal grows is causing the resize
-    // handling to be constantly called.
-    // The below function sets a state variable when the Modal has finished loading,
-    // which acts as a signal to render the CKEditor into the form
-    // TODO: might be able to update this to only execute in development
-    const renderDescriptionEditor = () => {
-        showForm ? setDelayEditorLoad(true) : setDelayEditorLoad(false);
-    };
+    const {
+        createNewTask,
+        cancelCreateNewTask,
+        searchRelatedTasks,
+        renderDescriptionEditor,
+        relatedTasksFound,
+        delayEditorLoad,
+        contextHolder,
+        user,
+        form
+    } = useNewTask(showForm, setShowForm);
 
     return (
         <Modal
@@ -123,11 +36,7 @@ const NewTask = (props) => {
             <Form
                 form={form}
             >
-                {errorsExist && <Alert
-                    type="error"
-                    message={errorMessage}
-                    showIcon
-                />}
+                {contextHolder}
                 <Form.Item
                     label="Project"
                     name="project"

@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useContext } from "react";
 
 import ProjectContext from "../contexts/ProjectContext";
 
@@ -6,8 +6,13 @@ import ProjectContext from "../contexts/ProjectContext";
 const useProjects = () => {
     const { projects, setProjects } = useContext(ProjectContext);
 
-    const addTask = task => {
-
+    const addTaskToState = (project, task) => {
+        setProjects(projects => {
+            const newProjects = [...projects];
+            const updateProject = newProjects.find(proj => proj.projectName === project);
+            updateProject.tasks = [...updateProject.tasks, task];
+            return newProjects;
+        });
     };
 
     const updateTaskState = (project, taskID, updatedTask) => {
@@ -36,7 +41,7 @@ const useProjects = () => {
 
     return {
         projects,
-        addTask,
+        addTaskToState,
         updateTaskState,
         deleteTaskState,
         deleteProjectState
