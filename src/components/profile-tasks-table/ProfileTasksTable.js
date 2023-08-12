@@ -123,7 +123,7 @@ const ProfileTasksTable = props => {
             ],
             onFilter: (value, record) => record.status.toLowerCase().includes(value.toLowerCase()),
             filterMultiple: false,
-            render: (value, record) => <StatusTag status={value} taskID={record.taskID} />
+            render: (value, record) => <StatusTag status={value} taskID={record.taskID} project={record.project} />
         }
     ];
 
@@ -139,7 +139,7 @@ const ProfileTasksTable = props => {
             onChange={onTableChange} 
             className="profile-right"
         />
-    )
+    );
 }
 
 export default ProfileTasksTable;
