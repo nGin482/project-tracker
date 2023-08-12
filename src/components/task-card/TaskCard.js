@@ -1,57 +1,25 @@
-import React, {useState, useEffect, useContext } from "react";
 import { NavLink } from "react-router-dom";
-import { Button, Card, Divider, message, Popconfirm, Popover } from "antd";
+import { Button, Card, Popconfirm, Popover } from "antd";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 import AdditionalDetails from "../sidebars/AdditionalDetails";
 import TaskType from "../task-type-icon/TaskType";
-import useProjects from "../../hooks/useProjects";
-import UserContext from "../../contexts/UserContext";
-import { updateTaskDetail, deleteTask } from "../../requests/taskRequests";
+import useTaskCard from "./useTaskCard";
 import "./TaskCard.css";
 
 const TaskCard = props => {
     const { task } = props;
-    const { title, description, comments, type, project } = task;
-    
-    const [editingTask, setEditingTask] = useState(false);
-    const [newDescription, setNewDescription] = useState('');
-    
-    const [messageApi, contextHolder] = message.useMessage();
-    const { updateTaskState, deleteTaskState } = useProjects();
+    const { taskID, title, description, type, project } = task;
 
-    const { user } = useContext(UserContext);
-
-    const updateTaskDetails = () => {
-        const taskDescription = newDescription === '' ? description : newDescription;
-        updateTaskDetail(task.taskID, {field: 'description', value: taskDescription}, user.token).then(data => {
-            updateTaskState(project, task.taskID, data);
-            setEditingTask(false);
-        }).catch(err => {
-            if (err?.response.data) {
-                messageApi.error(err.response.data);
-            }
-            else {
-                messageApi.error(err);
-            }
-        })
-    }
-
-    const handleDeleteTask = () => {
-        deleteTask(task.taskID, user.token).then(data => {
-            deleteTaskState(project, task.taskID);
-        }).catch(err => {
-            if (err?.response.data) {
-                messageApi.error(err.response.data);
-            }
-            else {
-                messageApi.error(err);
-            }
-        });
-    };
-    
+    const {
+        newDescription,
+        editingTask,
+        contextHolder,
+        updateDescription,
+        handleDeleteTask 
+    } = useTaskCard(description);
     
     return (
         <Card
@@ -61,7 +29,7 @@ const TaskCard = props => {
                 <Popconfirm
                     title={`Delete ${task.taskID}`}
                     description="Are you sure you want to delete this task?"
-                    onConfirm={handleDeleteTask}
+                    onConfirm={() => handleDeleteTask(taskID, project)}
                     okText="Yes"
                     cancelText="No"
                 >
@@ -71,25 +39,31 @@ const TaskCard = props => {
             actions={[
                 <NavLink to={`/task/${task.taskID}`}>View {task.taskID}</NavLink>,
                 <Popover title={`Edit ${task.taskID}`}>
-                    <EditOutlined onClick={() => setEditingTask(!editingTask)} />
+                    <EditOutlined onClick={() => editingTask.setEditingTask(!editingTask.editingTask)} />
                 </Popover>
             ]}
         >
             {contextHolder}
 
             <div className="task-info task__general-info">
-                {editingTask ? (
+                {editingTask.editingTask ? (
                     <>
                         <CKEditor
                             editor={ClassicEditor}
                             data={description}
                             onChange={(event, editor) => {
                                 const data = editor.getData();
-                                setNewDescription(data);
+                                newDescription.setNewDescription(data);
                             }}
                         />
-                        <Button onClick={() => setEditingTask(false)}>Cancel</Button>
-                        <Button htmlType="submit" type="primary" onClick={updateTaskDetails}>Update</Button>
+                        <Button onClick={() => editingTask.setEditingTask(false)}>Cancel</Button>
+                        <Button
+                            htmlType="submit"
+                            type="primary"
+                            onClick={() => updateDescription(taskID, project)}
+                        >
+                            Update
+                        </Button>
                     </>
                 ) : <div className="task-description" dangerouslySetInnerHTML={{__html: description}} />}
             </div>
