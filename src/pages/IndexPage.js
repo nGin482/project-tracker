@@ -3,6 +3,7 @@ import { Button, Drawer, Input, List, Pagination } from "antd";
 
 import TaskCard from '../components/task-card/TaskCard';
 import Navbar from "../components/navbar/Navbar";
+import CustomDrawer from "../components/custom-drawer/CustomDrawer";
 import useIndexPage from "./hooks/useIndexPage";
 
 const IndexPage = props => {
@@ -14,10 +15,8 @@ const IndexPage = props => {
         showProjects,
         setShowProjects,
         setProjectViewed,
-        searchResults,
         projects,
         contextHolder,
-        handleSearch,
         switchProjectViewed,
         handleDeleteProject
     } = useIndexPage();
@@ -25,23 +24,16 @@ const IndexPage = props => {
     return  (
         <>
             <Navbar />
-            <Drawer
-                title='Projects'
-                placement="left"
-                open={showProjects}
-                onClose={() => setShowProjects(false)}
-            >
-                <Input placeholder="Search" onChange={handleSearch}/>
-                <List
-                    dataSource={searchResults}
-                    bordered
-                    renderItem={item => (
-                        <List.Item onClick={() => switchProjectViewed(item)}>
-                            <h3>{item.projectCode}: {item.projectName}</h3>
-                        </List.Item>
-                    )}
+            {projects.length > 0 && 
+                <CustomDrawer
+                    title="Projects"
+                    view="projects"
+                    open={showProjects}
+                    listItems={projects}
+                    onClose={setShowProjects}
+                    switchProjectViewed={switchProjectViewed}
                 />
-            </Drawer>
+            }
             <div id="container">
                 <div className="project-controls">
                     <Button onClick={() => setShowProjects(!showProjects)}>Find Project</Button>

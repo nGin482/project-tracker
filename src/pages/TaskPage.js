@@ -3,10 +3,8 @@ import { useParams, NavLink, useNavigate } from "react-router-dom";
 import {
     Button,
     Divider,
-    Drawer,
     Input,
     Layout,
-    List,
     message,
     Popconfirm,
     Spin
@@ -20,6 +18,7 @@ import CommentsDisplay from "../components/comments/CommentsDisplay";
 import AdditionalDetails from "../components/sidebars/AdditionalDetails";
 import LinkTasks from "../components/link-tasks/LinkTasks";
 import StatusTag from "../components/status-tag/StatusTag";
+import CustomDrawer from "../components/custom-drawer/CustomDrawer";
 import Navbar from "../components/navbar/Navbar";
 import ErrorPage from "./ErrorPage";
 import ErrorsContext from "../contexts/ErrorsContext";
@@ -45,8 +44,6 @@ const TaskPage = () => {
     //Task by Project Drawer
     const [tasksByProject, setTasksByProject] = useState([]);
     const [showTasksDrawer, setShowTasksDrawer] = useState(false);
-    const [search, setSearch] = useState('');
-    const [searchResults, setSearchResults] = useState([]);
     
     // Linking Tasks
     const [showLinkTasks, setShowLinkTasks] = useState(false);
@@ -82,23 +79,8 @@ const TaskPage = () => {
     }, [taskID]);
 
     useEffect(() => {
-        if (search !== '') {
-            setSearchResults(tasksByProject.filter(task => 
-                task.title.toLowerCase().includes(search.toLowerCase())
-            ));
-        }
-        else {
-            setSearchResults(tasksByProject);
-        }
-    }, [search, tasksByProject]);
-
-    useEffect(() => {
         console.log(task)
     }, [task])
-
-    const handleSearch = event => {
-        setSearch(event.target.value);
-    };
 
     const submitUpdateTask = () => {
         const finalTask = {
@@ -121,14 +103,11 @@ const TaskPage = () => {
     const handleDeleteTask = () => {
         deleteTask(task.taskID, user.token).then(data => {
             deleteTaskState(task.project, task.taskID);
+            messageApi.success(data);
             navigate('/');
         }).catch(err => {
-            if (err?.response.data) {
-                messageApi.error(err.response.data);
-            }
-            else {
-                messageApi.error(err);
-            }
+            const error = err?.response.data ? err.response.data : err;
+            messageApi.error(error);
         });
     };
 
@@ -138,23 +117,14 @@ const TaskPage = () => {
             {!isEmpty(task) ? (
                 <div id="task-page">
                     {tasksByProject.length > 0 && (
-                        <Drawer
+                        <CustomDrawer
                             title={`Tasks in ${task.project}`}
-                            placement="left"
+                            view='tasks'
                             open={showTasksDrawer}
-                            onClose={() => setShowTasksDrawer(!showTasksDrawer)}
-                        >
-                            <Input placeholder="Search" onChange={handleSearch}/>
-                            <List
-                                dataSource={searchResults}
-                                bordered
-                                renderItem={item => (
-                                    <List.Item>
-                                        <NavLink to={`/task/${item.taskID}`}><h3>{item.title}</h3></NavLink>
-                                    </List.Item>
-                                )}
-                            />
-                        </Drawer>
+                            listItems={tasksByProject}
+                            onClose={setShowTasksDrawer}
+
+                        />
                     )}
                     <Layout>
                         <div id="task-main-content">

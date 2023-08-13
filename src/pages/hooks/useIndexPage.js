@@ -11,26 +11,12 @@ const useIndexPage = () => {
 
     const [tasksDisplayed, setTasksDisplayed] = useState([]);
     const [showProjects, setShowProjects] = useState(false);
-    const [searchResults, setSearchResults] = useState(projects);
-    const [search, setSearch] = useState('');
     const [messageApi, contextHolder] = message.useMessage();
 
     const { user } = useContext(UserContext);
     const { deleteProjectState } = useProjects();
 
     useEffect(() => {
-        if (search !== '') {
-            setSearchResults(projects.filter(project => 
-                project.projectName.toLowerCase().includes(search.toLowerCase())
-            ));
-        }
-        else {
-            setSearchResults(projects);
-        }
-    }, [search]);
-
-    useEffect(() => {
-        setSearchResults(projects);
         showAllTasks();
     }, [projects]);
     // TODO: Note: When projects state updates, this will then re-render all tasks,
@@ -49,10 +35,6 @@ const useIndexPage = () => {
         let allTasks = [];
         projects.forEach(project => allTasks = allTasks.concat(project.tasks));
         setTasksDisplayed(allTasks);
-    };
-
-    const handleSearch = event => {
-        setSearch(event.target.value);
     };
 
     const switchProjectViewed = item => {
@@ -76,10 +58,8 @@ const useIndexPage = () => {
         showProjects,
         setShowProjects,
         setProjectViewed,
-        searchResults,
         projects,
         contextHolder,
-        handleSearch,
         switchProjectViewed,
         handleDeleteProject
     };
