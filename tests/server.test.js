@@ -77,11 +77,17 @@ describe('Tasks Endpoint', () => {
         });
     });
 
+    it('should return 404 if project to search tasks by is not provided', async () => {
+        const response = await api.get('/api/tasks/project/undefined');
+        expect(response.statusCode).toEqual(404);
+        expect(response.text).toEqual('Please specify a project to search for');
+    });
+
     it('should return tasks in a specific project', async () => {
         const response = await api.get('/api/tasks/project/Random Project');
         expect(response.statusCode).toEqual(200);
         expect(response.body).toHaveLength(4);
-    })
+    });
 
     it('should return 404 if task is not found', async () => {
         const response = await api.get('/api/tasks/RAND-52');

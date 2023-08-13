@@ -36,15 +36,13 @@ taskRoutes.get('/:taskID', async (request, response) => {
     if (task) {
         return response.status(200).json(task)
     }
-    else {
-        return response.status(404).send(responseMessages.NOT_FOUND.TASK_NOT_FOUND);
-    }
+    return response.status(404).send(responseMessages.NOT_FOUND.TASK_NOT_FOUND);
 });
 
 taskRoutes.get('/project/:project', async (request, response) => {
     const { project } = request.params;
 
-    if (!project) {
+    if (!project || project === 'undefined') {
         return response.status(404).send('Please specify a project to search for');
     }
 
@@ -140,9 +138,7 @@ taskRoutes.patch('/:taskID', async (request, response) => {
     if (updatedTask) {
         return response.status(200).json(updatedTask);
     }
-    else {
-        return response.status(404).send(responseMessages.NOT_FOUND.TASK_NOT_FOUND);
-    }
+    return response.status(404).send(responseMessages.NOT_FOUND.TASK_NOT_FOUND);
 });
 
 taskRoutes.patch('/:taskID/link', async (request, response) => {
