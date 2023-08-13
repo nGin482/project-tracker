@@ -23,7 +23,6 @@ const ProfilePage = () => {
 
     useEffect(() => {
         fetchUser(username).then(data => {
-            console.log(data)
             setUser(data);  
         }).catch(err => {
             setErrors(true);
