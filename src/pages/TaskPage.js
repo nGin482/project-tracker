@@ -67,7 +67,6 @@ const TaskPage = () => {
             });
             getTasksByProject(data.project).then(data => {
                 setTasksByProject(data);
-                setSearchResults(data)
             })
         }).catch(err => {
             setErrors(true);
