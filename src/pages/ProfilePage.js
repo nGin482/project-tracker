@@ -30,7 +30,7 @@ const ProfilePage = () => {
                 setErrorMessage(err.response.data);
             }
         })
-    }, []);
+    }, [username]);
 
     return (
         <>

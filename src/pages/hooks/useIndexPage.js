@@ -1,4 +1,4 @@
-import {useState, useEffect, useContext} from "react";
+import {useState, useEffect, useContext, useCallback} from "react";
 import { message } from "antd";
 
 import ProjectContext from "../../contexts/ProjectContext";
@@ -16,9 +16,15 @@ const useIndexPage = () => {
     const { user } = useContext(UserContext);
     const { deleteProjectState } = useProjects();
 
+    const showAllTasks = useCallback(() => {
+        let allTasks = [];
+        projects.forEach(project => allTasks = allTasks.concat(project.tasks));
+        setTasksDisplayed(allTasks);
+    }, [projects]);
+
     useEffect(() => {
         showAllTasks();
-    }, [projects]);
+    }, [projects, showAllTasks]);
     // TODO: Note: When projects state updates, this will then re-render all tasks,
     // TODO: regardless of what filter state has been applied
 
@@ -29,13 +35,7 @@ const useIndexPage = () => {
         else {
             setTasksDisplayed(projectViewed.tasks);
         }
-    }, [projectViewed]);
-
-    function showAllTasks() {
-        let allTasks = [];
-        projects.forEach(project => allTasks = allTasks.concat(project.tasks));
-        setTasksDisplayed(allTasks);
-    };
+    }, [projectViewed, showAllTasks]);
 
     const switchProjectViewed = item => {
         setProjectViewed(item);

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Drawer, Input, List, Pagination } from "antd";
+import { Button, Pagination } from "antd";
 
 import TaskCard from '../components/task-card/TaskCard';
 import Navbar from "../components/navbar/Navbar";

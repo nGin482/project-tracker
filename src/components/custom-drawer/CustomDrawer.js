@@ -20,7 +20,7 @@ const CustomDrawer = props => {
         else {
             setSearchResults(listItems);
         }
-    }, [search]);
+    }, [search, listItems, view]);
 
     const closeDrawer = item => {
         setSearch('');
