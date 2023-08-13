@@ -253,11 +253,9 @@ describe('Tasks Endpoint', () => {
         
         expect(response.statusCode).toEqual(401);
         expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to perform this action');
-        console.log('should run first')
-
+        
         const taskResponse = await api.get('/api/tasks/RAND-4');
         const task = taskResponse.body;
-        console.log(task)
         expect(task.linkedTasks).toHaveLength(1);
     });
 
@@ -268,8 +266,7 @@ describe('Tasks Endpoint', () => {
         
         expect(response.statusCode).toEqual(401);
         expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to perform this action');
-        console.log('should run second')
-
+        
         const taskResponse = await api.get('/api/tasks/RAND-4');
         const task = taskResponse.body;
         expect(task.linkedTasks).toHaveLength(1);
@@ -282,8 +279,7 @@ describe('Tasks Endpoint', () => {
         
         expect(response.statusCode).toEqual(400);
         expect(response.text).toEqual('Please provide a task to be linked to this one');
-        console.log('should run third')
-
+        
         const taskResponse = await api.get('/api/tasks/RAND-4');
         const task = taskResponse.body;
         expect(task.linkedTasks).toHaveLength(1);
@@ -296,7 +292,6 @@ describe('Tasks Endpoint', () => {
         
         expect(response.statusCode).toEqual(400);
         expect(response.text).toEqual('Please provide a task to be linked to this one');
-        console.log('should run fourth')
 
         const taskResponse = await api.get('/api/tasks/RAND-4');
         const task = taskResponse.body;
@@ -311,8 +306,7 @@ describe('Tasks Endpoint', () => {
         
         expect(response.statusCode).toEqual(404);
         expect(response.text).toEqual('The server is unable to find this task');
-        console.log('should run fifth')
-
+        
         const taskResponse = await api.get('/api/tasks');
         const tasks = taskResponse.body;
         expect(tasks).toHaveLength(8);
