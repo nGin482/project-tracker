@@ -51,6 +51,10 @@ const linkedTasksOneNotFound = [
     'RAND-58'
 ];
 
+const newComment = {
+    content: 'This is a comment for this task'
+};
+
 const newProject = {
     projectCode: 'THIP',
     projectName: 'Third Project'
@@ -94,6 +98,7 @@ module.exports = {
     linkedTasksDefault,
     linkedTasksBothNotFound,
     linkedTasksOneNotFound,
+    newComment,
     newProject,
     loginDetailsAlreadyExist,
     loginDetailsNew,

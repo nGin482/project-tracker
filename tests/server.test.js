@@ -22,7 +22,9 @@ const {
     loginDetailsFailedPassword,
     loginDetailsSuccess,
     bearerToken,
+    newComment,
 } = require("./testUtils");
+const Comment = require("../server/models/CommentsSchema");
 
 const api = supertest(app);
 
@@ -406,6 +408,144 @@ describe('Tasks Endpoint', () => {
     });
 });
 
+describe('Comments Endpoint', () => {
+    it('CREATE COMMENT - should return 401 if no auth provided', async () => {
+        const response = await api.post('/api/tasks/TEST-2/comment')
+            .send({...newComment});
+
+        expect(response.statusCode).toEqual(401);
+        expect(response.text).toContain('Please login or create an account to perform this action');
+    });
+
+    it('CREATE COMMENT - should return 401 if no auth provided', async () => {
+        const response = await api.post('/api/tasks/TEST-2/comment')
+            .set('Authorization', 'invalid.token')
+            .send({...newComment});
+
+        expect(response.statusCode).toEqual(401);
+        expect(response.text).toContain('Please login or create an account to perform this action');
+    });
+
+    it('CREATE COMMENT - should return 404 if cannot find the task to comment on', async () => {
+        const response = await api.post('/api/tasks/TEST-25/comment')
+            .set('Authorization', bearerToken)
+            .send({...newComment});
+
+        expect(response.statusCode).toEqual(404);
+        expect(response.text).toContain('The server is unable to find this task');
+    });
+
+    it('CREATE COMMENT - should return 200 if able to successfully comment on task', async () => {
+        const response = await api.post('/api/tasks/TEST-2/comment')
+            .set('Authorization', bearerToken)
+            .send({...newComment});
+
+        expect(response.statusCode).toEqual(201);
+
+        const taskResponse = await api.get('/api/tasks/TEST-2');
+        expect(taskResponse.body).toMatchObject(response.body);
+        const comment = taskResponse.body.comments[0];
+        expect(comment.content).toContain(newComment.content);
+
+        const userResponse = await api.get('/api/users/Natalie-Test');
+        const userComments = userResponse.body.comments;
+        expect(userComments).toHaveLength(1);
+    });
+
+    it('UPDATE COMMENT - should respond with 401 if no auth provided', async () => {
+        const response = await api.patch('/api/tasks/TEST-2/comment/comment-1')
+            .send({...newComment});
+
+        expect(response.statusCode).toEqual(401);
+        expect(response.text).toContain('Please login or create an account to perform this action');
+    });
+
+    it('UPDATE COMMENT - should respond with 401 if invalid auth provided', async () => {
+        const response = await api.patch('/api/tasks/TEST-2/comment/comment-1')
+            .set('Authorization', 'invalid.token')
+            .send({...newComment});
+
+        expect(response.statusCode).toEqual(401);
+        expect(response.text).toContain('Please login or create an account to perform this action');
+    });
+
+    it('UPDATE COMMENT - should respond with 404 if unable to find the task comment was made on', async () => {
+        const response = await api.patch('/api/tasks/TEST-25/comment/comment-1')
+            .set('Authorization', bearerToken)
+            .send({...newComment});
+
+        expect(response.statusCode).toEqual(404);
+        expect(response.text).toContain('The server is unable to find this task');
+    });
+
+    it('UPDATE COMMENT - should respond with 404 if unable to find the comment', async () => {
+        const response = await api.patch('/api/tasks/TEST-2/comment/comment-15')
+            .set('Authorization', bearerToken)
+            .send({...newComment});
+
+        expect(response.statusCode).toEqual(404);
+        expect(response.text).toContain('The server is unable to find this comment');
+    });
+
+    it('UPDATE COMMENT - should respond with 200 if able to update the comment', async () => {
+        const response = await api.patch('/api/tasks/TEST-2/comment/comment-1')
+            .set('Authorization', bearerToken)
+            .send({ content: 'This is an updated comment'});
+
+        expect(response.statusCode).toEqual(200);
+
+        const taskResponse = await api.get('/api/tasks/TEST-2');
+        const taskComments = taskResponse.body.comments;
+        expect(taskComments[0].content).toEqual('This is an updated comment');
+    });
+
+    it('DELETE COMMENT - should respond with 401 if no auth provided', async () => {
+        const response = await api.delete('/api/tasks/TEST-2/comment/comment-1');
+
+        expect(response.statusCode).toEqual(401);
+        expect(response.text).toContain('Please login or create an account to perform this action');
+    });
+
+    it('DELETE COMMENT - should respond with 401 if invalid auth provided', async () => {
+        const response = await api.delete('/api/tasks/TEST-2/comment/comment-1')
+            .set('Authorization', 'invalid.token');
+
+        expect(response.statusCode).toEqual(401);
+        expect(response.text).toContain('Please login or create an account to perform this action');
+    });
+
+    it('DELETE COMMENT - should respond with 404 if unable to find the task comment was made on', async () => {
+        const response = await api.delete('/api/tasks/TEST-25/comment/comment-1')
+            .set('Authorization', bearerToken);
+
+        expect(response.statusCode).toEqual(404);
+        expect(response.text).toContain('The server is unable to find this task');
+    });
+
+    it('DELETE COMMENT - should respond with 404 if unable to find the comment', async () => {
+        const response = await api.delete('/api/tasks/TEST-2/comment/comment-15')
+            .set('Authorization', bearerToken);
+
+        expect(response.statusCode).toEqual(404);
+        expect(response.text).toContain('The server is unable to find this comment');
+    });
+
+    it('DELETE COMMENT - should respond with 200 if able to delete the comment', async () => {
+        const response = await api.delete('/api/tasks/TEST-2/comment/comment-1')
+            .set('Authorization', bearerToken);
+
+        expect(response.statusCode).toEqual(200);
+        
+        const taskResponse = await api.get('/api/tasks/TEST-2');
+        const taskComments = taskResponse.body.comments;
+        expect(taskComments).toHaveLength(0);
+
+        const userResponse = await api.get('/api/users/Natalie-Test');
+        const userComments = userResponse.body.comments;
+        expect(userComments).toHaveLength(0);
+    });
+});
+
 describe('Projects Endpoint', () => {
     it('should return all projects', async () => {
         const response = await api.get('/api/projects');
@@ -492,7 +632,7 @@ describe('Projects Endpoint', () => {
         expect(projectsResponse.body).toHaveLength(3);
     });
 
-    it('DELETE PROJECT - should respond with 200 if cannot find the project to delete', async () => {
+    it('DELETE PROJECT - should respond with 200 if able to delete the project', async () => {
         const response = await api.delete('/api/projects/THIP')
             .set('Authorization', bearerToken);
         
@@ -567,8 +707,9 @@ describe('Login/Register', () => {
 
 afterAll(async () => {
     await Project.deleteMany({});
+    await Comment.deleteMany({});
     await Task.deleteMany({});
     await User.deleteMany({});
-    mongoose.connection.close();
+    await mongoose.connection.close();
     app.close();
 });

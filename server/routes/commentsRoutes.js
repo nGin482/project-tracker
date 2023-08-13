@@ -99,11 +99,11 @@ commentsRouter.delete('/:commentID', async (request, response) => {
     }
 
     const user = await User.findOne({username: isAuthorisedUser.username});
-    const updatedUserComments = user.comments.filter(comment => comment.commentID !== commentID);
+    const updatedUserComments = user.comments.filter(comment => comment !== comment._id);
     user.set('comments', updatedUserComments);
     await user.save();
 
-    const updatedTaskComments = task.comments.filter(comment => comment.commentID !== commentID);
+    const updatedTaskComments = task.comments.filter(comment => comment !== comment._id);
     task.set('comments', updatedTaskComments);
     await task.save();
 
