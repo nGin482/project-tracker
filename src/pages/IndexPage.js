@@ -40,7 +40,7 @@ const IndexPage = props => {
                     <Button onClick={() => setProjectViewed('All')}>View all Tasks</Button>
                     {projects.map(project => (
                         <Button
-                            onClick={() => handleDeleteProject(project.projectName)}
+                            onClick={() => handleDeleteProject(project.projectCode)}
                             key={`project-${project.projectName}`}
                         >
                             Delete {project.projectName}

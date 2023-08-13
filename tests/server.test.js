@@ -450,7 +450,7 @@ describe('Projects Endpoint', () => {
     it('CREATE PROJECT - should respond with 200 if successfully creating a project', async () => {
         const response = await api.post('/api/projects')
             .set('Authorization', bearerToken)
-            .send({ newProject });
+            .send({ ...newProject });
         
         expect(response.statusCode).toEqual(200);
         expect(response.body).toHaveProperty('dateCreated');
@@ -458,6 +458,49 @@ describe('Projects Endpoint', () => {
 
         const projectsResponse = await api.get('/api/projects');
         expect(projectsResponse.body).toHaveLength(3);
+    });
+
+    it('DELETE PROJECT - should respond with 401 if no auth provided', async () => {
+        const response = await api.delete('/api/projects/THIP');
+        
+        expect(response.statusCode).toEqual(401);
+        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to perform this action');
+        
+        const projectsResponse = await api.get('/api/projects');
+        expect(projectsResponse.body).toHaveLength(3);
+    });
+
+    it('DELETE PROJECT - should respond with 401 if invalid auth provided', async () => {
+        const response = await api.delete('/api/projects/THIP')
+            .set('Authorization', 'invalid.token');
+        
+        expect(response.statusCode).toEqual(401);
+        expect(response.text).toEqual('This action can only be performed by a logged in user. Please login or create an account to perform this action');
+        
+        const projectsResponse = await api.get('/api/projects');
+        expect(projectsResponse.body).toHaveLength(3);
+    });
+
+    it('DELETE PROJECT - should respond with 404 if cannot find the project to delete', async () => {
+        const response = await api.delete('/api/projects/NEW')
+            .set('Authorization', bearerToken);
+        
+        expect(response.statusCode).toEqual(404);
+        expect(response.text).toEqual('The server is unable to find this project');
+        
+        const projectsResponse = await api.get('/api/projects');
+        expect(projectsResponse.body).toHaveLength(3);
+    });
+
+    it('DELETE PROJECT - should respond with 200 if cannot find the project to delete', async () => {
+        const response = await api.delete('/api/projects/THIP')
+            .set('Authorization', bearerToken);
+        
+        expect(response.statusCode).toEqual(200);
+        expect(response.text).toEqual('The project was successfully deleted');
+        
+        const projectsResponse = await api.get('/api/projects');
+        expect(projectsResponse.body).toHaveLength(2);
     });
 });
 

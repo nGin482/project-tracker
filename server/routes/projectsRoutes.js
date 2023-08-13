@@ -29,16 +29,16 @@ projectsRouter.post('/', async (request, response) => {
 
 projectsRouter.delete('/:project', async (request, response) => {
     if (!Utils.isAuthorised(request.headers)) {
-        return response.status(401).send(responseMessages.UNAUTHORISED.USER_UNAUTHORISED);
+        return response.status(401).send(responseMessages.UNAUTHORISED_USER);
     }
 
     const { project } = request.params;
-    const checkProjectExists = await Project.exists({projectName: project});
+    const checkProjectExists = await Project.findOne({projectCode: project});
     if (!checkProjectExists) {
         return response.status(404).send(responseMessages.NOT_FOUND.PROJECT_NOT_FOUND);
     }
-    await Task.deleteMany({project: project});
-    await Project.findOneAndDelete({projectName: project});
+    await Task.deleteMany({project: checkProjectExists.projectName});
+    await Project.findOneAndDelete({projectCode: project});
     return response.status(200).send(responseMessages.SUCCESS.PROJECT_DELETED);
 });
 
