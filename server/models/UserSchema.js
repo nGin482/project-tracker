@@ -1,8 +1,6 @@
 const mongoose = require("mongoose");
 const { model, Schema } = mongoose;
 
-const Utils = require("../../utilities/utils");
-
 const userSchema = new Schema({
     username: String,
     password: String,
