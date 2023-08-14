@@ -30,13 +30,11 @@ const api = supertest(app);
 
 beforeAll(async () => {
     const rawData = fs.readFileSync("tests/test_data.json");
-    console.log(rawData)
     const sampleData = JSON.parse(rawData);
-    console.log(sampleData)
 
     for (var i = 0; i < sampleData.projects.length; i++) {
         const newProject = new Project(sampleData.projects[i]);
-        newProject.save().then(() => {
+        await newProject.save().then(() => {
             console.log('project saved')
         }).catch(err => {
             console.log(err)
@@ -44,7 +42,7 @@ beforeAll(async () => {
     }
     for (var i = 0; i < sampleData.tasks.length; i++) {
         const newTask = new Task(sampleData.tasks[i]);
-        newTask.save().then(() => {
+        await newTask.save().then(() => {
             console.log('task saved')
         }).catch(err => {
             console.log(err)
@@ -52,7 +50,7 @@ beforeAll(async () => {
     }
     for (var i = 0; i < sampleData.users.length; i++) {
         const newUser = new User(sampleData.users[i]);
-        newUser.save().then(() => {
+        await newUser.save().then(() => {
             console.log('user saved')
         }).catch(err => {
             console.log(err)
