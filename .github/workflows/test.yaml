@@ -17,7 +17,7 @@ jobs:
           touch .env
           echo MONGO_TEST_URI=${{ secrets.MONGO_TEST_URI }} >> .env
           echo SECRET=${{ secrets.SECRET }} >> .env
-          echo TEST_BEARER_TOKEN = ${{ TEST_BEARER_TOKEN }} >> .env
+          echo TEST_BEARER_TOKEN = ${{ secrets.TEST_BEARER_TOKEN }} >> .env
 
       - name: Setup Node
         uses: actions/setup-node@v3
