@@ -6,11 +6,18 @@ on:
       - main
 
 jobs:
-  Perform-Testing:
+  Run-Tests:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Project
         uses: actions/checkout@v3
+
+      - name: Create ENV file
+        run: |
+          touch .env
+          echo MONGO_TEST_URI=${{ secrets.MONGO_TEST_URI }} >> .env
+          echo SECRET=${{ secrets.SECRET }} >> .env
+          echo TEST_BEARER_TOKEN = ${{ TEST_BEARER_TOKEN }} >> .env
 
       - name: Setup Node
         uses: actions/setup-node@v3
@@ -20,6 +27,5 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Say hello
-        run: |
-          echo "Hello World!"
+      - name: Run test
+        run: npm run test-api
