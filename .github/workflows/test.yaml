@@ -5,19 +5,17 @@ on:
     branches:
       - main
 
+env:
+  MONGO_TEST_URI: ${{ secrets.MONGO_TEST_URI }}
+  SECRET: ${{ secrets.SECRET }}
+  TEST_BEARER_TOKEN: ${{ secrets.TEST_BEARER_TOKEN }}
+
 jobs:
   Run-Tests:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Project
         uses: actions/checkout@v3
-
-      - name: Create ENV file
-        run: |
-          touch .env
-          echo MONGO_TEST_URI=${{ secrets.MONGO_TEST_URI }} >> .env
-          echo SECRET=${{ secrets.SECRET }} >> .env
-          echo TEST_BEARER_TOKEN = ${{ secrets.TEST_BEARER_TOKEN }} >> .env
 
       - name: Setup Node
         uses: actions/setup-node@v3
