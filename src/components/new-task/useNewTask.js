@@ -95,6 +95,7 @@ const useNewTask = (showForm, setShowForm) => {
         contextHolder,
         user,
         form,
+        projects,
         createNewTask,
         cancelCreateNewTask,
         searchRelatedTasks,

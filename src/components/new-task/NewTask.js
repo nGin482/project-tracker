@@ -19,7 +19,8 @@ const NewTask = (props) => {
         delayEditorLoad,
         contextHolder,
         user,
-        form
+        form,
+        projects
     } = useNewTask(showForm, setShowForm);
 
     return (
@@ -48,11 +49,9 @@ const NewTask = (props) => {
                     ]}
                 >
                     <Select>
-                        <Option value="TV Guide">TV Guide</Option>
-                        <Option value="tv-guide-ui">TV Guide UI</Option>
-                        <Option value="Project Tracker">Project Tracker</Option>
-                        <Option value="read-list">Read List</Option>
-                        <Option value="dvd-library">DVD Library</Option>
+                        {projects.map(project => 
+                            <Option value={project.projectName}>{project.projectName}</Option>    
+                        )}
                     </Select>
                 </Form.Item>
                 
