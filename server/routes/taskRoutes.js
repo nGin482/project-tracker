@@ -180,11 +180,16 @@ taskRoutes.delete('/:taskID', async (request, response) => {
     }
     
     const { taskID } = request.params;
-    const taskExists = await Task.exists({taskID: taskID});
+    const taskExists = await Task.findOne({taskID: taskID});
     if (!taskExists) {
         return response.status(404).send(responseMessages.NOT_FOUND.TASK_NOT_FOUND);
     }
     await Task.findOneAndDelete({taskID: taskID});
+    
+    const project = await Project.findOne({projectName: taskExists.project});
+    project.set('tasks', project.tasks.filter(task => task.toString() !== taskExists._id.toString()));
+    await project.save();
+    
     return response.status(200).send(responseMessages.SUCCESS.TASK_DELETED);
 });
 
