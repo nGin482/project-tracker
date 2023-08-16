@@ -50,7 +50,12 @@ const NewTask = (props) => {
                 >
                     <Select>
                         {projects.map(project => 
-                            <Option value={project.projectName}>{project.projectName}</Option>    
+                            <Option
+                                key={project.projectCode}
+                                value={project.projectName}
+                            >
+                                {project.projectName}
+                            </Option>    
                         )}
                     </Select>
                 </Form.Item>
