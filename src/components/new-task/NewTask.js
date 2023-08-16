@@ -123,6 +123,7 @@ const NewTask = (props) => {
                         mode="multiple"
                         onSearch={text => searchRelatedTasks(text)}
                         options={relatedTasksFound}
+                        filterOption={false}
                     />
                 </Form.Item>
             </Form>

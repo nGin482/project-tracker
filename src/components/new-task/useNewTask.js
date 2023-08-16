@@ -17,6 +17,44 @@ const useNewTask = (showForm, setShowForm) => {
     const { addTaskToState } = useProjects();
     const { user } = useContext(UserContext);
 
+    useEffect(() => {
+        let allTasks = [];
+        projects.forEach(project => {
+            allTasks = allTasks.concat(mapRelatedTasks(project.tasks));
+        });
+        setRelatedTasksFound(allTasks);
+    }, [projects]);
+
+    const mapRelatedTasks = relatedTasks => {
+        const mappedRelatedTasks = relatedTasks.map(task => (
+            {
+                label: `${task.taskID}: ${task.title}`,
+                value: task.taskID
+            }
+        ));
+        return mappedRelatedTasks;
+    };
+
+    const searchRelatedTasks = searchTerm => {
+        let searchResults = [];
+        if (searchTerm === '') {
+            projects.forEach(project => {
+                searchResults = searchResults.concat(project.tasks)
+            });
+        }
+        else {
+            projects.forEach(project => {
+                searchResults = searchResults.concat(
+                    project.tasks.filter(task => 
+                        task.title.toLowerCase().includes(searchTerm) ||
+                        task.taskID.toLowerCase().includes(searchTerm)
+                    )
+                );
+            });
+        }
+        setRelatedTasksFound(mapRelatedTasks(searchResults));
+    };
+
     const createNewTask = () => {
         form.validateFields().then(values => {
             const task = {...values, status: 'Backlog'};
@@ -41,29 +79,6 @@ const useNewTask = (showForm, setShowForm) => {
         form.resetFields();
     };
 
-    const searchRelatedTasks = searchTerm => {
-        if (searchTerm === '') {
-            setRelatedTasksFound(projects);
-        }
-        else {
-            let searchResults = [];
-            projects.forEach(project => {
-                searchResults = searchResults.concat(
-                    project.tasks.filter(task => 
-                        task.title.toLowerCase().includes(searchTerm) ||
-                        task.taskID.toLowerCase().includes(searchTerm)
-                    )
-                );
-            });
-            setRelatedTasksFound(searchResults.map(result => (
-                {
-                    label: `${result.taskID}: ${result.title}`,
-                    value: result.taskID
-                }
-            )));
-        }
-    };
-
     // Webpack throws a ResizeObserver loop limit exceeded error
     // This was introduced when the CKEditor has been introduced into the Modal,
     // where the resizing of the CKEditor as the Modal grows is causing the resize
@@ -74,20 +89,6 @@ const useNewTask = (showForm, setShowForm) => {
     const renderDescriptionEditor = () => {
         showForm ? setDelayEditorLoad(true) : setDelayEditorLoad(false);
     };
-
-    useEffect(() => {
-        let initialTasks = [];
-        projects.forEach(project => {
-            project.tasks.forEach(task => {
-                const searchItem = {
-                    label: `${task.taskID}: ${task.title}`,
-                    value: task.taskID
-                };
-                initialTasks = [...initialTasks, searchItem];                
-            })
-        });
-        setRelatedTasksFound(initialTasks);
-    }, [projects]);
     
     return {
         relatedTasksFound,
