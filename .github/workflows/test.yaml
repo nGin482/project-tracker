@@ -28,7 +28,7 @@ jobs:
       - name: Run test
         run: npm run test-api
 
-  Deploy to Render:
+  Deploy-to-Render:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Render Deployment
