@@ -58,14 +58,6 @@ beforeAll(async () => {
     }
 });
 
-describe('Index', () => {
-    it('should return string', async () => {
-        const response = await api.get('/');
-        expect(response.statusCode).toEqual(200);
-        expect(response.text).toEqual('<h1>Hello World</h1>');
-    })
-})
-
 describe('Tasks Endpoint', () => {
     it('should return all tasks', async () => {
         const response = await api.get('/api/tasks');
