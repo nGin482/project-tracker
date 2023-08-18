@@ -27,3 +27,9 @@ jobs:
 
       - name: Run test
         run: npm run test-api
+
+  Deploy to Render:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render Deployment
+        uses: curl https://api.render.com/deploy/srv-${{ secrets.RENDER_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}
