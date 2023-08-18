@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 require("dotenv").config();
 
 const projectsRoutes = require("./routes/projectsRoutes");
@@ -19,7 +20,8 @@ const mongo_uri = process.env.NODE_ENV === 'test'
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static('build'));
+const buildPath = path.join(__dirname, '..', 'build')
+app.use(express.static(buildPath));
 
 app.use('/api/projects', projectsRoutes);
 app.use('/api/tasks', taskRoutes);
@@ -27,10 +29,6 @@ app.use('/api/tasks/:taskID/comment', commentsRouter);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRouter);
 app.use('/api/uploads', uploadRouter);
-
-app.get('/', (request, response) => {
-    response.send('<h1>Hello World</h1>')
-})
 
 const PORT = 3001;
 const server = app.listen(PORT, () => {
