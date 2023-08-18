@@ -18,10 +18,14 @@ const mongo_uri = process.env.NODE_ENV === 'test'
     ? process.env.MONGO_TEST_URI
     : process.env.MONGODB_URI;
 
-app.use(cors());
-app.use(express.json());
 const buildPath = path.join(__dirname, '..', 'build')
 app.use(express.static(buildPath));
+app.use(express.json());
+app.use(cors());
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join(buildPath, 'index.html'))
+})
 
 app.use('/api/projects', projectsRoutes);
 app.use('/api/tasks', taskRoutes);
