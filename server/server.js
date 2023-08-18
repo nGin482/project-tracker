@@ -23,16 +23,16 @@ app.use(express.static(buildPath));
 app.use(express.json());
 app.use(cors());
 
-app.get('*', (req, res) => {
-    res.sendFile(path.join(buildPath, 'index.html'))
-})
-
 app.use('/api/projects', projectsRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/tasks/:taskID/comment', commentsRouter);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRouter);
 app.use('/api/uploads', uploadRouter);
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(buildPath, 'index.html'))
+})
 
 const PORT = 3001;
 const server = app.listen(PORT, () => {
