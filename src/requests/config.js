@@ -1,4 +1,4 @@
-const baseURL = 'http://localhost:3001/api';
+const baseURL = '/api';
 
 const authHeader = token => {
     return {headers: {"Authorization": `Bearer ${token}`}}
