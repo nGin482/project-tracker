@@ -24,7 +24,7 @@ const CustomDrawer = props => {
 
     const closeDrawer = item => {
         setSearch('');
-        view === 'projects' && typeof item === 'string' ? switchProjectViewed(item) : onClose(false)
+        view === 'projects' ? switchProjectViewed(item) : onClose(false)
     };
 
     return (
