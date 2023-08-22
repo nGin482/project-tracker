@@ -39,6 +39,9 @@ jobs:
     needs: Deploy-to-Render
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Project
+        uses: actions/checkout@v3
+
       - name: Get Version
         id: get-version
         uses: beaconbrigade/package-json-version@v0.3
