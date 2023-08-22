@@ -1,6 +1,6 @@
 {
   "name": "project-tracker",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "dependencies": {
     "@ckeditor/ckeditor5-build-classic": "^38.0.1",
