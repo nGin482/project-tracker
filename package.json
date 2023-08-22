@@ -57,6 +57,5 @@
   "devDependencies": {
     "nodemon": "^2.0.22",
     "supertest": "^6.3.3"
-  },
-  "proxy": "http://localhost:3001"
+  }
 }

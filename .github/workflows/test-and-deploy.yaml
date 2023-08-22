@@ -1,0 +1,51 @@
+name: Test and Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  MONGO_TEST_URI: ${{ secrets.MONGO_TEST_URI }}
+  SECRET: ${{ secrets.SECRET }}
+  TEST_BEARER_TOKEN: ${{ secrets.TEST_BEARER_TOKEN }}
+
+jobs:
+  Run-Tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with: 
+          node-version: '16'
+      
+      - name: Install dependencies
+        run: npm install
+
+      - name: Test API
+        run: npm run test-api
+
+  Deploy-to-Render:
+    needs: Run-Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render Deployment
+        run: curl https://api.render.com/deploy/srv-${{ secrets.RENDER_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}
+
+  Send-Discord-Notification:
+    needs: Deploy-to-Render
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Version
+        id: get-version
+        uses: beaconbrigade/package-json-version@v0.3
+
+      - name: Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: 'Version {{ steps.get-version.outputs.version }} of the Project Tracker has been deployed.'

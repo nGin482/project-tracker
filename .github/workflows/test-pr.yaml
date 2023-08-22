@@ -1,9 +1,6 @@
-name: Test
+name: Test Pull Request
 
-on:
-  push:
-    branches:
-      - main
+on: pull_request
 
 env:
   MONGO_TEST_URI: ${{ secrets.MONGO_TEST_URI }}
@@ -25,12 +22,5 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run test
+      - name: Test API
         run: npm run test-api
-
-  Deploy-to-Render:
-    needs: Run-Tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Trigger Render Deployment
-        run: curl https://api.render.com/deploy/srv-${{ secrets.RENDER_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}
