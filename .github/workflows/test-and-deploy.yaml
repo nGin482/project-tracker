@@ -42,6 +42,8 @@ jobs:
       - name: Get Version
         id: get-version
         uses: beaconbrigade/package-json-version@v0.3
+        with:
+          path: .
 
       - name: Discord notification
         env:
